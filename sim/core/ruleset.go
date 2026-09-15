@@ -14,12 +14,27 @@ const (
 	activeRulesetID             = rulesetInheritedTBC
 	activeCharacterLevel        = inheritedTBCCharacterLevel
 	activeDefaultBossLevelDelta = inheritedTBCDefaultBossLevelDelta
+
+	activeExpertisePerQuarterPercentReduction     = inheritedTBCExpertisePerQuarterPercentReduction
+	activeDefenseRatingPerDefenseLevel            = inheritedTBCDefenseRatingPerDefenseLevel
+	activeDodgeRatingPerDodgePercent              = inheritedTBCDodgeRatingPerDodgePercent
+	activeParryRatingPerParryPercent              = inheritedTBCParryRatingPerParryPercent
+	activeBlockRatingPerBlockPercent              = inheritedTBCBlockRatingPerBlockPercent
+	activePhysicalHitRatingPerHitPercent          = inheritedTBCPhysicalHitRatingPerHitPercent
+	activeSpellHitRatingPerHitPercent             = inheritedTBCSpellHitRatingPerHitPercent
+	activePhysicalCritRatingPerCritPercent        = inheritedTBCPhysicalCritRatingPerCritPercent
+	activeSpellCritRatingPerCritPercent           = inheritedTBCSpellCritRatingPerCritPercent
+	activePhysicalHasteRatingPerHastePercent      = inheritedTBCPhysicalHasteRatingPerHastePercent
+	activeSpellHasteRatingPerHastePercent         = inheritedTBCSpellHasteRatingPerHastePercent
+	activeDefenseChancePerDefenseLevelPercent     = inheritedTBCDefenseChancePerDefenseLevelPercent
+	activeResilienceRatingPerCritReductionPercent = inheritedTBCResilienceRatingPerCritReductionPercent
 )
 
 type rulesetProfile struct {
-	id     rulesetID
-	levels levelRules
-	combat combatRules
+	id      rulesetID
+	levels  levelRules
+	ratings ratingRules
+	combat  combatRules
 }
 
 type levelRules struct {
@@ -79,6 +94,37 @@ func (levels levelRules) float64ByLevel(unitLevel int32, characterMinusTwo float
 	}
 }
 
+// ratingRules keeps conversion values separate even where Forever exposes a
+// shared item stat. Shared Hit and Crit sources still feed distinct physical
+// and spell outcome channels, whose conversion values are not yet confirmed.
+type ratingRules struct {
+	expertisePerQuarterPercentReduction     float64
+	defenseRatingPerDefenseLevel            float64
+	dodgeRatingPerDodgePercent              float64
+	parryRatingPerParryPercent              float64
+	blockRatingPerBlockPercent              float64
+	physicalHitRatingPerHitPercent          float64
+	spellHitRatingPerHitPercent             float64
+	physicalCritRatingPerCritPercent        float64
+	spellCritRatingPerCritPercent           float64
+	physicalHasteRatingPerHastePercent      float64
+	spellHasteRatingPerHastePercent         float64
+	defenseChancePerDefenseLevelPercent     float64
+	resilienceRatingPerCritReductionPercent float64
+}
+
+// outcomeRules contains fixed values consumed while resolving an attack. A
+// value copy is cached on each AttackTable so an injected profile cannot mix
+// its table seeds with values from the active build-time profile.
+type outcomeRules struct {
+	expertiseAvoidanceStepsPerUnit     float64
+	dualWieldMissPenalty               float64
+	minimumSpellMissChance             float64
+	enemyCritDamageMultiplier          float64
+	resilienceCritDamageReductionScale float64
+	crushingBlowDamageMultiplier       float64
+}
+
 // attackTableBase contains only immutable seed values. All chances and
 // suppressions are fractions, while glanceMultiplier is a damage multiplier.
 // Runtime state, pointers, maps, and dynamic modifiers remain on AttackTable.
@@ -101,8 +147,10 @@ type attackTableByLevel [levelBandCount]attackTableBase
 type combatRules struct {
 	// These names describe the existing discriminator, not an assumption about
 	// attacker type. NewAttackTable branches only on defender.Type.
-	versusEnemy    attackTableByLevel
-	versusNonEnemy attackTableByLevel
+	versusEnemy               attackTableByLevel
+	versusNonEnemy            attackTableByLevel
+	targetPhysicalCritByLevel [levelBandCount]float64
+	outcomes                  outcomeRules
 }
 
 func (rules rulesetProfile) attackTableBase(attacker *Unit, defender *Unit) attackTableBase {
@@ -111,6 +159,10 @@ func (rules rulesetProfile) attackTableBase(attacker *Unit, defender *Unit) atta
 	}
 
 	return rules.combat.versusNonEnemy[rules.levels.bandFor(attacker.Level)]
+}
+
+func (rules rulesetProfile) targetPhysicalCritPercent(level int32) float64 {
+	return rules.combat.targetPhysicalCritByLevel[rules.levels.bandFor(level)]
 }
 
 func (base attackTableBase) applyTo(table *AttackTable) {

@@ -25,8 +25,24 @@ const MaxMeleeRange = 5.0 // in yards
 const DefaultAttackPowerPerDPS = 14.0
 
 const ArmorPenPerPercentArmor = 5.92
-const MissDodgeParryBlockCritChancePerDefense = 0.04
-const ResilienceRatingPerCritReductionChance = 39.4231
+
+// Compatibility constants for rating and defense consumers outside core.
+// Their canonical values live in the active build-time ruleset profile.
+const (
+	ExpertisePerQuarterPercentReduction     = activeExpertisePerQuarterPercentReduction
+	DefenseRatingPerDefenseLevel            = activeDefenseRatingPerDefenseLevel
+	DodgeRatingPerDodgePercent              = activeDodgeRatingPerDodgePercent
+	ParryRatingPerParryPercent              = activeParryRatingPerParryPercent
+	BlockRatingPerBlockPercent              = activeBlockRatingPerBlockPercent
+	PhysicalHitRatingPerHitPercent          = activePhysicalHitRatingPerHitPercent
+	SpellHitRatingPerHitPercent             = activeSpellHitRatingPerHitPercent
+	PhysicalCritRatingPerCritPercent        = activePhysicalCritRatingPerCritPercent
+	SpellCritRatingPerCritPercent           = activeSpellCritRatingPerCritPercent
+	PhysicalHasteRatingPerHastePercent      = activePhysicalHasteRatingPerHastePercent
+	SpellHasteRatingPerHastePercent         = activeSpellHasteRatingPerHastePercent
+	MissDodgeParryBlockCritChancePerDefense = activeDefenseChancePerDefenseLevelPercent
+	ResilienceRatingPerCritReductionChance  = activeResilienceRatingPerCritReductionPercent
+)
 
 const EnemyAutoAttackAPCoefficient = 0.00052
 

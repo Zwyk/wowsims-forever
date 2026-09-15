@@ -172,8 +172,13 @@ func (spell *Spell) RangedAttackPower(target *Unit) float64 {
 }
 
 func (spell *Spell) DodgeParrySuppression() float64 {
+	rules := currentRuleset()
+	return spell.dodgeParrySuppression(rules.ratings, rules.combat.outcomes)
+}
+
+func (spell *Spell) dodgeParrySuppression(ratings ratingRules, outcomes outcomeRules) float64 {
 	expertiseRating := spell.Unit.stats[stats.ExpertiseRating] + spell.BonusExpertiseRating
-	return math.Floor(expertiseRating/ExpertisePerQuarterPercentReduction) / 400
+	return math.Floor(expertiseRating/ratings.expertisePerQuarterPercentReduction) / outcomes.expertiseAvoidanceStepsPerUnit
 }
 
 func (spell *Spell) PhysicalHitChance(attackTable *AttackTable) float64 {
@@ -258,7 +263,7 @@ func (spell *Spell) SpellChanceToMiss(attackTable *AttackTable) float64 {
 		baseHitChance *= attackTable.GetBinaryHitChance(spell)
 	}
 	hitChance := baseHitChance + spell.SpellHitChance(attackTable.Defender)
-	return math.Max(0.01, 1-hitChance)
+	return math.Max(attackTable.resolvedOutcomeRules().minimumSpellMissChance, 1-hitChance)
 }
 func (spell *Spell) MagicHitCheck(sim *Simulation, attackTable *AttackTable) bool {
 	return sim.Proc(1.0-spell.SpellChanceToMiss(attackTable), "Magical Hit Roll")
@@ -283,11 +288,15 @@ type critChances struct {
 }
 
 func getCritChances(rawChance float64, target *Unit) critChances {
+	return getCritChancesWithRatingRules(rawChance, target, currentRuleset().ratings)
+}
+
+func getCritChancesWithRatingRules(rawChance float64, target *Unit, ratings ratingRules) critChances {
 	actual := max(rawChance-target.PseudoStats.ReducedCritTakenPercent, 0)
-	resilienceSuppression := max(rawChance-target.GetDefenseReduction(), 0)
+	resilienceSuppression := max(rawChance-target.getDefenseReduction(ratings), 0)
 	return critChances{
 		actual:     actual,
-		suppressed: min(resilienceSuppression, target.GetResilienceReduction()),
+		suppressed: min(resilienceSuppression, target.getResilienceReduction(ratings)),
 	}
 }
 

@@ -14,7 +14,6 @@ MELEE_CRIT = "chancetomeleecrit.txt"
 MELEE_CRIT_BASE = "chancetomeleecritbase.txt"
 SPELL_CRIT = "chancetospellcrit.txt"
 SPELL_CRIT_BASE = "chancetospellcritbase.txt"
-COMBAT_RATINGS = "combatratings.txt"
 RATING_SCALAR = "octclasscombatratingscalar.txt"
 
 BASE_LEVEL = 70
@@ -43,24 +42,12 @@ def GenIndexedDb(file : str):
             db[line[0]] = line[1:]
     return db
 
-def GenRowIndexedDb(file : str):
-    db = {}
-    with open(file) as tsv:
-        first = True
-        for col in zip(*[line for line in csv.reader(tsv, delimiter='\t')]):
-            if first:
-                first = False
-                continue
-            db[col[0]] = list(col[1:])
-    return db
-
 class ClassStats:
     BaseMp : dict
     MCrit : dict
     SCrit : dict
     MCritBase : dict
     SCritBase : dict
-    CombatRatings : dict
 
 def GenExtraStatsGoFile(cs: ClassStats):
     header = '''
@@ -76,19 +63,10 @@ import (
 )
 
 '''
-# weapon skill	defense skill	dodge	parry	block	hit melee	hit ranged		hit spell	crit melee		crit ranged		crit spell		hit taken melee		hit taken ranged	hit taken spell		crit taken melee	crit taken ranged	crit taken spell	haste melee		haste ranged	haste spell
     output = header
-    output += f"const ExpertisePerQuarterPercentReduction = {float(cs.CombatRatings['weapon skill'][BASE_LEVEL-1])}\n"
-    output += f"const DefenseRatingPerDefenseLevel = {cs.CombatRatings['defense skill'][BASE_LEVEL-1]}\n"
-    output += f"const DodgeRatingPerDodgePercent = {cs.CombatRatings['dodge'][BASE_LEVEL-1]}\n"
-    output += f"const ParryRatingPerParryPercent = {cs.CombatRatings['parry'][BASE_LEVEL-1]}\n"
-    output += f"const BlockRatingPerBlockPercent = {cs.CombatRatings['block'][BASE_LEVEL-1]}\n"
-    output += f"const PhysicalHitRatingPerHitPercent = {cs.CombatRatings['hit melee'][BASE_LEVEL-1]}\n"
-    output += f"const SpellHitRatingPerHitPercent = {cs.CombatRatings['hit spell'][BASE_LEVEL-1]}\n"
-    output += f"const PhysicalCritRatingPerCritPercent = {cs.CombatRatings['crit melee'][BASE_LEVEL-1]}\n"
-    output += f"const SpellCritRatingPerCritPercent = {cs.CombatRatings['crit spell'][BASE_LEVEL-1]}\n"
-    output += f"const PhysicalHasteRatingPerHastePercent = {cs.CombatRatings['haste melee'][BASE_LEVEL-1]}\n"
-    output += f"const SpellHasteRatingPerHastePercent = {cs.CombatRatings['haste spell'][BASE_LEVEL-1]}\n"
+    # Combat-rating conversions are ruleset data. Keeping them out of this
+    # generated file prevents a base-stat refresh from silently changing the
+    # inherited profile or recreating its public compatibility constants.
 
     output += '''var CritPerAgiMaxLevel = map[proto.Class]float64{
 proto.Class_ClassUnknown: 0.0,'''
@@ -132,7 +110,6 @@ if __name__ == "__main__":
     args.SCrit = GenIndexedDb(BASE_DIR + DIR_PATH + SPELL_CRIT)
     args.MCritBase = GenIndexedDb(BASE_DIR + DIR_PATH + MELEE_CRIT_BASE)
     args.SCritBase = GenIndexedDb(BASE_DIR + DIR_PATH + SPELL_CRIT_BASE)
-    args.CombatRatings = GenRowIndexedDb(BASE_DIR + DIR_PATH + COMBAT_RATINGS)
 
     output = GenExtraStatsGoFile(args)
     fname = BASE_DIR + OUTPUT_PATH + "base_stats_auto_gen.go"

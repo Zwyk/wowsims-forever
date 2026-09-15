@@ -8,21 +8,15 @@ import (
 )
 
 func TestInheritedTBCLevelBaseline(t *testing.T) {
-	rules := currentRuleset()
+	rules := inheritedTBCRuleset()
 	if rules.id != rulesetInheritedTBC {
-		t.Fatalf("active ruleset: got %d, want inherited TBC", rules.id)
+		t.Fatalf("ruleset: got %d, want inherited TBC", rules.id)
 	}
-	if CharacterLevel != 70 {
-		t.Fatalf("character level: got %d, want 70", CharacterLevel)
+	if rules.levels.characterLevel != 70 {
+		t.Fatalf("character level: got %d, want 70", rules.levels.characterLevel)
 	}
-	if DefaultBossLevel != 73 {
-		t.Fatalf("default boss level: got %d, want 73", DefaultBossLevel)
-	}
-	if int32(CharacterLevel) != rules.levels.characterLevel {
-		t.Fatalf("character-level compatibility constant: got %d, ruleset has %d", CharacterLevel, rules.levels.characterLevel)
-	}
-	if int32(DefaultBossLevel) != rules.levels.defaultBossLevel() {
-		t.Fatalf("boss-level compatibility constant: got %d, ruleset has %d", DefaultBossLevel, rules.levels.defaultBossLevel())
+	if rules.levels.defaultBossLevel() != 73 {
+		t.Fatalf("default boss level: got %d, want 73", rules.levels.defaultBossLevel())
 	}
 }
 
@@ -30,7 +24,8 @@ func TestInheritedTBCLevelBaseline(t *testing.T) {
 // Forever formulas are installed. A later rules-data change should update the
 // table and these expectations together, using beta evidence.
 func TestInheritedPlayerVsEnemyAttackTables(t *testing.T) {
-	player := Unit{Type: PlayerUnit, Level: CharacterLevel}
+	rules := inheritedTBCRuleset()
+	player := Unit{Type: PlayerUnit, Level: rules.levels.characterLevel}
 
 	tests := []struct {
 		name                 string
@@ -46,17 +41,17 @@ func TestInheritedPlayerVsEnemyAttackTables(t *testing.T) {
 		meleeCritSuppression float64
 		spellCritSuppression float64
 	}{
-		{"minus-two", CharacterLevel - 2, 0.02, 0.04, 0.05, 0.04, 0.04, 0.00, 0.95, 0.00, 0.000, 0.000},
-		{"same-level", CharacterLevel, 0.04, 0.05, 0.05, 0.05, 0.05, 0.06, 0.95, 0.00, 0.000, 0.000},
-		{"plus-one", CharacterLevel + 1, 0.05, 0.055, 0.05, 0.055, 0.055, 0.12, 0.95, 0.00, 0.010, 0.000},
-		{"plus-two", CharacterLevel + 2, 0.06, 0.06, 0.05, 0.06, 0.06, 0.18, 0.85, 0.00, 0.020, 0.003},
-		{"boss", DefaultBossLevel, 0.17, 0.08, 0.05, 0.065, 0.14, 0.24, 0.75, 0.01, 0.048, 0.021},
+		{"minus-two", rules.levels.characterLevel - 2, 0.02, 0.04, 0.05, 0.04, 0.04, 0.00, 0.95, 0.00, 0.000, 0.000},
+		{"same-level", rules.levels.characterLevel, 0.04, 0.05, 0.05, 0.05, 0.05, 0.06, 0.95, 0.00, 0.000, 0.000},
+		{"plus-one", rules.levels.characterLevel + 1, 0.05, 0.055, 0.05, 0.055, 0.055, 0.12, 0.95, 0.00, 0.010, 0.000},
+		{"plus-two", rules.levels.characterLevel + 2, 0.06, 0.06, 0.05, 0.06, 0.06, 0.18, 0.85, 0.00, 0.020, 0.003},
+		{"boss", rules.levels.defaultBossLevel(), 0.17, 0.08, 0.05, 0.065, 0.14, 0.24, 0.75, 0.01, 0.048, 0.021},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			enemy := Unit{Type: EnemyUnit, Level: test.level}
-			table := NewAttackTable(&player, &enemy)
+			table := newAttackTableWithRuleset(&player, &enemy, rules)
 
 			assertFloat64(t, "spell miss", table.BaseSpellMissChance, test.spellMiss)
 			assertFloat64(t, "physical miss", table.BaseMissChance, test.physicalMiss)
@@ -73,7 +68,8 @@ func TestInheritedPlayerVsEnemyAttackTables(t *testing.T) {
 }
 
 func TestInheritedEnemyVsPlayerAttackTables(t *testing.T) {
-	player := Unit{Type: PlayerUnit, Level: CharacterLevel}
+	rules := inheritedTBCRuleset()
+	player := Unit{Type: PlayerUnit, Level: rules.levels.characterLevel}
 
 	tests := []struct {
 		name         string
@@ -85,17 +81,17 @@ func TestInheritedEnemyVsPlayerAttackTables(t *testing.T) {
 		parry        float64
 		crush        float64
 	}{
-		{"minus-two", CharacterLevel - 2, 0.05, 0.054, 0.054, 0.004, 0.054, 0.00},
-		{"same-level", CharacterLevel, 0.05, 0.050, 0.050, 0.000, 0.050, 0.00},
-		{"plus-one", CharacterLevel + 1, 0.05, 0.048, 0.048, -0.002, 0.048, 0.00},
-		{"plus-two", CharacterLevel + 2, 0.05, 0.046, 0.046, -0.004, 0.046, 0.00},
-		{"boss", DefaultBossLevel, 0.05, 0.044, 0.044, -0.006, 0.044, 0.15},
+		{"minus-two", rules.levels.characterLevel - 2, 0.05, 0.054, 0.054, 0.004, 0.054, 0.00},
+		{"same-level", rules.levels.characterLevel, 0.05, 0.050, 0.050, 0.000, 0.050, 0.00},
+		{"plus-one", rules.levels.characterLevel + 1, 0.05, 0.048, 0.048, -0.002, 0.048, 0.00},
+		{"plus-two", rules.levels.characterLevel + 2, 0.05, 0.046, 0.046, -0.004, 0.046, 0.00},
+		{"boss", rules.levels.defaultBossLevel(), 0.05, 0.044, 0.044, -0.006, 0.044, 0.15},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			enemy := Unit{Type: EnemyUnit, Level: test.level}
-			table := NewAttackTable(&enemy, &player)
+			table := newAttackTableWithRuleset(&enemy, &player, rules)
 
 			assertFloat64(t, "spell miss", table.BaseSpellMissChance, test.spellMiss)
 			assertFloat64(t, "physical miss", table.BaseMissChance, test.physicalMiss)
@@ -107,14 +103,16 @@ func TestInheritedEnemyVsPlayerAttackTables(t *testing.T) {
 	}
 }
 
-func TestDefaultTargetUsesBossLevel(t *testing.T) {
-	target := NewTarget(&proto.Target{}, 0)
-	if target.Level != DefaultBossLevel {
-		t.Fatalf("default target level: got %d, want %d", target.Level, DefaultBossLevel)
+func TestInheritedDefaultTargetUsesBossLevel(t *testing.T) {
+	rules := inheritedTBCRuleset()
+	target := newTargetWithRuleset(&proto.Target{}, 0, rules)
+	if target.Level != rules.levels.defaultBossLevel() {
+		t.Fatalf("default target level: got %d, want %d", target.Level, rules.levels.defaultBossLevel())
 	}
 }
 
 func TestInheritedExpertiseQuarterPercentFloor(t *testing.T) {
+	rules := inheritedTBCRuleset()
 	tests := []struct {
 		name        string
 		rating      float64
@@ -126,21 +124,27 @@ func TestInheritedExpertiseQuarterPercentFloor(t *testing.T) {
 		{"below-second-step", 7.884615, 0, 0.0025},
 		{"second-step", 7.884616, 0, 0.005},
 		{"spell-bonus-rating", 0, 3.942308, 0.0025},
+		{"many-steps-preserve-division", rules.ratings.expertisePerQuarterPercentReduction * 35.5, 0, float64(35) / 400},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			unit := Unit{stats: stats.Stats{stats.ExpertiseRating: test.rating}}
 			spell := Spell{Unit: &unit, BonusExpertiseRating: test.bonusRating}
-			assertFloat64(t, "avoidance suppression", spell.DodgeParrySuppression(), test.want)
+			got := spell.dodgeParrySuppression(rules.ratings, rules.combat.outcomes)
+			if test.name == "many-steps-preserve-division" && got != test.want {
+				t.Fatalf("avoidance suppression changed floating-point operation: got %x, want %x", got, test.want)
+			}
+			assertFloat64(t, "avoidance suppression", got, test.want)
 		})
 	}
 }
 
 func TestInheritedDodgeReductionRemainsSeparateFromParry(t *testing.T) {
+	rules := inheritedTBCRuleset()
 	attacker := Unit{
 		Type:        PlayerUnit,
-		Level:       CharacterLevel,
+		Level:       rules.levels.characterLevel,
 		stats:       stats.Stats{stats.ExpertiseRating: 3.942308},
 		PseudoStats: stats.NewPseudoStats(),
 	}
@@ -148,10 +152,10 @@ func TestInheritedDodgeReductionRemainsSeparateFromParry(t *testing.T) {
 	attacker.PseudoStats.DodgeReduction = 0.02
 	defender := Unit{
 		Type:        EnemyUnit,
-		Level:       DefaultBossLevel,
+		Level:       rules.levels.defaultBossLevel(),
 		PseudoStats: stats.NewPseudoStats(),
 	}
-	table := NewAttackTable(&attacker, &defender)
+	table := newAttackTableWithRuleset(&attacker, &defender, rules)
 	spell := Spell{Unit: &attacker}
 
 	assertFloat64(t, "dodge", defender.GetTotalDodgeChanceAsDefender(&spell, table), 0.0425)

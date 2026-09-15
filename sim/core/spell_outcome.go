@@ -571,7 +571,7 @@ func (spell *Spell) GetPhysicalMissChance(attackTable *AttackTable) float64 {
 	missChance := attackTable.BaseMissChance - spell.PhysicalHitChance(attackTable)
 
 	if spell.Unit.AutoAttacks.IsDualWielding && !spell.Unit.PseudoStats.DisableDWMissPenalty {
-		missChance += 0.19
+		missChance += attackTable.resolvedOutcomeRules().dualWieldMissPenalty
 	}
 
 	return max(0, missChance)
@@ -723,7 +723,7 @@ func (result *SpellResult) applyEnemyAttackTableMiss(spell *Spell, attackTable *
 	missChance := result.Target.GetTotalChanceToBeMissedAsDefender(attackTable) - spell.Unit.GetStat(stats.PhysicalHitPercent)/100
 
 	if spell.Unit.AutoAttacks.IsDualWielding && !spell.Unit.PseudoStats.DisableDWMissPenalty {
-		missChance += 0.19
+		missChance += attackTable.resolvedOutcomeRules().dualWieldMissPenalty
 	}
 	*chance += max(0, missChance)
 
@@ -795,7 +795,9 @@ func (result *SpellResult) applyEnemyAttackTableCrit(spell *Spell, attackTable *
 	if spell.ProcMask.Matches(ProcMaskRanged) {
 		critPercent += spell.Unit.stats[stats.RangedCritPercent]
 	}
-	chances := getCritChances(critPercent/100-attackTable.MeleeCritSuppression, result.Target)
+	ratings := attackTable.resolvedRatingRules()
+	outcomes := attackTable.resolvedOutcomeRules()
+	chances := getCritChancesWithRatingRules(critPercent/100-attackTable.MeleeCritSuppression, result.Target, ratings)
 	*chance += chances.suppressed
 	if roll < *chance {
 		result.Outcome = OutcomeSuppressedCrit
@@ -819,8 +821,8 @@ func (result *SpellResult) applyEnemyAttackTableCrit(spell *Spell, attackTable *
 				spell.SpellMetrics[result.Target.UnitIndex].ResistedCrits++
 			}
 		}
-		resilCritMultiplier := 1 - (max(0, result.Target.GetResilienceReduction()/2))
-		result.Damage *= 2 * resilCritMultiplier
+		resilCritMultiplier := 1 - max(0, result.Target.getResilienceReduction(ratings)*outcomes.resilienceCritDamageReductionScale)
+		result.Damage *= outcomes.enemyCritDamageMultiplier * resilCritMultiplier
 		return true
 	}
 	return false
@@ -839,7 +841,7 @@ func (result *SpellResult) applyEnemyAttackTableCrush(spell *Spell, at *AttackTa
 		if countHits {
 			spell.SpellMetrics[result.Target.UnitIndex].Crushes++
 		}
-		result.Damage *= 1.5
+		result.Damage *= at.resolvedOutcomeRules().crushingBlowDamageMultiplier
 		return true
 	}
 	return false
@@ -894,8 +896,10 @@ func (spell *Spell) OutcomeExpectedPhysicalCrit(_ *Simulation, result *SpellResu
 
 func (spell *Spell) OutcomeExpectedMeleeWhite(_ *Simulation, result *SpellResult, attackTable *AttackTable) {
 	missChance := spell.GetPhysicalMissChance(attackTable)
-	dodgeChance := TernaryFloat64(spell.Flags.Matches(SpellFlagCannotBeDodged), 0, max(0, attackTable.BaseDodgeChance-spell.DodgeParrySuppression()-spell.Unit.PseudoStats.DodgeReduction))
-	parryChance := TernaryFloat64(spell.Unit.PseudoStats.InFrontOfTarget, max(0, attackTable.BaseParryChance-spell.DodgeParrySuppression()), 0)
+	ratings := attackTable.resolvedRatingRules()
+	outcomes := attackTable.resolvedOutcomeRules()
+	dodgeChance := TernaryFloat64(spell.Flags.Matches(SpellFlagCannotBeDodged), 0, max(0, attackTable.BaseDodgeChance-spell.dodgeParrySuppression(ratings, outcomes)-spell.Unit.PseudoStats.DodgeReduction))
+	parryChance := TernaryFloat64(spell.Unit.PseudoStats.InFrontOfTarget, max(0, attackTable.BaseParryChance-spell.dodgeParrySuppression(ratings, outcomes)), 0)
 	glanceChance := attackTable.BaseGlanceChance
 	blockChance := TernaryFloat64(spell.Unit.PseudoStats.InFrontOfTarget, attackTable.BaseBlockChance, 0)
 	whiteCritCap := 1.0 - missChance - dodgeChance - parryChance - glanceChance - blockChance
@@ -906,8 +910,10 @@ func (spell *Spell) OutcomeExpectedMeleeWhite(_ *Simulation, result *SpellResult
 
 func (spell *Spell) OutcomeExpectedMeleeWeaponSpecialHitAndCrit(_ *Simulation, result *SpellResult, attackTable *AttackTable) {
 	missChance := max(0, attackTable.BaseMissChance-spell.PhysicalHitChance(attackTable))
-	dodgeChance := TernaryFloat64(spell.Flags.Matches(SpellFlagCannotBeDodged), 0, max(0, attackTable.BaseDodgeChance-spell.DodgeParrySuppression()-spell.Unit.PseudoStats.DodgeReduction))
-	parryChance := TernaryFloat64(spell.Unit.PseudoStats.InFrontOfTarget, max(0, attackTable.BaseParryChance-spell.DodgeParrySuppression()), 0)
+	ratings := attackTable.resolvedRatingRules()
+	outcomes := attackTable.resolvedOutcomeRules()
+	dodgeChance := TernaryFloat64(spell.Flags.Matches(SpellFlagCannotBeDodged), 0, max(0, attackTable.BaseDodgeChance-spell.dodgeParrySuppression(ratings, outcomes)-spell.Unit.PseudoStats.DodgeReduction))
+	parryChance := TernaryFloat64(spell.Unit.PseudoStats.InFrontOfTarget, max(0, attackTable.BaseParryChance-spell.dodgeParrySuppression(ratings, outcomes)), 0)
 	blockChance := TernaryFloat64(spell.Unit.PseudoStats.InFrontOfTarget, attackTable.BaseBlockChance, 0)
 	critChance := spell.PhysicalCritChance(attackTable)
 	averageMultiplier := (1.0 - missChance - dodgeChance - parryChance) * (1.0 + (spell.CritDamageMultiplier(attackTable)-1)*critChance)

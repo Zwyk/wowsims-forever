@@ -25,9 +25,11 @@ The per-class golden results are the broad regression layer. Do not regenerate t
 
 ## Core ruleset boundary
 
-The active core ruleset is selected at build time and remains internal to the Go engine. It contains value-only level and attack-table data; simulations cannot mutate it or choose a different ruleset through proto input. Existing public constants and constructors remain compatibility facades while call sites are migrated incrementally.
+The active core ruleset is selected at build time and remains internal to the Go engine. It contains value-only level, rating, and combat-outcome data; simulations cannot mutate it or choose a different ruleset through proto input. Existing public constants and constructors remain compatibility facades while call sites are migrated incrementally.
 
-The first extraction contains only the inherited TBC level bands and both attack-table directions. Rating conversions, outcome caps, armor, resistance, weapon skill, talents and UI values stay outside this profile until each surface can move in a focused, zero-behavior-change pull request. A later Forever profile will be added alongside the inherited profile, then activated only with the matching level-60 data and UI changes.
+The first extraction contains the inherited TBC level bands and both attack-table directions. The second adds combat-rating conversions, level-based NPC critical strike chance, and fixed outcome values such as expertise steps, the dual-wield miss penalty, the spell miss floor, and enemy critical/crushing damage multipliers. Engine-created attack tables cache value copies of the selected rating and outcome rules, providing a profile-local calculation seam without mutable global state.
+
+All extracted values still reproduce the inherited TBC engine exactly. Armor, resistance, weapon skill, class base stats, talents and UI values stay outside this profile until each surface can move in a focused pull request. A later Forever profile will be added alongside the inherited profile, then activated only with matching level-60 base-stat data and UI changes.
 
 ### Known inherited quirks
 
@@ -63,3 +65,7 @@ Weapon skill is not represented by the inherited `tbc-new` combat model. Its abs
 
 - Blizzard: [World of Warcraft: Forever Deep Dive Panel Recap](https://news.blizzard.com/en-us/article/24303313/world-of-warcraft-forever-deep-dive-panel-recap)
 - Blizzard: [World of Warcraft: Forever — What's Next Panel Recap](https://news.blizzard.com/en-us/article/24303862/world-of-warcraft-forever-whats-next-panel-recap)
+
+## Secondary evidence
+
+- [talentsforever.com data export](https://talentsforever.com/data.json) is a fan-maintained, CC BY 4.0 transcription of demo footage and Blizzard slides. Its source metadata distinguishes confirmed tooltip ranks from estimates and Classic fallbacks. It is useful for later class, talent, spell and racial work, but it is not authoritative evidence for undocumented global combat formulas.

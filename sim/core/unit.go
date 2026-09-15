@@ -676,18 +676,22 @@ func (unit *Unit) GetCurrentPowerBar() PowerBarType {
 // Stat dependencies that apply both to players/pets (represented as Character
 // structs) and to NPCs (represented as Target structs).
 func (unit *Unit) addUniversalStatDependencies() {
-	unit.AddStatDependency(stats.MeleeHitRating, stats.PhysicalHitPercent, 1/PhysicalHitRatingPerHitPercent)
-	unit.AddStatDependency(stats.SpellHitRating, stats.SpellHitPercent, 1/SpellHitRatingPerHitPercent)
-	unit.AddStatDependency(stats.MeleeCritRating, stats.PhysicalCritPercent, 1/PhysicalCritRatingPerCritPercent)
-	unit.AddStatDependency(stats.SpellCritRating, stats.SpellCritPercent, 1/SpellCritRatingPerCritPercent)
+	unit.addUniversalStatDependenciesWithRuleset(currentRuleset())
+}
+
+func (unit *Unit) addUniversalStatDependenciesWithRuleset(rules rulesetProfile) {
+	unit.AddStatDependency(stats.MeleeHitRating, stats.PhysicalHitPercent, 1/rules.ratings.physicalHitRatingPerHitPercent)
+	unit.AddStatDependency(stats.SpellHitRating, stats.SpellHitPercent, 1/rules.ratings.spellHitRatingPerHitPercent)
+	unit.AddStatDependency(stats.MeleeCritRating, stats.PhysicalCritPercent, 1/rules.ratings.physicalCritRatingPerCritPercent)
+	unit.AddStatDependency(stats.SpellCritRating, stats.SpellCritPercent, 1/rules.ratings.spellCritRatingPerCritPercent)
 
 	// Forever combines the item sources for Hit and Crit, but the derived
 	// physical and spell stats stay separate because their combat tables,
 	// caps, and contextual bonuses are different.
-	unit.AddStatDependency(stats.HitRating, stats.PhysicalHitPercent, 1/PhysicalHitRatingPerHitPercent)
-	unit.AddStatDependency(stats.HitRating, stats.SpellHitPercent, 1/SpellHitRatingPerHitPercent)
-	unit.AddStatDependency(stats.CritRating, stats.PhysicalCritPercent, 1/PhysicalCritRatingPerCritPercent)
-	unit.AddStatDependency(stats.CritRating, stats.SpellCritPercent, 1/SpellCritRatingPerCritPercent)
+	unit.AddStatDependency(stats.HitRating, stats.PhysicalHitPercent, 1/rules.ratings.physicalHitRatingPerHitPercent)
+	unit.AddStatDependency(stats.HitRating, stats.SpellHitPercent, 1/rules.ratings.spellHitRatingPerHitPercent)
+	unit.AddStatDependency(stats.CritRating, stats.PhysicalCritPercent, 1/rules.ratings.physicalCritRatingPerCritPercent)
+	unit.AddStatDependency(stats.CritRating, stats.SpellCritPercent, 1/rules.ratings.spellCritRatingPerCritPercent)
 }
 
 func (unit *Unit) finalize() {
@@ -885,31 +889,44 @@ func (unit *Unit) ExecuteCustomRotation(sim *Simulation) {
 }
 
 func (unit *Unit) GetDodgeFromRating() float64 {
-	return unit.stats[stats.DodgeRating] / DodgeRatingPerDodgePercent / 100
+	return unit.getDodgeFromRating(currentRuleset().ratings)
+}
+func (unit *Unit) getDodgeFromRating(ratings ratingRules) float64 {
+	return unit.stats[stats.DodgeRating] / ratings.dodgeRatingPerDodgePercent / 100
 }
 func (unit *Unit) GetParryFromRating() float64 {
-	return unit.stats[stats.ParryRating] / ParryRatingPerParryPercent / 100
+	return unit.getParryFromRating(currentRuleset().ratings)
+}
+func (unit *Unit) getParryFromRating(ratings ratingRules) float64 {
+	return unit.stats[stats.ParryRating] / ratings.parryRatingPerParryPercent / 100
 }
 func (unit *Unit) GetBlockFromRating() float64 {
-	return unit.stats[stats.BlockPercent] + unit.stats[stats.BlockRating]/BlockRatingPerBlockPercent/100
+	return unit.getBlockFromRating(currentRuleset().ratings)
+}
+func (unit *Unit) getBlockFromRating(ratings ratingRules) float64 {
+	return unit.stats[stats.BlockPercent] + unit.stats[stats.BlockRating]/ratings.blockRatingPerBlockPercent/100
 }
 
 func (unit *Unit) GetTotalDodgeChanceAsDefender(spell *Spell, atkTable *AttackTable) float64 {
+	ratings := atkTable.resolvedRatingRules()
+	outcomes := atkTable.resolvedOutcomeRules()
 	chance := unit.PseudoStats.BaseDodgeChance +
 		atkTable.BaseDodgeChance +
-		unit.GetDodgeFromRating() -
-		spell.DodgeParrySuppression() -
+		unit.getDodgeFromRating(ratings) -
+		spell.dodgeParrySuppression(ratings, outcomes) -
 		spell.Unit.PseudoStats.DodgeReduction +
-		unit.GetDefenseReduction()
+		unit.getDefenseReduction(ratings)
 	return math.Max(chance, 0.0)
 }
 
 func (unit *Unit) GetTotalParryChanceAsDefender(spell *Spell, atkTable *AttackTable) float64 {
+	ratings := atkTable.resolvedRatingRules()
+	outcomes := atkTable.resolvedOutcomeRules()
 	chance := unit.PseudoStats.BaseParryChance +
 		atkTable.BaseParryChance +
-		unit.GetParryFromRating() -
-		spell.DodgeParrySuppression() +
-		unit.GetDefenseReduction()
+		unit.getParryFromRating(ratings) -
+		spell.dodgeParrySuppression(ratings, outcomes) +
+		unit.getDefenseReduction(ratings)
 	return math.Max(chance, 0.0)
 }
 
@@ -921,18 +938,25 @@ func (unit *Unit) GetTotalChanceToBeMissedAsDefender(atkTable *AttackTable) floa
 }
 
 func (unit *Unit) GetTotalBlockChanceAsDefender(atkTable *AttackTable) float64 {
+	ratings := atkTable.resolvedRatingRules()
 	chance := unit.PseudoStats.BaseBlockChance +
 		atkTable.BaseBlockChance +
-		unit.GetBlockFromRating() +
-		unit.GetDefenseReduction()
+		unit.getBlockFromRating(ratings) +
+		unit.getDefenseReduction(ratings)
 	return math.Max(chance, 0.0)
 }
 
 func (unit *Unit) GetDefenseReduction() float64 {
-	return math.Floor(unit.stats[stats.DefenseRating]/DefenseRatingPerDefenseLevel) * MissDodgeParryBlockCritChancePerDefense / 100
+	return unit.getDefenseReduction(currentRuleset().ratings)
+}
+func (unit *Unit) getDefenseReduction(ratings ratingRules) float64 {
+	return math.Floor(unit.stats[stats.DefenseRating]/ratings.defenseRatingPerDefenseLevel) * ratings.defenseChancePerDefenseLevelPercent / 100
 }
 func (unit *Unit) GetResilienceReduction() float64 {
-	return unit.GetStat(stats.ResilienceRating) / ResilienceRatingPerCritReductionChance / 100
+	return unit.getResilienceReduction(currentRuleset().ratings)
+}
+func (unit *Unit) getResilienceReduction(ratings ratingRules) float64 {
+	return unit.GetStat(stats.ResilienceRating) / ratings.resilienceRatingPerCritReductionPercent / 100
 }
 
 func (unit *Unit) updateReducedCritTakenPercent() {

@@ -7,17 +7,18 @@ import (
 )
 
 func newInheritedBossOutcomeFixture() (*Unit, *Unit, *Spell, *AttackTable) {
+	rules := inheritedTBCRuleset()
 	attacker := &Unit{
 		Type:        PlayerUnit,
-		Level:       CharacterLevel,
+		Level:       rules.levels.characterLevel,
 		PseudoStats: stats.NewPseudoStats(),
 	}
 	defender := &Unit{
 		Type:        EnemyUnit,
-		Level:       DefaultBossLevel,
+		Level:       rules.levels.defaultBossLevel(),
 		PseudoStats: stats.NewPseudoStats(),
 	}
-	table := NewAttackTable(attacker, defender)
+	table := newAttackTableWithRuleset(attacker, defender, rules)
 	attacker.AttackTables = []*AttackTable{table}
 	spell := &Spell{
 		Unit:                   attacker,
