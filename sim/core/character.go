@@ -264,6 +264,7 @@ func (character *Character) applyEquipment() {
 		panic("Equipment stats already applied to character!")
 	}
 	character.AddStats(character.EquipStats())
+	character.addWeaponSkillBonuses(character.Equipment.WeaponSkillBonuses())
 	character.equipStatsApplied = true
 }
 

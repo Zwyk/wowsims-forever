@@ -160,6 +160,8 @@ type Item struct {
 	LimitCategory int32
 	SetName       string // Empty string if not part of a set.
 	SetID         int32  // 0 if not part of a set.
+	// Category-specific bonuses carried independently from normal item stats.
+	WeaponSkillBonuses stats.WeaponSkillBonuses
 
 	GemSockets  []proto.GemColor
 	SocketBonus stats.Stats
@@ -178,23 +180,24 @@ type Item struct {
 
 func ItemFromProto(pData *proto.SimItem) Item {
 	return Item{
-		ID:               pData.Id,
-		Name:             pData.Name,
-		Type:             pData.Type,
-		ArmorType:        pData.ArmorType,
-		WeaponType:       pData.WeaponType,
-		HandType:         pData.HandType,
-		RangedWeaponType: pData.RangedWeaponType,
-		SwingSpeed:       pData.WeaponSpeed,
-		QualityModifier:  pData.QualityModifier,
-		GemSockets:       pData.GemSockets,
-		SocketBonus:      stats.FromProtoArray(pData.SocketBonus),
-		Unique:           pData.Unique,
-		LimitCategory:    pData.LimitCategory,
-		SetName:          pData.SetName,
-		SetID:            pData.SetId,
-		ScalingOptions:   pData.ScalingOptions,
-		ItemEffects:      pData.ItemEffects,
+		ID:                 pData.Id,
+		Name:               pData.Name,
+		Type:               pData.Type,
+		ArmorType:          pData.ArmorType,
+		WeaponType:         pData.WeaponType,
+		HandType:           pData.HandType,
+		RangedWeaponType:   pData.RangedWeaponType,
+		SwingSpeed:         pData.WeaponSpeed,
+		QualityModifier:    pData.QualityModifier,
+		GemSockets:         pData.GemSockets,
+		SocketBonus:        stats.FromProtoArray(pData.SocketBonus),
+		Unique:             pData.Unique,
+		LimitCategory:      pData.LimitCategory,
+		SetName:            pData.SetName,
+		SetID:              pData.SetId,
+		WeaponSkillBonuses: stats.WeaponSkillBonusesFromProto(pData.WeaponSkillBonuses),
+		ScalingOptions:     pData.ScalingOptions,
+		ItemEffects:        pData.ItemEffects,
 	}
 }
 
@@ -594,6 +597,21 @@ func (equipment *Equipment) Stats(spec proto.Spec) stats.Stats {
 	}
 
 	return equipStats
+}
+
+func (equipment *Equipment) WeaponSkillBonuses() stats.WeaponSkillBonuses {
+	bonuses := stats.WeaponSkillBonuses{}
+	for itemIndex := range equipment {
+		bonuses = bonuses.Add(equipment[itemIndex].effectiveWeaponSkillBonuses())
+	}
+	return bonuses
+}
+
+func (item *Item) effectiveWeaponSkillBonuses() stats.WeaponSkillBonuses {
+	if item == nil || item.ID == 0 {
+		return stats.WeaponSkillBonuses{}
+	}
+	return item.WeaponSkillBonuses
 }
 
 // Returns the base stats on the equipment. That is all stats without Gems / Enchants

@@ -95,6 +95,7 @@ jobs:
                   # tools/tooltip requires gitignored client-extracted DBC inputs.
                   # Keep this explicit until that package has self-contained fixtures.
                   go test \
+                      ./tools/database \
                       ./tools/database/dbc \
                       ./tools/db2tool/dbd \
                       ./tools/db2tool/sqlite \

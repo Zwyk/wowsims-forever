@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/wowsims/tbc/sim/core/proto"
+	"github.com/wowsims/tbc/sim/core/stats"
 )
 
 func TestWeaponAttackSourceZeroValueIsUnspecified(t *testing.T) {
@@ -117,6 +118,7 @@ func TestWeaponFromItemPreservesClassification(t *testing.T) {
 			name: "two-handed sword",
 			item: Item{
 				ID:         1,
+				Type:       proto.ItemType_ItemTypeWeapon,
 				WeaponType: proto.WeaponType_WeaponTypeSword,
 				HandType:   proto.HandType_HandTypeTwoHand,
 				SwingSpeed: 3.4,
@@ -126,6 +128,7 @@ func TestWeaponFromItemPreservesClassification(t *testing.T) {
 			name: "bow",
 			item: Item{
 				ID:               2,
+				Type:             proto.ItemType_ItemTypeRanged,
 				RangedWeaponType: proto.RangedWeaponType_RangedWeaponTypeBow,
 				SwingSpeed:       2.8,
 			},
@@ -140,6 +143,7 @@ func TestWeaponFromItemPreservesClassification(t *testing.T) {
 				weaponType:       test.item.WeaponType,
 				handType:         test.item.HandType,
 				rangedWeaponType: test.item.RangedWeaponType,
+				skillCategory:    weaponSkillCategoryFromItem(&test.item),
 			}
 			if weapon.classification != want {
 				t.Fatalf("classification = %+v, want %+v", weapon.classification, want)
@@ -225,10 +229,10 @@ func TestWeaponAttackContextUsesCurrentWeapon(t *testing.T) {
 func TestWeaponAttackContextReadsLivePlayerEquipment(t *testing.T) {
 	character := &Character{Unit: Unit{Type: PlayerUnit}}
 	character.AutoAttacks.character = character
-	cachedItem := Item{ID: 1, WeaponType: proto.WeaponType_WeaponTypeSword, SwingSpeed: 2.6}
+	cachedItem := Item{ID: 1, Type: proto.ItemType_ItemTypeWeapon, WeaponType: proto.WeaponType_WeaponTypeSword, SwingSpeed: 2.6}
 	character.AutoAttacks.mh.Weapon = newWeaponFromItem(&cachedItem, 2, 0)
 
-	currentItem := Item{ID: 2, WeaponType: proto.WeaponType_WeaponTypeMace, HandType: proto.HandType_HandTypeTwoHand, SwingSpeed: 3.6}
+	currentItem := Item{ID: 2, Type: proto.ItemType_ItemTypeWeapon, WeaponType: proto.WeaponType_WeaponTypeMace, HandType: proto.HandType_HandTypeTwoHand, SwingSpeed: 3.6}
 	character.Equipment[proto.ItemSlot_ItemSlotMainHand] = currentItem
 	context := (&Spell{Unit: &character.Unit, weaponAttackSource: WeaponAttackSourceMainHand}).weaponAttackContext()
 	want := weaponClassificationFromItem(&currentItem)
@@ -242,12 +246,15 @@ func TestWeaponAttackContextReadsLivePlayerEquipment(t *testing.T) {
 	}
 	character.Equipment[proto.ItemSlot_ItemSlotMainHand] = Item{}
 	context = (&Spell{Unit: &character.Unit, weaponAttackSource: WeaponAttackSourceMainHand}).weaponAttackContext()
-	wantUnarmed := weaponClassification{kind: weaponClassificationUnarmed}
+	wantUnarmed := weaponClassification{
+		kind:          weaponClassificationUnarmed,
+		skillCategory: proto.WeaponSkillCategory_WeaponSkillCategoryUnarmed,
+	}
 	if context.classification != wantUnarmed {
 		t.Fatalf("empty main hand classification = %+v, want %+v", context.classification, wantUnarmed)
 	}
 
-	bow := Item{ID: 3, RangedWeaponType: proto.RangedWeaponType_RangedWeaponTypeBow, SwingSpeed: 2.8}
+	bow := Item{ID: 3, Type: proto.ItemType_ItemTypeRanged, RangedWeaponType: proto.RangedWeaponType_RangedWeaponTypeBow, SwingSpeed: 2.8}
 	character.Equipment[proto.ItemSlot_ItemSlotRanged] = bow
 	rangedContext := (&Spell{Unit: &character.Unit, weaponAttackSource: WeaponAttackSourceRanged}).weaponAttackContext()
 	wantRanged := weaponClassificationFromItem(&bow)
@@ -259,7 +266,7 @@ func TestWeaponAttackContextReadsLivePlayerEquipment(t *testing.T) {
 func TestWeaponAttackContextFindsPlayerWithoutAutoAttacks(t *testing.T) {
 	agent := &FakeAgent{}
 	agent.Character.Unit.Type = PlayerUnit
-	bow := Item{ID: 1, RangedWeaponType: proto.RangedWeaponType_RangedWeaponTypeBow, SwingSpeed: 2.8}
+	bow := Item{ID: 1, Type: proto.ItemType_ItemTypeRanged, RangedWeaponType: proto.RangedWeaponType_RangedWeaponTypeBow, SwingSpeed: 2.8}
 	agent.Character.Equipment[proto.ItemSlot_ItemSlotRanged] = bow
 
 	raid := &Raid{}
@@ -279,6 +286,7 @@ func TestWeaponAttackContextKeepsSyntheticWeaponAuthoritative(t *testing.T) {
 	character.AutoAttacks.character = character
 	character.Equipment[proto.ItemSlot_ItemSlotMainHand] = Item{
 		ID:         1,
+		Type:       proto.ItemType_ItemTypeWeapon,
 		WeaponType: proto.WeaponType_WeaponTypeSword,
 		SwingSpeed: 2.6,
 	}
@@ -296,29 +304,44 @@ func TestWeaponAttackContextKeepsSyntheticWeaponAuthoritative(t *testing.T) {
 }
 
 func TestWeaponAttackContextKeepsUnarmedDistinctFromMissing(t *testing.T) {
-	character := &Character{Unit: Unit{Type: PlayerUnit}}
+	character := &Character{Unit: Unit{Type: PlayerUnit, PseudoStats: stats.NewPseudoStats()}}
 	character.AutoAttacks.character = character
 	character.AutoAttacks.mh.Weapon = newWeaponFromUnarmed(2)
+	character.addWeaponSkillBonus(proto.WeaponSkillCategory_WeaponSkillCategoryUnarmed, 3)
 
 	context := (&Spell{Unit: &character.Unit, weaponAttackSource: WeaponAttackSourceMainHand}).weaponAttackContext()
-	want := weaponClassification{kind: weaponClassificationUnarmed}
+	want := weaponClassification{
+		kind:          weaponClassificationUnarmed,
+		skillCategory: proto.WeaponSkillCategory_WeaponSkillCategoryUnarmed,
+	}
 	if context.classification != want {
 		t.Fatalf("classification = %+v, want %+v", context.classification, want)
+	}
+	if context.weaponSkillBonus != 3 {
+		t.Fatalf("unarmed bonus = %v, want 3", context.weaponSkillBonus)
+	}
+	if none := (&Spell{Unit: &character.Unit, weaponAttackSource: WeaponAttackSourceNone}).weaponAttackContext(); none.weaponSkillBonus != 0 {
+		t.Fatalf("explicit-none bonus = %v, want 0", none.weaponSkillBonus)
 	}
 }
 
 func TestWeaponAttackContextDoesNotGivePlayerEquipmentToPets(t *testing.T) {
-	player := &Character{Unit: Unit{Type: PlayerUnit}}
+	player := &Character{Unit: Unit{Type: PlayerUnit, PseudoStats: stats.NewPseudoStats()}}
 	player.Equipment[proto.ItemSlot_ItemSlotRanged] = Item{
 		ID:               1,
+		Type:             proto.ItemType_ItemTypeRanged,
 		RangedWeaponType: proto.RangedWeaponType_RangedWeaponTypeBow,
 		SwingSpeed:       2.8,
 	}
+	player.addWeaponSkillBonus(proto.WeaponSkillCategory_WeaponSkillCategoryBows, 50)
 	pet := &Unit{Type: PetUnit}
 	pet.AutoAttacks.character = player
 
 	context := (&Spell{Unit: pet, weaponAttackSource: WeaponAttackSourceRanged}).weaponAttackContext()
 	if context.classification != (weaponClassification{}) {
 		t.Fatalf("pet classification = %+v, want unspecified", context.classification)
+	}
+	if context.weaponSkillBonus != 0 {
+		t.Fatalf("pet weapon-skill bonus = %v, want 0", context.weaponSkillBonus)
 	}
 }

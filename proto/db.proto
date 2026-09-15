@@ -28,6 +28,7 @@ message SimEnchant {
 }
 
 // Contains only the Item info needed by the sim.
+// Next tag: 19.
 message SimItem {
 	int32 id = 1;
 	string name = 2;
@@ -51,6 +52,10 @@ message SimItem {
 
 	int32 limit_category = 16;
 	bool unique = 17;
+
+	// Indexed by WeaponSkillCategory. These values are carried through the
+	// engine but do not affect combat until a ruleset explicitly consumes them.
+	repeated double weapon_skill_bonuses = 18;
 }
 
 message Consumable {

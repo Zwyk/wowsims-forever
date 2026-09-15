@@ -37,7 +37,13 @@ Spells can declare a currently inert weapon source: none, main hand, off hand or
 
 The engine continues to keep one mutable `AttackTable` per attacker/defender pair. It does not copy Classic's per-cast-type table maps, which would duplicate pair-wide aura state. Future weapon-skill rules will resolve a short-lived context from the spell, the current player equipment and any authoritative synthetic auto-attack weapon instead.
 
-Weapon context distinguishes unspecified, absent, equipped-item, unarmed and synthetic origins. Player equipment classification is read live, including for disabled or unpopulated auto-attack channels, while a form, pet or other synthetic weapon never falls back to an equipped item. Synthetic weapons still need explicit skill categories, such as feral combat, before any weapon-skill rule consumes the context.
+Weapon context distinguishes unspecified, absent, equipped-item, unarmed and synthetic origins. Player equipment classification is read live, including for disabled or unpopulated auto-attack channels, while a form, pet or other synthetic weapon never falls back to an equipped item.
+
+### Weapon-skill categories and bonuses
+
+The engine carries an inactive, fixed-size weapon-skill bonus vector. Its category indices 0-15 intentionally preserve the Classic WoWSims layout. Wand is a forward-compatible engine extension at category 16 because it is distinct from the imported ranged categories; it was not present in the Classic reference simulator and is not a claim about confirmed Forever behavior. Item transport, character aggregation and item-swap deltas all preserve these values independently of regular stats. Fist weapons map to Unarmed, and cat/bear weapons are explicitly tagged as Feral Combat. Missing, malformed, non-weapon, wrong-slot and unclassified synthetic contexts fail closed to the unspecified category.
+
+These values are bonuses only: the engine does not yet define whether Forever expresses them as skill points, rating, percentage points or some other unit. Nothing converts them to inherited Expertise Rating, and no hit, dodge, parry, critical, glancing or damage formula reads them. Current item data also leaves every bonus at zero; populating a checked, provenance-backed Forever data overlay is a separate step.
 
 ### Known inherited quirks
 
@@ -52,7 +58,7 @@ Weapon context distinguishes unspecified, absent, equipped-item, unarmed and syn
 | Maximum player level is 60 | Level 60 and default boss level 63 will be installed atomically with matching base-stat data | Not implemented |
 | Melee, ranged, and spell hit are one item stat | `StatHitRating` is a shared source feeding separate physical and spell hit percentages | Foundation implemented |
 | Melee, ranged, and spell crit are one item stat | `StatCritRating` is a shared source feeding separate physical and spell crit percentages | Foundation implemented |
-| Weapon skill remains relevant | Preserve room for per-weapon skill; do not treat current TBC expertise as the final model | Awaiting beta data |
+| Weapon skill remains relevant | Preserve category-specific bonus data and weapon context; do not treat current TBC expertise as the final model | Inactive foundation implemented; effects await beta data |
 | Some items reduce dodge/parry chance | Keep dodge and parry reduction distinct internally, even if one item stat eventually feeds both | Awaiting beta data |
 | Bonus healing contributes one-third as much bonus damage | Add once at the item-data boundary, with a regression test against double counting | Not implemented |
 
@@ -67,7 +73,7 @@ The generic source stats do **not** merge physical and spell outcome tables. Bas
 
 Until those values are confirmed, the runnable branch still uses inherited TBC conversion constants and combat tables. Characterization tests pin those placeholders so a later evidence-backed rules update produces an explicit reviewable diff.
 
-Weapon skill is not represented by the inherited `tbc-new` combat model. Its absence is recorded here rather than treated as expected Forever behavior; it will need a new weapon-aware seam in the modern engine.
+Weapon-skill categories and bonuses are now represented by an inactive seam in the modern engine. Their units, populated data and combat effects remain deliberately unresolved.
 
 ## Evidence
 
