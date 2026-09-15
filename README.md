@@ -1,30 +1,24 @@
-# WoW The Burning Crusade Classic Simulator
+# WoWSims Forever (experimental, unofficial)
 
-Welcome to the WoW The Burning Crusade Classic simulator! If you have questions or are thinking about contributing, [join our discord](https://discord.gg/jJMPr9JWwx) to chat!
+This repository is an early community port of [WoWSims TBC](https://github.com/wowsims/tbc-new) for World of Warcraft: Forever. It is a staging area while the WoWSims community decides where the long-term project should live.
 
-The primary goal of this project is to provide a framework that makes it easy to build a DPS sim for any class/spec, with a polished UI and accurate results. Each community will have ownership / responsibility over their portion of the sim, to ensure accuracy and that their community is represented.
+> [!WARNING]
+> The simulator still contains TBC rules, level-70 data, talents, spells, and encounter defaults. Its current output is **not valid for Forever**.
 
-This project is licensed with MIT license. We request that anyone using this software in their own project to make sure there is a user visible link back to the original project.
+The port starts from the modern `tbc-new` architecture at commit [`17a8fb28c5ad14b649acecdaacd488594048f467`](https://github.com/wowsims/tbc-new/commit/17a8fb28c5ad14b649acecdaacd488594048f467). We will preserve that architecture while replacing the game model in small, tested steps:
 
-[Live sims can be found here.](https://wowsims.com/tbc)
+- establish level-60 and level-63 encounter foundations;
+- model Forever's shared hit and critical-strike item stats without merging the physical and spell outcome tables;
+- restore weapon-skill mechanics from Classic where Forever matches them;
+- keep dodge/parry reduction and numeric conversions provisional until beta data confirms them;
+- port class, race, talent, spell, and item changes after the core rules are stable.
 
-[Support our devs via Patreon.](https://www.patreon.com/wowsims)
+The inherited deployment, release, database-update, labeling, and webhook workflows are disabled in this branch. Test CI is the only active workflow.
 
-## Downloading Sim
+## Development
 
-Links for latest Sim build:
+See the [installation guide](docs/installation.md) and [development commands](docs/commands.md). Work should be based on a feature branch; keep `master` available for syncing the upstream `tbc-new` baseline.
 
-- [Windows Sim](https://github.com/wowsims/tbc-new/releases/latest/download/wowsimtbc-windows.exe.zip)
-- [MacOS Sim](https://github.com/wowsims/tbc-new/releases/latest/download/wowsimtbc-amd64-darwin.zip)
-- [Linux Sim](https://github.com/wowsims/tbc-new/releases/latest/download/wowsimtbc-amd64-linux.zip)
+## Community and attribution
 
-Then unzip the downloaded file, then open the unzipped file to open the sim in your browser!
-
-Alternatively, you can choose from a specific relase on the [Releases](https://github.com/wowsims/tbc-new/releases) page and click the suitable link under "Assets"
-
-## Documentation
-
-- [Installation Guide](docs/installation.md)
-- [Development Commands](docs/commands.md)
-- [Adding a New Sim](docs/adding_sim.md)
-- [Internationalization](docs/i18n_guide.md)
+For coordination with the upstream project, join the [WoWSims Discord](https://discord.gg/jJMPr9JWwx). This fork retains the upstream MIT license and visible attribution requested by the WoWSims maintainers.

@@ -11,6 +11,8 @@ on:
                 description: 'Commit reference to test (defaults to the triggering ref)'
                 required: false
                 type: string
+permissions:
+    contents: read
 jobs:
     build-ui:
         runs-on: ubuntu-latest

@@ -34,7 +34,7 @@ func readExpectedProtoVersion(fileName string, allowMissingFile bool) (int32, er
 func TestProtoVersioning(t *testing.T) {
 	// First run the "buf breaking" utility to determine whether any breaking proto changes have been made compared to the
 	// remote master.
-	cmd := exec.Command("npx", "buf", "breaking", "--against", "https://github.com/wowsims/tbc-new.git#branch=master,subdir=proto")
+	cmd := exec.Command("npx", "buf", "breaking", "--against", "https://github.com/Zwyk/wowsims-forever.git#branch=master,subdir=proto")
 	cmd.Dir = "../../"
 	out, err := cmd.CombinedOutput()
 

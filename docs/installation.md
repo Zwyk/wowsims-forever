@@ -17,7 +17,7 @@ echo 'export GOPATH=$HOME/go' >> $HOME/.bashrc
 echo 'export PATH=$PATH:$GOPATH/bin' >> $HOME/.bashrc
 source $HOME/.bashrc
 
-cd tbc
+cd wowsims-forever
 
 # Install protobuf compiler and Go plugins
 sudo apt update && sudo apt upgrade
@@ -38,8 +38,8 @@ npm install
 Alternatively, install Docker and your workflow will look something like this:
 
 ```sh
-git clone https://github.com/wowsims/tbc-new.git
-cd tbc-new
+git clone https://github.com/Zwyk/wowsims-forever.git
+cd wowsims-forever
 
 # Build the docker image and install npm dependencies (only need to run these once).
 docker build --tag wowsims-tbc .
