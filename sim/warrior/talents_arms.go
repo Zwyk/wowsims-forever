@@ -162,8 +162,10 @@ func (war *Warrior) registerDeepWounds() {
 		ClassSpellMask: SpellMaskDeepWounds,
 		Flags:          core.SpellFlagNoOnCastComplete | core.SpellFlagIgnoreResists,
 
+		// Deep Wounds (12867) has no SpellCategories row in the client DB. It's a bleed that
+		// snapshots on proc; the application uses OutcomeAlwaysHitNoHitCounter and the DoT ticks
+		// with OutcomeTick, so it never rolls a crit and DefenseType is intentionally left unset.
 		DamageMultiplier: 1,
-		CritMultiplier:   war.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier: 1,
 
 		Dot: core.DotConfig{
@@ -364,7 +366,8 @@ func (war *Warrior) registerMaceSpecialization() {
 	rageMetrics := war.NewRageMetrics(actionID)
 
 	spell := war.RegisterSpell(core.SpellConfig{
-		ActionID: core.ActionID{SpellID: 5530},
+		ActionID:    core.ActionID{SpellID: 5530},
+		DefenseType: core.DefenseTypeMagic,
 
 		ApplyEffects: func(sim *core.Simulation, _ *core.Unit, spell *core.Spell) {
 			war.AddRage(sim, 7, rageMetrics)
@@ -511,6 +514,7 @@ func (war *Warrior) registerMortalStrike() {
 	war.MortalStrike = war.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 30330},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		Flags:          core.SpellFlagAPL | core.SpellFlagMeleeMetrics,
 		ClassSpellMask: SpellMaskMortalStrike,
@@ -533,7 +537,6 @@ func (war *Warrior) registerMortalStrike() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   war.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier: 1,
 
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {

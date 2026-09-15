@@ -24,6 +24,7 @@ type Spell struct {
 	ChargeRecoveryTime    int32
 	CategoryTypeMask      int32
 	Category              int32
+	DefenseType           int32 // SpellCategories.DefenseType: 0 none, 1 magic, 2 melee, 3 ranged
 	Duration              int32
 	ProcChance            float32
 	ProcCharges           int32

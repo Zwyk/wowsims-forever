@@ -10,6 +10,7 @@ func (hunter *Hunter) registerMultiShotSpell() {
 	hunter.MultiShot = hunter.RegisterRangedSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 27021},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeRanged,
 		ProcMask:       core.ProcMaskRangedSpecial,
 		ClassSpellMask: HunterSpellMultiShot,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagAPL,
@@ -44,5 +45,5 @@ func (hunter *Hunter) registerMultiShotSpell() {
 				spell.DealBatchedAoeDamage(sim)
 			})
 		},
-	}, true)
+	})
 }

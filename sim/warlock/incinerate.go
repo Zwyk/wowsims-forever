@@ -26,7 +26,7 @@ func (warlock *Warlock) registerIncinerate() {
 		},
 
 		DamageMultiplierAdditive: 1,
-		CritMultiplier:           warlock.DefaultSpellCritMultiplier(),
+		DefenseType:              core.DefenseTypeMagic,
 		ThreatMultiplier:         1,
 		BonusCoefficient:         incinerateCoeff,
 

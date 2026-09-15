@@ -121,6 +121,7 @@ func (ai *MorogrimAI) registerTidalWave(disableSlow bool) {
 	ai.TidalWave = ai.BossUnit.RegisterSpell(core.SpellConfig{
 		ActionID:    core.ActionID{SpellID: 37730},
 		SpellSchool: core.SpellSchoolFrost,
+		DefenseType: core.DefenseTypeMagic,
 		ProcMask:    core.ProcMaskEmpty,
 		Flags:       core.SpellFlagBinary | core.SpellFlagAPL,
 
@@ -164,6 +165,7 @@ func (ai *MorogrimAI) registerEarthquake() {
 	ai.Earthquake = ai.BossUnit.RegisterSpell(core.SpellConfig{
 		ActionID:    core.ActionID{SpellID: 37764},
 		SpellSchool: core.SpellSchoolPhysical,
+		DefenseType: core.DefenseTypeRanged,
 		ProcMask:    core.ProcMaskSpellDamage,
 
 		Cast: core.CastConfig{

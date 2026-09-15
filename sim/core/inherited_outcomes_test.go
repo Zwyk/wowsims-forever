@@ -22,8 +22,9 @@ func newInheritedBossOutcomeFixture() (*Unit, *Unit, *Spell, *AttackTable) {
 	attacker.AttackTables = []*AttackTable{table}
 	spell := &Spell{
 		Unit:                   attacker,
+		DefenseType:            DefenseTypeMelee,
 		ProcMask:               ProcMaskMelee,
-		CritMultiplier:         2,
+		CritMultiplierPct:      1,
 		CritMultiplierAdditive: 0,
 	}
 	return attacker, defender, spell, table

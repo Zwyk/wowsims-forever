@@ -11,6 +11,7 @@ func (druid *Druid) registerMaulSpell() {
 	maulSpell := druid.RegisterSpell(Bear, core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 26996},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		ClassSpellMask: DruidSpellMaul,
 		Flags:          core.SpellFlagMeleeMetrics,
@@ -27,7 +28,6 @@ func (druid *Druid) registerMaulSpell() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   druid.FeralCritMultiplier(),
 		ThreatMultiplier: 1,
 		FlatThreatBonus:  344,
 		MaxRange:         core.MaxMeleeRange,
@@ -81,6 +81,7 @@ func (druid *Druid) makeMaulQueueSpellAndAura(maulSpell *DruidSpell) *DruidSpell
 	queueSpell := druid.RegisterSpell(Bear, core.SpellConfig{
 		ActionID:    maulSpell.ActionID.WithTag(1),
 		SpellSchool: core.SpellSchoolPhysical,
+		DefenseType: core.DefenseTypeMelee,
 		ProcMask:    core.ProcMaskMeleeMHSpecial,
 		Flags:       core.SpellFlagMeleeMetrics | core.SpellFlagAPL | core.SpellFlagNoMetrics,
 

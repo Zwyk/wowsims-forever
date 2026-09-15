@@ -14,6 +14,7 @@ func (mage *Mage) registerScorchSpell() {
 	mage.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 27074},
 		SpellSchool:    core.SpellSchoolFire,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		Flags:          core.SpellFlagAPL,
 		ClassSpellMask: MageSpellScorch,
@@ -29,7 +30,6 @@ func (mage *Mage) registerScorchSpell() {
 		},
 
 		DamageMultiplierAdditive: 1,
-		CritMultiplier:           mage.DefaultSpellCritMultiplier(),
 		BonusCoefficient:         scorchCoefficient,
 		ThreatMultiplier:         1,
 

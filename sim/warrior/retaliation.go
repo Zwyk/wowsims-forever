@@ -13,11 +13,11 @@ func (war *Warrior) registerRetaliation() {
 		ClassSpellMask: SpellMaskRetaliationHit,
 		ActionID:       core.ActionID{SpellID: 20240},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMH,
 		Flags:          core.SpellFlagMeleeMetrics,
 
 		DamageMultiplier: 1,
-		CritMultiplier:   war.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier: 1,
 
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
@@ -41,6 +41,7 @@ func (war *Warrior) registerRetaliation() {
 
 	spell := war.RegisterSpell(core.SpellConfig{
 		ActionID:       actionID,
+		DefenseType:    core.DefenseTypeMelee,
 		ClassSpellMask: SpellMaskRetaliation,
 		Cast: core.CastConfig{
 			DefaultCast: core.Cast{

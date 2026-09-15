@@ -61,12 +61,12 @@ func (shaman *Shaman) newWindfuryImbueSpell(isMH bool) *core.Spell {
 	spellConfig := core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 25505, Tag: int32(tag)},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee, // Windfury Attack (25504)
 		ProcMask:       procMask,
 		ClassSpellMask: SpellMaskWindfuryWeapon,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagPassiveSpell,
 
 		DamageMultiplier: 1,
-		CritMultiplier:   shaman.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier: 1,
 		BonusCoefficient: 1,
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
@@ -156,13 +156,15 @@ func (shaman *Shaman) RegisterWindfuryImbue(procMask core.ProcMask) {
 
 func (shaman *Shaman) newFlametongueImbueSpell(weapon *core.Item) *core.Spell {
 	return shaman.RegisterSpell(core.SpellConfig{
-		ActionID:         core.ActionID{SpellID: 25489},
-		SpellSchool:      core.SpellSchoolFire,
+		ActionID:    core.ActionID{SpellID: 25489},
+		SpellSchool: core.SpellSchoolFire,
+		// The damage logs as Flametongue Attack (10444), Magic in SpellCategories; it crits for 1.5x
+		// (2.0x with Elemental Fury, see talents_elemental.go).
+		DefenseType:      core.DefenseTypeMagic,
 		ProcMask:         core.ProcMaskSpellDamageProc,
 		ClassSpellMask:   SpellMaskFlametongueWeapon,
 		Flags:            core.SpellFlagPassiveSpell | SpellFlagShamanSpell,
 		DamageMultiplier: 1,
-		CritMultiplier:   shaman.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier: 1,
 		BonusCoefficient: 0.10000000149,
 
@@ -266,12 +268,12 @@ func (shaman *Shaman) newFrostbrandImbueSpell() *core.Spell {
 	return shaman.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 8033},
 		SpellSchool:    core.SpellSchoolFrost,
+		DefenseType:    core.DefenseTypeMagic, // Frostbrand Attack (25501 / 38617) is Magic in SpellCategories
 		ClassSpellMask: SpellMaskFrostbrandWeapon,
 		ProcMask:       core.ProcMaskEmpty,
 		Flags:          core.SpellFlagPassiveSpell | SpellFlagShamanSpell,
 
 		DamageMultiplier: 1,
-		CritMultiplier:   shaman.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier: 1,
 		BonusCoefficient: 0.10000000149,
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {

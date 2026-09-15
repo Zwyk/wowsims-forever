@@ -16,11 +16,11 @@ func (mage *Mage) registerBlizzardSpell() {
 	blizzardTickSpell := mage.RegisterSpell(core.SpellConfig{
 		ActionID:       blizzardActionId,
 		SpellSchool:    core.SpellSchoolFrost,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		ClassSpellMask: MageSpellBlizzard,
 
 		DamageMultiplier: 1,
-		CritMultiplier:   mage.DefaultSpellCritMultiplier(),
 		BonusCoefficient: blizzardCoefficient,
 		ThreatMultiplier: 1,
 
@@ -32,6 +32,7 @@ func (mage *Mage) registerBlizzardSpell() {
 	mage.RegisterSpell(core.SpellConfig{
 		ActionID:       blizzardActionId,
 		SpellSchool:    core.SpellSchoolFrost,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		Flags:          core.SpellFlagChanneled | core.SpellFlagAPL,
 		ClassSpellMask: MageSpellBlizzard,

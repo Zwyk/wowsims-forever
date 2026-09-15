@@ -36,6 +36,7 @@ func (paladin *Paladin) registerHammerOfWrath(rankConfig shared.SpellRankConfig)
 	paladin.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: spellID},
 		SpellSchool:    core.SpellSchoolHoly,
+		DefenseType:    core.DefenseTypeRanged,
 		ProcMask:       core.ProcMaskRangedSpecial,
 		Flags:          core.SpellFlagAPL,
 		ClassSpellMask: SpellMaskHammerOfWrath,
@@ -67,7 +68,6 @@ func (paladin *Paladin) registerHammerOfWrath(rankConfig shared.SpellRankConfig)
 		},
 
 		BonusCoefficient: coefficient,
-		CritMultiplier:   paladin.DefaultMeleeCritMultiplier(),
 
 		ExtraCastCondition: func(sim *core.Simulation, target *core.Unit) bool {
 			return sim.IsExecutePhase20()

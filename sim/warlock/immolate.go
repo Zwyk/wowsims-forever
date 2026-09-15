@@ -32,7 +32,7 @@ func (warlock *Warlock) registerImmolate() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   warlock.DefaultSpellCritMultiplier(),
+		DefenseType:      core.DefenseTypeMagic,
 		ThreatMultiplier: 1,
 		BonusCoefficient: immolateCoeff,
 
@@ -49,6 +49,7 @@ func (warlock *Warlock) registerImmolate() {
 	warlock.Immolate.RelatedDotSpell = warlock.RegisterSpell(core.SpellConfig{
 		ActionID:       actionID.WithTag(1),
 		SpellSchool:    core.SpellSchoolFire,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		ClassSpellMask: WarlockSpellImmolateDot,
 		Flags:          core.SpellFlagPassiveSpell,
@@ -77,7 +78,7 @@ func (warlock *Warlock) registerImmolate() {
 				result.Damage /= dot.TickPeriod().Seconds()
 				return result
 			} else {
-				result := spell.CalcPeriodicDamage(sim, target, 615, spell.OutcomeExpectedMagicCrit)
+				result := spell.CalcPeriodicDamage(sim, target, 615, spell.OutcomeExpectedMagicHit)
 				result.Damage /= dot.CalcTickPeriod().Round(time.Millisecond).Seconds()
 				return result
 			}

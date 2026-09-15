@@ -13,6 +13,7 @@ func (druid *Druid) registerLacerateSpell() {
 	druid.Lacerate = druid.RegisterSpell(Bear, core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 33745},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		ClassSpellMask: DruidSpellLacerate,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagAPL,
@@ -29,7 +30,6 @@ func (druid *Druid) registerLacerateSpell() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   druid.FeralCritMultiplier(),
 		ThreatMultiplier: 0.5,
 		FlatThreatBonus:  267,
 		MaxRange:         core.MaxMeleeRange,

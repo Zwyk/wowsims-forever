@@ -13,6 +13,7 @@ func (mage *Mage) registerFireBlastSpell() {
 	mage.FireBlast = mage.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 27079},
 		SpellSchool:    core.SpellSchoolFire,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		Flags:          core.SpellFlagAPL,
 		ClassSpellMask: MageSpellFireBlast,
@@ -31,7 +32,6 @@ func (mage *Mage) registerFireBlastSpell() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   mage.DefaultSpellCritMultiplier(),
 		BonusCoefficient: fireBlastCoefficient,
 
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {

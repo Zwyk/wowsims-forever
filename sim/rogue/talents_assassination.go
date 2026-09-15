@@ -269,6 +269,7 @@ func (rogue *Rogue) registerMutilate() {
 	rogue.Mutilate = rogue.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: MutilateSpellID, Tag: 0},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagAPL,
 		ClassSpellMask: RogueSpellMutilate,
@@ -319,13 +320,13 @@ func (rogue *Rogue) newMutilateHitSpell(isMH bool) *core.Spell {
 	return rogue.RegisterSpell(core.SpellConfig{
 		ActionID:       actionID,
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       procMask,
 		Flags:          core.SpellFlagMeleeMetrics | SpellFlagBuilder,
 		ClassSpellMask: RogueSpellMutilateHit,
 
 		DamageMultiplier:         1,
 		DamageMultiplierAdditive: 1,
-		CritMultiplier:           rogue.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier:         1,
 
 		BonusCoefficient: 1,

@@ -13,6 +13,7 @@ func (rogue *Rogue) registerAmbushSpell() {
 	rogue.Ambush = rogue.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 27441},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		Flags:          core.SpellFlagMeleeMetrics | SpellFlagBuilder | core.SpellFlagAPL,
 		ClassSpellMask: RogueSpellAmbush,
@@ -34,7 +35,6 @@ func (rogue *Rogue) registerAmbushSpell() {
 
 		DamageMultiplier:         weaponDamage,
 		DamageMultiplierAdditive: 1,
-		CritMultiplier:           rogue.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier:         1,
 
 		BonusCoefficient: 1,

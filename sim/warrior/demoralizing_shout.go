@@ -12,6 +12,7 @@ func (war *Warrior) registerDemoralizingShout() {
 	war.DemoralizingShout = war.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 25203},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMagic,
 		ClassSpellMask: SpellMaskDemoralizingShout,
 		ProcMask:       core.ProcMaskEmpty,
 		Flags:          core.SpellFlagAPL,

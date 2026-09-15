@@ -20,6 +20,7 @@ func (mage *Mage) registerFlamestrike(rankConfig shared.SpellRankConfig) {
 	spell := mage.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: rankConfig.SpellID},
 		SpellSchool:    core.SpellSchoolFire,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		Flags:          core.SpellFlagAPL,
 		ClassSpellMask: MageSpellFlamestrike,
@@ -36,7 +37,6 @@ func (mage *Mage) registerFlamestrike(rankConfig shared.SpellRankConfig) {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   mage.DefaultSpellCritMultiplier(),
 		BonusCoefficient: flameStrikeCoefficient,
 		ThreatMultiplier: rankConfig.ThreatMultiplier,
 

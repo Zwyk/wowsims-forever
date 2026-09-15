@@ -13,6 +13,7 @@ func (war *Warrior) registerPummel() {
 		ClassSpellMask: SpellMaskPummel,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		MaxRange:       core.MaxMeleeRange,
 
 		RageCost: core.RageCostOptions{
@@ -28,7 +29,6 @@ func (war *Warrior) registerPummel() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   war.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier: 1,
 
 		ExtraCastCondition: func(sim *core.Simulation, target *core.Unit) bool {

@@ -15,6 +15,7 @@ func (warlock *Warlock) registerHellfire() *core.Spell {
 	warlock.Hellfire = warlock.RegisterSpell(core.SpellConfig{
 		ActionID:         hellfireActionID,
 		SpellSchool:      core.SpellSchoolFire,
+		DefenseType:      core.DefenseTypeMagic,
 		Flags:            core.SpellFlagChanneled | core.SpellFlagAPL,
 		ProcMask:         core.ProcMaskSpellDamage,
 		ClassSpellMask:   WarlockSpellHellfire,

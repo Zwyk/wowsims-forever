@@ -16,6 +16,7 @@ func (druid *Druid) registerStarfireSpell(rankConfig shared.SpellRankConfig) {
 	spell := druid.RegisterSpell(Humanoid|Moonkin, core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: rankConfig.SpellID},
 		SpellSchool:    core.SpellSchoolArcane,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		ClassSpellMask: DruidSpellStarfire,
 		Flags:          core.SpellFlagAPL,
@@ -35,7 +36,6 @@ func (druid *Druid) registerStarfireSpell(rankConfig shared.SpellRankConfig) {
 		BonusCoefficient: rankConfig.Coefficient,
 		DamageMultiplier: 1,
 		ThreatMultiplier: 1,
-		CritMultiplier:   druid.DefaultSpellCritMultiplier(),
 
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
 			baseDamage := druid.CalcAndRollDamageRange(sim, rankConfig.MinDamage, rankConfig.MaxDamage)

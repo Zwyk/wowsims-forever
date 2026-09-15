@@ -13,6 +13,7 @@ func (mage *Mage) registerFrostNovaSpell() {
 	mage.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 27088},
 		SpellSchool:    core.SpellSchoolFrost,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		Flags:          core.SpellFlagAPL | core.SpellFlagBinary,
 		ClassSpellMask: MageSpellFrostNova,
@@ -32,7 +33,6 @@ func (mage *Mage) registerFrostNovaSpell() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   mage.DefaultSpellCritMultiplier(),
 		BonusCoefficient: frostNovaCoefficient,
 		ThreatMultiplier: 1,
 

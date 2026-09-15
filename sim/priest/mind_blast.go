@@ -26,6 +26,7 @@ func (priest *Priest) registerMindBlastSpell(rankConfig shared.SpellRankConfig, 
 	spell := priest.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: rankConfig.SpellID},
 		SpellSchool:    core.SpellSchoolShadow,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		Flags:          core.SpellFlagAPL,
 		ClassSpellMask: PriestSpellMindBlast,
@@ -46,7 +47,6 @@ func (priest *Priest) registerMindBlastSpell(rankConfig shared.SpellRankConfig, 
 
 		DamageMultiplier:         1,
 		DamageMultiplierAdditive: 1,
-		CritMultiplier:           priest.DefaultSpellCritMultiplier(),
 		BonusCoefficient:         rankConfig.Coefficient,
 		ThreatMultiplier:         1,
 

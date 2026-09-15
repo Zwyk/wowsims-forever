@@ -38,11 +38,10 @@ func (shaman *Shaman) NewFireElemental() *FireElemental {
 
 	fireElemental.EnableAutoAttacks(fireElemental, core.AutoAttackOptions{
 		MainHand: core.Weapon{
-			BaseDamageMin:  134.0,
-			BaseDamageMax:  134.0,
-			SwingSpeed:     2.0,
-			CritMultiplier: fireElemental.DefaultMeleeCritMultiplier(),
-			SpellSchool:    core.SpellSchoolFire,
+			BaseDamageMin: 134.0,
+			BaseDamageMax: 134.0,
+			SwingSpeed:    2.0,
+			SpellSchool:   core.SpellSchoolFire,
 		},
 		AutoSwingMelee: true,
 	})

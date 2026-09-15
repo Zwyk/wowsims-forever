@@ -84,11 +84,10 @@ func (druid *Druid) newTreant(idx int) *TreantPet {
 		MainHand: core.Weapon{
 			// TODO: Verify base damage values in-game.
 			// Took the Wrath sim values * 70 / 80 to normalize for level 80
-			BaseDamageMin:  220.5,
-			BaseDamageMax:  312.375,
-			SwingSpeed:     1.75, // Seems to vary from 1.5 to almost 2
-			CritMultiplier: treant.DefaultMeleeCritMultiplier(),
-			SpellSchool:    core.SpellSchoolPhysical,
+			BaseDamageMin: 220.5,
+			BaseDamageMax: 312.375,
+			SwingSpeed:    1.75, // Seems to vary from 1.5 to almost 2
+			SpellSchool:   core.SpellSchoolPhysical,
 		},
 		AutoSwingMelee: true,
 	})

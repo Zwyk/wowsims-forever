@@ -10,6 +10,7 @@ func (druid *Druid) registerShredSpell() {
 	druid.Shred = druid.RegisterSpell(Cat, core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 27002},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		ClassSpellMask: DruidSpellShred,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagAPL,
@@ -31,7 +32,6 @@ func (druid *Druid) registerShredSpell() {
 
 		// Weapon damage * 2.25 + flatDamageBonus, boosted by 30% if Mangle is active.
 		DamageMultiplier: 2.25,
-		CritMultiplier:   druid.FeralCritMultiplier(),
 		ThreatMultiplier: 1,
 		MaxRange:         core.MaxMeleeRange,
 

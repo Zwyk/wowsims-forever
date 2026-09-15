@@ -178,6 +178,7 @@ func (war *Warrior) registerSweepingStrikes() {
 		ActionID:       actionID.WithTag(1), // Real SpellID: 26654
 		ClassSpellMask: SpellMaskSweepingStrikesNormalizedHit,
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeSpecial,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagPassiveSpell | core.SpellFlagNoOnCastComplete,
 
@@ -335,6 +336,7 @@ func (war *Warrior) registerBloodthirst() {
 	war.RegisterSpell(core.SpellConfig{
 		ActionID:       actionID,
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagAPL,
 		ClassSpellMask: SpellMaskBloodthirst,
@@ -357,7 +359,6 @@ func (war *Warrior) registerBloodthirst() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   war.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier: 1,
 
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {

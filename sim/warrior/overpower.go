@@ -28,6 +28,7 @@ func (war *Warrior) registerOverpower() {
 	war.RegisterSpell(core.SpellConfig{
 		ActionID:       actionID,
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagAPL,
 		ClassSpellMask: SpellMaskOverpower,
@@ -49,7 +50,6 @@ func (war *Warrior) registerOverpower() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   war.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier: 0.75,
 
 		ExtraCastCondition: func(sim *core.Simulation, target *core.Unit) bool {

@@ -11,6 +11,7 @@ func (war *Warrior) registerExecute() {
 	spell := war.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 25236},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagAPL,
 		ClassSpellMask: SpellMaskExecute,
@@ -27,7 +28,6 @@ func (war *Warrior) registerExecute() {
 			IgnoreHaste: true,
 		},
 
-		CritMultiplier:   war.DefaultMeleeCritMultiplier(),
 		DamageMultiplier: 1,
 		ThreatMultiplier: 1.25,
 

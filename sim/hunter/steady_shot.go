@@ -10,6 +10,7 @@ func (hunter *Hunter) registerSteadyShotSpell() {
 	hunter.SteadyShot = hunter.RegisterRangedSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 34120},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeRanged,
 		ClassSpellMask: HunterSpellSteadyShot,
 		ProcMask:       core.ProcMaskRangedSpecial,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagAPL,
@@ -51,5 +52,5 @@ func (hunter *Hunter) registerSteadyShotSpell() {
 				spell.DealDamage(sim, result)
 			})
 		},
-	}, true)
+	})
 }

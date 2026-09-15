@@ -17,6 +17,7 @@ func (warlock *Warlock) registerSiphonLifeSpell() {
 	warlock.SiphonLife = warlock.RegisterSpell(core.SpellConfig{
 		ActionID:       actionID,
 		SpellSchool:    core.SpellSchoolShadow,
+		DefenseType:    core.DefenseTypeMagic,
 		ClassSpellMask: WarlockSpellSiphonLife,
 		ProcMask:       core.ProcMaskSpellDamage,
 		Flags:          core.SpellFlagAPL,
@@ -66,7 +67,7 @@ func (warlock *Warlock) registerSiphonLifeSpell() {
 				result.Damage /= dot.TickPeriod().Seconds()
 				return result
 			} else {
-				result := spell.CalcPeriodicDamage(sim, target, 840, spell.OutcomeExpectedMagicCrit)
+				result := spell.CalcPeriodicDamage(sim, target, 840, spell.OutcomeExpectedMagicHit)
 				result.Damage /= dot.CalcTickPeriod().Round(time.Millisecond).Seconds()
 				return result
 			}

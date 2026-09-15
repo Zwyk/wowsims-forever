@@ -14,6 +14,7 @@ func (paladin *Paladin) registerCrusaderStrike() {
 	paladin.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 35395},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		Flags:          core.SpellFlagAPL | core.SpellFlagMeleeMetrics | core.SpellFlagNoOnCastComplete,
 		ClassSpellMask: SpellMaskCrusaderStrike,
@@ -36,7 +37,6 @@ func (paladin *Paladin) registerCrusaderStrike() {
 		MaxRange:         core.MaxMeleeRange,
 		DamageMultiplier: 1.1,
 		ThreatMultiplier: 1,
-		CritMultiplier:   paladin.DefaultMeleeCritMultiplier(),
 
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
 			baseDamage := spell.Unit.MHNormalizedWeaponDamage(sim, spell.MeleeAttackPower(target))

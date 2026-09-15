@@ -19,6 +19,7 @@ func (war *Warrior) registerShieldWall() {
 
 	spell := war.RegisterSpell(core.SpellConfig{
 		ActionID:       actionID,
+		DefenseType:    core.DefenseTypeMelee,
 		ClassSpellMask: SpellMaskShieldWall,
 
 		Cast: core.CastConfig{

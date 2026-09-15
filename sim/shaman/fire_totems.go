@@ -15,6 +15,7 @@ func (shaman *Shaman) registerSearingTotemSpell() {
 	shaman.SearingTotem = shaman.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 25530},
 		SpellSchool:    core.SpellSchoolFire,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskEmpty,
 		Flags:          core.SpellFlagAPL | SpellFlagShamanSpell | SpellFlagInstant,
 		ClassSpellMask: SpellMaskSearingTotem,
@@ -29,7 +30,6 @@ func (shaman *Shaman) registerSearingTotemSpell() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   shaman.DefaultSpellCritMultiplier(),
 		Dot: core.DotConfig{
 			Aura: core.Aura{
 				Label: "Searing Totem",
@@ -79,6 +79,7 @@ func (shaman *Shaman) registerMagmaTotemSpell() {
 	shaman.MagmaTotem = shaman.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 25550},
 		SpellSchool:    core.SpellSchoolFire,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskEmpty,
 		Flags:          core.SpellFlagAPL | SpellFlagShamanSpell | SpellFlagInstant,
 		ClassSpellMask: SpellMaskMagmaTotem,
@@ -92,7 +93,6 @@ func (shaman *Shaman) registerMagmaTotemSpell() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   shaman.DefaultSpellCritMultiplier(),
 
 		Dot: core.DotConfig{
 			IsAOE: true,
@@ -127,6 +127,7 @@ func (shaman *Shaman) registerFireNovaTotemSpell() {
 	shaman.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 25537},
 		SpellSchool:    core.SpellSchoolFire,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskEmpty,
 		Flags:          core.SpellFlagAPL | SpellFlagShamanSpell | SpellFlagInstant,
 		ClassSpellMask: SpellMaskFireNovaTotem,
@@ -144,7 +145,6 @@ func (shaman *Shaman) registerFireNovaTotemSpell() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   shaman.DefaultSpellCritMultiplier(),
 		BonusCoefficient: 0.21400000155,
 
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {

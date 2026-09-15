@@ -109,7 +109,7 @@ func NewHunter(character *core.Character, options *proto.Player, hunterOptions *
 	hunter.applyAmmoDPS()
 	hunter.applyQuiverBonus(rangedSlot)
 
-	rangedWeapon := hunter.WeaponFromRanged(hunter.DefaultMeleeCritMultiplier())
+	rangedWeapon := hunter.WeaponFromRanged()
 
 	if rangedSlot == nil || rangedSlot.ID != ThoridalTheStarsFuryItemID {
 		hunter.AmmoDamageBonus = hunter.AmmoDPS * rangedWeapon.SwingSpeed
@@ -119,8 +119,8 @@ func NewHunter(character *core.Character, options *proto.Player, hunterOptions *
 
 	hunter.EnableAutoAttacks(hunter, core.AutoAttackOptions{
 		Ranged:          rangedWeapon,
-		MainHand:        hunter.WeaponFromMainHand(hunter.DefaultMeleeCritMultiplier()),
-		OffHand:         hunter.WeaponFromOffHand(hunter.DefaultMeleeCritMultiplier()),
+		MainHand:        hunter.WeaponFromMainHand(),
+		OffHand:         hunter.WeaponFromOffHand(),
 		ReplaceMHSwing:  hunter.TryRaptorStrike,
 		AutoSwingRanged: true,
 		AutoSwingMelee:  true,
@@ -211,7 +211,7 @@ func (hunter *Hunter) applyAmmoDPS() {
 	}
 }
 
-func (hunter *Hunter) RegisterRangedSpell(config core.SpellConfig, canCrit bool) *core.Spell {
+func (hunter *Hunter) RegisterRangedSpell(config core.SpellConfig) *core.Spell {
 	if config.MissileSpeed == 0 {
 		config.MissileSpeed = 40
 	}
@@ -244,18 +244,10 @@ func (hunter *Hunter) RegisterRangedSpell(config core.SpellConfig, canCrit bool)
 		}
 	}
 
-	if canCrit && config.CritMultiplier == 0 {
-		config.CritMultiplier = hunter.DefaultMeleeCritMultiplier()
-	}
-
 	return hunter.RegisterSpell(config)
 }
 
 func (hunter *Hunter) Initialize() {
-	hunter.AutoAttacks.MHConfig().CritMultiplier = hunter.DefaultMeleeCritMultiplier()
-	hunter.AutoAttacks.OHConfig().CritMultiplier = hunter.DefaultMeleeCritMultiplier()
-	hunter.AutoAttacks.RangedConfig().CritMultiplier = hunter.DefaultMeleeCritMultiplier()
-
 	hunter.RegisterSpells()
 	hunter.addPvpGloves()
 }

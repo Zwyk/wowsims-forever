@@ -239,8 +239,9 @@ func init() {
 		})
 
 		spell := warlock.RegisterSpell(core.SpellConfig{
-			ActionID: core.ActionID{ItemID: 19337},
-			Flags:    core.SpellFlagNoOnCastComplete,
+			ActionID:    core.ActionID{ItemID: 19337},
+			DefenseType: core.DefenseTypeMagic, // Blessing of the Black Book (23720)
+			Flags:       core.SpellFlagNoOnCastComplete,
 
 			Cast: core.CastConfig{
 				CD: core.Cooldown{

@@ -18,6 +18,7 @@ func (warlock *Warlock) registerCurseOfDoom() {
 	warlock.CurseOfDoom = warlock.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 30910},
 		SpellSchool:    core.SpellSchoolShadow,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		Flags:          core.SpellFlagAPL,
 		ClassSpellMask: WarlockSpellCurseOfDoom,
@@ -35,7 +36,6 @@ func (warlock *Warlock) registerCurseOfDoom() {
 		ThreatMultiplier: 1,
 		DamageMultiplier: 1,
 		BonusCoefficient: doomCoeff,
-		CritMultiplier:   1,
 
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
 			result := spell.CalcOutcome(sim, target, spell.OutcomeMagicHit)
@@ -69,7 +69,7 @@ func (warlock *Warlock) registerCurseOfDoom() {
 			if useSnapshot {
 				return dot.CalcSnapshotDamage(sim, target, dot.OutcomeTick)
 			} else {
-				return spell.CalcPeriodicDamage(sim, target, calculateBaseDamage(), spell.OutcomeExpectedMagicCrit)
+				return spell.CalcPeriodicDamage(sim, target, calculateBaseDamage(), spell.OutcomeExpectedMagicHit)
 			}
 		},
 	})

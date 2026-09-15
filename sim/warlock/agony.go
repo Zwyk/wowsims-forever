@@ -20,12 +20,12 @@ func (warlock *Warlock) registerCurseOfAgony() {
 		Flags:          core.SpellFlagAPL,
 		ProcMask:       core.ProcMaskSpellDamage,
 		SpellSchool:    core.SpellSchoolShadow,
+		DefenseType:    core.DefenseTypeMagic,
 		ClassSpellMask: WarlockSpellCurseOfAgony,
 
 		ThreatMultiplier: 1,
 		DamageMultiplier: 1,
 		BonusCoefficient: agonyCoeff,
-		CritMultiplier:   1,
 		Cast: core.CastConfig{
 			DefaultCast: core.Cast{
 				GCD: core.GCDDefault,
@@ -74,7 +74,7 @@ func (warlock *Warlock) registerCurseOfAgony() {
 				result.Damage /= dot.TickPeriod().Seconds()
 				return result
 			} else {
-				result := spell.CalcPeriodicDamage(sim, target, calculateBaseDamage(sim, dot), spell.OutcomeExpectedMagicCrit)
+				result := spell.CalcPeriodicDamage(sim, target, calculateBaseDamage(sim, dot), spell.OutcomeExpectedMagicHit)
 				result.Damage *= 10
 				result.Damage /= dot.CalcTickPeriod().Round(time.Millisecond).Seconds()
 				return result

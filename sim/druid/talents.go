@@ -7,12 +7,6 @@ import (
 	"github.com/wowsims/tbc/sim/core/stats"
 )
 
-// FeralCritMultiplier returns the melee crit multiplier for cat/bear form abilities,
-// including the bonus from Predatory Instincts (+2% crit damage per rank).
-func (druid *Druid) FeralCritMultiplier() float64 {
-	return druid.DefaultMeleeCritMultiplier() * (1 + 0.02*float64(druid.Talents.PredatoryInstincts))
-}
-
 func (druid *Druid) ApplyTalents() {
 	// Balance
 	druid.applyStarlightWrath()
@@ -38,6 +32,7 @@ func (druid *Druid) ApplyTalents() {
 	druid.applyFerocity()
 	druid.applyFeralAggression()
 	druid.applyFeralInstincts()
+	druid.applyPredatoryInstincts()
 	druid.applyThickHide()
 	druid.applyFeralSwiftness()
 	druid.applySharpenedClaws()
@@ -70,6 +65,21 @@ func (druid *Druid) applyThickHide() {
 	bonus := bonusByRank[druid.Talents.ThickHide-1]
 	druid.ApplyEquipScaling(stats.Armor, 1.0+bonus)
 	druid.ApplyEquipScaling(stats.BonusArmor, 1.0+bonus)
+}
+
+// Predatory Instincts: +2% melee critical strike damage per rank while in Cat or Bear form.
+// The client aura (33859 and its ranks) is school-masked to Physical, so it covers every
+// physical attack in form (abilities and auto attacks, Ravage included) and nothing else.
+func (druid *Druid) applyPredatoryInstincts() {
+	if druid.Talents.PredatoryInstincts == 0 {
+		return
+	}
+
+	druid.AddStaticMod(core.SpellModConfig{
+		Kind:       core.SpellMod_CritMultiplier_Pct,
+		School:     core.SpellSchoolPhysical,
+		FloatValue: 0.02 * float64(druid.Talents.PredatoryInstincts),
+	})
 }
 
 func (druid *Druid) applyForceOfNature() {

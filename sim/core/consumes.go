@@ -375,11 +375,11 @@ func registerConjuredCD(agent Agent, consumes *proto.ConsumesSpec) {
 			flameCapProc := character.RegisterSpell(SpellConfig{
 				ActionID:    conjuredMCD.Spell.ActionID,
 				SpellSchool: SpellSchoolFire,
+				DefenseType: DefenseTypeMagic, // Flamecap Fire (28715)
 				ProcMask:    ProcMaskSpellDamageProc | ProcMaskSpellProc,
 				Flags:       SpellFlagSuppressEquipProcs,
 
 				DamageMultiplier: 1,
-				CritMultiplier:   character.DefaultSpellCritMultiplier(),
 				ThreatMultiplier: 1,
 
 				ApplyEffects: func(sim *Simulation, target *Unit, spell *Spell) {
@@ -607,6 +607,7 @@ func (character *Character) newBasicExplosiveSpellConfig(sharedTimer *Timer, act
 	return SpellConfig{
 		ActionID:     actionID,
 		SpellSchool:  school,
+		DefenseType:  DefenseTypeMagic, // Every explosive's damage spell is Magic in SpellCategories, so they crit for 150%
 		ProcMask:     ProcMaskEmpty,
 		Flags:        SpellFlagExplosive,
 		MissileSpeed: speed,
@@ -625,7 +626,6 @@ func (character *Character) newBasicExplosiveSpellConfig(sharedTimer *Timer, act
 		// Explosives always have 1% resist chance, so just give them hit cap.
 		BonusHitPercent:  100,
 		DamageMultiplier: 1,
-		CritMultiplier:   2,
 		ThreatMultiplier: 1,
 
 		ApplyEffects: func(sim *Simulation, target *Unit, spell *Spell) {

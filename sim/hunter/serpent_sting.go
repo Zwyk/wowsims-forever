@@ -10,6 +10,7 @@ func (hunter *Hunter) registerSerpentStingSpell() {
 	hunter.SerpentSting = hunter.RegisterRangedSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 27016},
 		SpellSchool:    core.SpellSchoolNature,
+		DefenseType:    core.DefenseTypeRanged,
 		ProcMask:       core.ProcMaskProc,
 		ClassSpellMask: HunterSpellSerpentSting,
 		Flags:          core.SpellFlagAPL,
@@ -50,5 +51,5 @@ func (hunter *Hunter) registerSerpentStingSpell() {
 				spell.DealOutcome(sim, result)
 			})
 		},
-	}, false)
+	})
 }

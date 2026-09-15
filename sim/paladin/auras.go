@@ -19,6 +19,7 @@ func (paladin *Paladin) registerAuraSpell(aura *core.Aura, classSpellMask int64)
 	paladin.RegisterSpell(core.SpellConfig{
 		ActionID:       aura.ActionID,
 		SpellSchool:    core.SpellSchoolHoly,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskEmpty,
 		Flags:          core.SpellFlagAPL | core.SpellFlagHelpful,
 		ClassSpellMask: classSpellMask,

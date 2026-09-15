@@ -11,6 +11,7 @@ func (warlock *Warlock) registerCurseOfElements() {
 	warlock.CurseOfElements = warlock.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 27228},
 		SpellSchool:    core.SpellSchoolShadow,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskEmpty,
 		Flags:          core.SpellFlagAPL,
 		ClassSpellMask: WarlockSpellCurseOfElements,

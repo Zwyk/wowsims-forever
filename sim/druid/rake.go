@@ -10,6 +10,7 @@ func (druid *Druid) registerRakeSpell() {
 	druid.Rake = druid.RegisterSpell(Cat, core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 27003},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		ClassSpellMask: DruidSpellRake,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagAPL,
@@ -26,7 +27,6 @@ func (druid *Druid) registerRakeSpell() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   druid.FeralCritMultiplier(),
 		ThreatMultiplier: 1,
 		MaxRange:         core.MaxMeleeRange,
 
@@ -72,7 +72,7 @@ func (druid *Druid) registerRakeSpell() {
 			ticks := spell.CalcPeriodicDamage(sim, target, tickBase, spell.OutcomeExpectedMagicAlwaysHit)
 			attackTable := spell.Unit.AttackTables[target.UnitIndex]
 			critChance := spell.PhysicalCritChance(attackTable)
-			ticks.Damage *= 1 + critChance*(spell.CritMultiplier-1)
+			ticks.Damage *= 1 + critChance*(spell.CritDamageMultiplier(attackTable)-1)
 			return ticks
 		},
 	})

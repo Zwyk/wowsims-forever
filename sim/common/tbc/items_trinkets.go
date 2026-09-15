@@ -121,6 +121,7 @@ func init() {
 			ActionID:    core.ActionID{SpellID: 33090},
 			ProcMask:    core.ProcMaskEmpty,
 			SpellSchool: core.SpellSchoolHoly,
+			DefenseType: core.DefenseTypeMagic,
 			Flags:       core.SpellFlagIgnoreTargetModifiers | core.SpellFlagIgnoreAttackerModifiers,
 
 			Cast: core.CastConfig{
@@ -130,7 +131,6 @@ func init() {
 			},
 
 			DamageMultiplier: 1,
-			CritMultiplier:   character.DefaultHealingCritMultiplier(),
 			ThreatMultiplier: 0.5,
 
 			ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
@@ -232,6 +232,7 @@ func init() {
 		spell := character.RegisterSpell(core.SpellConfig{
 			ActionID:    core.ActionID{SpellID: 34587},
 			SpellSchool: core.SpellSchoolNature,
+			DefenseType: core.DefenseTypeMagic,
 
 			ProcMask: core.ProcMaskSpellProc | core.ProcMaskSpellDamageProc,
 			Flags:    core.SpellFlagPassiveSpell | core.SpellFlagNoOnCastComplete,
@@ -268,12 +269,12 @@ func init() {
 		lightningBolt := character.RegisterSpell(core.SpellConfig{
 			ActionID:     core.ActionID{SpellID: 37661},
 			SpellSchool:  core.SpellSchoolNature,
+			DefenseType:  core.DefenseTypeMagic,
 			ProcMask:     core.ProcMaskEmpty,
 			Flags:        core.SpellFlagPassiveSpell | core.SpellFlagIgnoreAttackerModifiers,
 			MissileSpeed: 20,
 
 			DamageMultiplier: 1,
-			CritMultiplier:   character.DefaultSpellCritMultiplier(),
 
 			ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
 				spell.WaitTravelTime(sim, func(s *core.Simulation) {
@@ -361,6 +362,7 @@ func init() {
 		spell := character.RegisterSpell(core.SpellConfig{
 			ActionID:    core.ActionID{ItemID: 30620},
 			SpellSchool: core.SpellSchoolNature,
+			DefenseType: core.DefenseTypeMagic, // Regeneration (38325)
 
 			ProcMask: core.ProcMaskSpellProc | core.ProcMaskSpellDamageProc,
 			Flags:    core.SpellFlagNoOnCastComplete,
@@ -377,7 +379,6 @@ func init() {
 			},
 
 			DamageMultiplier: 1,
-			CritMultiplier:   character.DefaultMeleeCritMultiplier(),
 			ThreatMultiplier: 1,
 
 			Hot: core.DotConfig{
@@ -532,12 +533,13 @@ func init() {
 		spell := character.RegisterSpell(core.SpellConfig{
 			ActionID:    core.ActionID{SpellID: 39445},
 			SpellSchool: core.SpellSchoolHoly,
+			// Vengeance has no SpellCategories row. Kept as Melee so it keeps rolling its melee-crit-only outcome.
+			DefenseType: core.DefenseTypeMelee,
 
 			ProcMask: core.ProcMaskEmpty,
 			Flags:    core.SpellFlagPassiveSpell | core.SpellFlagNoOnCastComplete | core.SpellFlagIgnoreResists,
 
 			DamageMultiplier: 1,
-			CritMultiplier:   character.DefaultMeleeCritMultiplier(),
 			ThreatMultiplier: 1,
 
 			ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {

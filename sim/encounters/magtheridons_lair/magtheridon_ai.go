@@ -179,6 +179,7 @@ func (ai *MagtheridonAI) registerCleave() {
 	ai.Cleave = ai.BossUnit.RegisterSpell(core.SpellConfig{
 		ActionID:         core.ActionID{SpellID: 30619},
 		SpellSchool:      core.SpellSchoolPhysical,
+		DefenseType:      core.DefenseTypeMelee,
 		ProcMask:         core.ProcMaskMeleeMHSpecial,
 		Flags:            core.SpellFlagMeleeMetrics,
 		DamageMultiplier: 1.5,

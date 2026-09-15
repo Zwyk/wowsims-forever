@@ -78,8 +78,9 @@ func (mage *Mage) registerCombustionSpell() {
 	})
 
 	combustSpell := mage.RegisterSpell(core.SpellConfig{
-		ActionID: actionID,
-		Flags:    core.SpellFlagNoOnCastComplete,
+		ActionID:    actionID,
+		DefenseType: core.DefenseTypeMagic,
+		Flags:       core.SpellFlagNoOnCastComplete,
 		Cast: core.CastConfig{
 			CD: cd,
 		},

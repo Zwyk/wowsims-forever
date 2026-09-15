@@ -8,6 +8,7 @@ func (druid *Druid) registerSwipeBearSpell() {
 	druid.Swipe = druid.RegisterSpell(Bear, core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 26997},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		ClassSpellMask: DruidSpellSwipe,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagAPL,
@@ -24,7 +25,6 @@ func (druid *Druid) registerSwipeBearSpell() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   druid.FeralCritMultiplier(),
 		ThreatMultiplier: 1,
 		MaxRange:         core.MaxMeleeRange,
 

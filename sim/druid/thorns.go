@@ -17,6 +17,7 @@ func (druid *Druid) registerThornsSpell() {
 	druid.RegisterSpell(Humanoid, core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 26992},
 		SpellSchool:    core.SpellSchoolNature,
+		DefenseType:    core.DefenseTypeMagic,
 		Flags:          core.SpellFlagAPL | core.SpellFlagHelpful,
 		ClassSpellMask: DruidSpellThorns,
 		ProcMask:       core.ProcMaskEmpty,

@@ -24,6 +24,7 @@ func (paladin *Paladin) registerDivineIllumination() {
 	divineIlluminationSpell := paladin.RegisterSpell(core.SpellConfig{
 		ActionID:       actionId,
 		SpellSchool:    core.SpellSchoolHoly,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskEmpty,
 		Flags:          core.SpellFlagAPL,
 		ClassSpellMask: SpellMaskDivineIllumination,

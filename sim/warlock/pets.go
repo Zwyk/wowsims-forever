@@ -91,10 +91,9 @@ func (warlock *Warlock) SimplePetStatInheritanceWithScale() core.PetStatInherita
 func AutoAttackConfig(min float64, max float64) *core.AutoAttackOptions {
 	return &core.AutoAttackOptions{
 		MainHand: core.Weapon{
-			BaseDamageMin:  float64(min),
-			BaseDamageMax:  float64(max),
-			SwingSpeed:     2.0,
-			CritMultiplier: 2,
+			BaseDamageMin: float64(min),
+			BaseDamageMax: float64(max),
+			SwingSpeed:    2.0,
 		},
 		AutoSwingMelee: true,
 	}
@@ -334,7 +333,7 @@ func (pet *WarlockPet) registerFireboltSpell() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   1.5,
+		DefenseType:      core.DefenseTypeMagic,
 		ThreatMultiplier: 1,
 		BonusCoefficient: 0.571,
 
@@ -371,7 +370,7 @@ func (pet *WarlockPet) registerLashOfPainSpell() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   1.5,
+		DefenseType:      core.DefenseTypeMagic,
 		ThreatMultiplier: 1,
 		BonusCoefficient: 0.429,
 
@@ -404,6 +403,7 @@ func (pet *WarlockPet) registerTormentSpell() {
 				Duration: time.Second * 5,
 			},
 		},
+		DefenseType: core.DefenseTypeMagic,
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
 			result := spell.CalcDamage(sim, target, 1000, spell.OutcomeMagicHitAndCrit)
 			spell.DealDamage(sim, result)
@@ -420,7 +420,7 @@ func (pet *WarlockPet) registerCleaveSpell() {
 		ProcMask:         core.ProcMaskMeleeMHSpecial,
 		ClassSpellMask:   WarlockSpellFelguardCleave,
 		DamageMultiplier: 1,
-		CritMultiplier:   2,
+		DefenseType:      core.DefenseTypeMelee,
 		ThreatMultiplier: 1,
 		ManaCost: core.ManaCostOptions{
 			FlatCost: 295,

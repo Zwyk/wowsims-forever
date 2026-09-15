@@ -46,6 +46,7 @@ func (hp *HunterPet) registerKillCommandSpell() {
 	hp.KillCommand = hp.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 34027},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskEmpty,
 		Flags:          core.SpellFlagAPL,
 		ClassSpellMask: HunterSpellKillCommandPet,
@@ -61,7 +62,6 @@ func (hp *HunterPet) registerKillCommandSpell() {
 		},
 
 		DamageMultiplier: hp.config.DamageMultiplier,
-		CritMultiplier:   hp.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier: 1,
 
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
@@ -75,6 +75,7 @@ func (hp *HunterPet) newBite() *core.Spell {
 	return hp.RegisterSpell(core.SpellConfig{
 		ActionID:    core.ActionID{SpellID: 27050},
 		SpellSchool: core.SpellSchoolPhysical,
+		DefenseType: core.DefenseTypeMelee,
 		ProcMask:    core.ProcMaskMeleeMHSpecial,
 		Flags:       core.SpellFlagMeleeMetrics,
 		MaxRange:    core.MaxMeleeRange,
@@ -94,7 +95,6 @@ func (hp *HunterPet) newBite() *core.Spell {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   hp.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier: 1,
 
 		ExtraCastCondition: func(sim *core.Simulation, target *core.Unit) bool {
@@ -112,6 +112,7 @@ func (hp *HunterPet) newClaw() *core.Spell {
 	return hp.RegisterSpell(core.SpellConfig{
 		ActionID:    core.ActionID{SpellID: 27049},
 		SpellSchool: core.SpellSchoolPhysical,
+		DefenseType: core.DefenseTypeMelee,
 		ProcMask:    core.ProcMaskMeleeMHSpecial,
 		Flags:       core.SpellFlagMeleeMetrics,
 		MaxRange:    core.MaxMeleeRange,
@@ -127,7 +128,6 @@ func (hp *HunterPet) newClaw() *core.Spell {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   hp.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier: 1,
 
 		ExtraCastCondition: func(sim *core.Simulation, target *core.Unit) bool {
@@ -145,6 +145,7 @@ func (hp *HunterPet) newGore() *core.Spell {
 	return hp.RegisterSpell(core.SpellConfig{
 		ActionID:    core.ActionID{SpellID: 35298},
 		SpellSchool: core.SpellSchoolPhysical,
+		DefenseType: core.DefenseTypeMelee,
 		ProcMask:    core.ProcMaskMeleeMHSpecial,
 		Flags:       core.SpellFlagMeleeMetrics,
 		MaxRange:    core.MaxMeleeRange,
@@ -160,7 +161,6 @@ func (hp *HunterPet) newGore() *core.Spell {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   hp.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier: 1,
 
 		ExtraCastCondition: func(sim *core.Simulation, target *core.Unit) bool {
@@ -181,6 +181,7 @@ func (hp *HunterPet) newLightningBreath() *core.Spell {
 	return hp.RegisterSpell(core.SpellConfig{
 		ActionID:    core.ActionID{SpellID: 25012},
 		SpellSchool: core.SpellSchoolNature,
+		DefenseType: core.DefenseTypeMagic,
 		ProcMask:    core.ProcMaskSpellDamage,
 		MaxRange:    20,
 
@@ -195,7 +196,6 @@ func (hp *HunterPet) newLightningBreath() *core.Spell {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   hp.DefaultSpellCritMultiplier(),
 		ThreatMultiplier: 1,
 		BonusCoefficient: 0.05,
 
@@ -216,6 +216,7 @@ func (hp *HunterPet) newFireBreath() *core.Spell {
 	return hp.RegisterSpell(core.SpellConfig{
 		ActionID:    core.ActionID{SpellID: 35323},
 		SpellSchool: core.SpellSchoolFire,
+		DefenseType: core.DefenseTypeMagic,
 		ProcMask:    core.ProcMaskSpellDamage,
 		MaxRange:    10,
 
@@ -272,6 +273,7 @@ func (hp *HunterPet) newScreech() *core.Spell {
 	return hp.RegisterSpell(core.SpellConfig{
 		ActionID:    core.ActionID{SpellID: 27051},
 		SpellSchool: core.SpellSchoolPhysical,
+		DefenseType: core.DefenseTypeMelee,
 		ProcMask:    core.ProcMaskMeleeMHSpecial,
 		Flags:       core.SpellFlagMeleeMetrics,
 		MaxRange:    core.MaxMeleeRange,
@@ -287,7 +289,6 @@ func (hp *HunterPet) newScreech() *core.Spell {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   hp.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier: 1,
 
 		ExtraCastCondition: func(sim *core.Simulation, target *core.Unit) bool {

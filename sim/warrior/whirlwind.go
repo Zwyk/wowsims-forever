@@ -12,12 +12,12 @@ func (war *Warrior) registerWhirlwind() {
 	whirlwindOH := war.RegisterSpell(core.SpellConfig{
 		ActionID:       actionID.WithTag(2),
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeOHSpecial,
 		ClassSpellMask: SpellMaskWhirlwindOh,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagPassiveSpell | core.SpellFlagNoOnCastComplete,
 
 		DamageMultiplier: 1,
-		CritMultiplier:   war.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier: 1.25,
 
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
@@ -30,6 +30,7 @@ func (war *Warrior) registerWhirlwind() {
 	war.RegisterSpell(core.SpellConfig{
 		ActionID:       actionID.WithTag(1),
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		ClassSpellMask: SpellMaskWhirlwind,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagAPL,
@@ -49,7 +50,6 @@ func (war *Warrior) registerWhirlwind() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   war.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier: 1.25,
 
 		ExtraCastCondition: func(sim *core.Simulation, target *core.Unit) bool {

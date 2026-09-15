@@ -25,6 +25,7 @@ func (mage *Mage) registerManaGems() {
 
 	manaGem := mage.RegisterSpell(core.SpellConfig{
 		ActionID:       actionID,
+		DefenseType:    core.DefenseTypeMagic, // Replenish Mana (27103), the spell behind this item's use effect
 		ProcMask:       core.ProcMaskEmpty,
 		Flags:          core.SpellFlagAPL | core.SpellFlagHelpful,
 		ClassSpellMask: MageSpellManaGem,

@@ -14,6 +14,7 @@ func (rogue *Rogue) registerRupture() {
 	rogue.Rupture = rogue.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: RuptureSpellID},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		Flags:          core.SpellFlagMeleeMetrics | SpellFlagFinisher | core.SpellFlagAPL,
 		MetricSplits:   6,
@@ -38,7 +39,6 @@ func (rogue *Rogue) registerRupture() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   1,
 		ThreatMultiplier: 1,
 
 		Dot: core.DotConfig{

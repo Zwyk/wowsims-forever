@@ -197,13 +197,13 @@ func (paladin *Paladin) registerSealOfRighteousness(seal seal) {
 	judgeSpell := paladin.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: seal.judge.spellID},
 		SpellSchool:    core.SpellSchoolHoly,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagBinary | core.SpellFlagSuppressEquipProcs,
 		ClassSpellMask: SpellMaskJudgementOfRighteousness,
 
 		DamageMultiplier: 1,
 		ThreatMultiplier: 1,
-		CritMultiplier:   paladin.DefaultSpellCritMultiplier(),
 		BonusCoefficient: seal.judge.coeff,
 
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
@@ -233,6 +233,7 @@ func (paladin *Paladin) registerSealOfRighteousness(seal seal) {
 	procSpell := paladin.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: seal.proc.spellID},
 		SpellSchool:    core.SpellSchoolHoly,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagPassiveSpell | core.SpellFlagSuppressEquipProcs,
 		ClassSpellMask: SpellMaskSealOfRighteousness,
@@ -287,6 +288,7 @@ func (paladin *Paladin) registerSealOfRighteousness(seal seal) {
 		ActionID:       core.ActionID{SpellID: seal.spellID},
 		ClassSpellMask: SpellMaskSealOfRighteousness,
 		SpellSchool:    core.SpellSchoolHoly,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskEmpty,
 		Flags:          core.SpellFlagAPL,
 		Rank:           seal.rank,
@@ -325,6 +327,7 @@ func (paladin *Paladin) registerSealOfLight(seal seal) {
 	judgeSpell := paladin.RegisterSpell(core.SpellConfig{
 		ActionID:         core.ActionID{SpellID: seal.judge.spellID},
 		SpellSchool:      core.SpellSchoolHoly,
+		DefenseType:      core.DefenseTypeMagic,
 		ProcMask:         core.ProcMaskEmpty,
 		Flags:            core.SpellFlagMeleeMetrics | core.SpellFlagBinary,
 		ClassSpellMask:   SpellMaskJudgementOfLight,
@@ -366,6 +369,7 @@ func (paladin *Paladin) registerSealOfLight(seal seal) {
 		ActionID:       core.ActionID{SpellID: seal.spellID},
 		ClassSpellMask: SpellMaskSealOfLight,
 		SpellSchool:    core.SpellSchoolHoly,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskEmpty,
 		Flags:          core.SpellFlagAPL,
 		Rank:           seal.rank,
@@ -399,6 +403,7 @@ func (paladin *Paladin) registerSealOfWisdom(seal seal) {
 	judgeSpell := paladin.RegisterSpell(core.SpellConfig{
 		ActionID:         core.ActionID{SpellID: seal.judge.spellID},
 		SpellSchool:      core.SpellSchoolHoly,
+		DefenseType:      core.DefenseTypeMagic,
 		ProcMask:         core.ProcMaskEmpty,
 		Flags:            core.SpellFlagMeleeMetrics | core.SpellFlagBinary,
 		ClassSpellMask:   SpellMaskJudgementOfWisdom,
@@ -440,6 +445,7 @@ func (paladin *Paladin) registerSealOfWisdom(seal seal) {
 		ActionID:       core.ActionID{SpellID: seal.spellID},
 		ClassSpellMask: SpellMaskSealOfWisdom,
 		SpellSchool:    core.SpellSchoolHoly,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskEmpty,
 		Flags:          core.SpellFlagAPL,
 		Rank:           seal.rank,
@@ -487,6 +493,7 @@ func (paladin *Paladin) registerSealOfJustice(seal seal) {
 	judgeSpell := paladin.RegisterSpell(core.SpellConfig{
 		ActionID:         core.ActionID{SpellID: seal.judge.spellID},
 		SpellSchool:      core.SpellSchoolHoly,
+		DefenseType:      core.DefenseTypeMagic,
 		ProcMask:         core.ProcMaskEmpty,
 		Flags:            core.SpellFlagMeleeMetrics | core.SpellFlagBinary,
 		ClassSpellMask:   SpellMaskJudgementOfJustice,
@@ -501,6 +508,7 @@ func (paladin *Paladin) registerSealOfJustice(seal seal) {
 		ActionID:         core.ActionID{SpellID: seal.proc.spellID},
 		ClassSpellMask:   SpellMaskSealOfJustice,
 		SpellSchool:      core.SpellSchoolHoly,
+		DefenseType:      core.DefenseTypeMagic,
 		ProcMask:         core.ProcMaskEmpty,
 		Flags:            core.SpellFlagMeleeMetrics | core.SpellFlagPassiveSpell,
 		DamageMultiplier: 1,
@@ -522,6 +530,7 @@ func (paladin *Paladin) registerSealOfJustice(seal seal) {
 		ActionID:       core.ActionID{SpellID: seal.spellID},
 		ClassSpellMask: SpellMaskSealOfJustice,
 		SpellSchool:    core.SpellSchoolHoly,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskEmpty,
 		Flags:          core.SpellFlagAPL,
 		Rank:           seal.rank,
@@ -567,12 +576,12 @@ func (paladin *Paladin) registerSealOfTheCrusader(seal seal) {
 	judgeSpell := paladin.RegisterSpell(core.SpellConfig{
 		ActionID:         core.ActionID{SpellID: seal.judge.spellID},
 		SpellSchool:      core.SpellSchoolHoly,
+		DefenseType:      core.DefenseTypeMagic,
 		ProcMask:         core.ProcMaskEmpty,
 		Flags:            core.SpellFlagMeleeMetrics | core.SpellFlagBinary,
 		ClassSpellMask:   SpellMaskJudgementOfTheCrusader,
 		DamageMultiplier: 1,
 		ThreatMultiplier: 1,
-		CritMultiplier:   1,
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
 			spell.CalcAndDealOutcome(sim, target, spell.OutcomeAlwaysHit)
 			judgementOfTheCrusaderAuras.Get(target).Activate(sim)
@@ -596,6 +605,7 @@ func (paladin *Paladin) registerSealOfTheCrusader(seal seal) {
 		ActionID:         aura.ActionID,
 		ClassSpellMask:   SpellMaskSealOfTheCrusader,
 		SpellSchool:      core.SpellSchoolHoly,
+		DefenseType:      core.DefenseTypeMagic,
 		ProcMask:         core.ProcMaskEmpty,
 		Flags:            core.SpellFlagAPL,
 		Rank:             seal.rank,
@@ -624,12 +634,12 @@ func (paladin *Paladin) registerSealOfBlood() {
 	judgeSpell := paladin.RegisterSpell(core.SpellConfig{
 		ActionID:         core.ActionID{SpellID: 31898},
 		SpellSchool:      core.SpellSchoolHoly,
+		DefenseType:      core.DefenseTypeMelee,
 		ProcMask:         core.ProcMaskMeleeMHSpecial,
 		Flags:            core.SpellFlagMeleeMetrics,
 		ClassSpellMask:   SpellMaskJudgementOfBlood,
 		DamageMultiplier: 1,
 		ThreatMultiplier: 1,
-		CritMultiplier:   paladin.DefaultMeleeCritMultiplier(),
 		BonusCoefficient: 0.429,
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
 			flags := spell.Flags
@@ -652,11 +662,11 @@ func (paladin *Paladin) registerSealOfBlood() {
 		ActionID:         core.ActionID{SpellID: 31893},
 		ClassSpellMask:   SpellMaskSealOfBlood,
 		SpellSchool:      core.SpellSchoolHoly,
+		DefenseType:      core.DefenseTypeMelee,
 		ProcMask:         core.ProcMaskMeleeProc,
 		Flags:            core.SpellFlagMeleeMetrics | core.SpellFlagPassiveSpell | core.SpellFlagSuppressEquipProcs,
 		DamageMultiplier: 1,
 		ThreatMultiplier: 1,
-		CritMultiplier:   paladin.DefaultMeleeCritMultiplier(),
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
 			baseDamage := spell.Unit.MHWeaponDamage(sim, spell.MeleeAttackPower(target)) * 0.35
 			result := spell.CalcDamage(sim, target, baseDamage, spell.OutcomeMeleeSpecialHitAndCrit)
@@ -689,6 +699,7 @@ func (paladin *Paladin) registerSealOfBlood() {
 		ActionID:       core.ActionID{SpellID: 31892},
 		ClassSpellMask: SpellMaskSealOfBlood,
 		SpellSchool:    core.SpellSchoolHoly,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskEmpty,
 		Flags:          core.SpellFlagAPL,
 		ManaCost: core.ManaCostOptions{
@@ -721,12 +732,12 @@ func (paladin *Paladin) registerSealOfVengeance() {
 	judgeSpell := paladin.RegisterSpell(core.SpellConfig{
 		ActionID:         core.ActionID{SpellID: 31804},
 		SpellSchool:      core.SpellSchoolHoly,
+		DefenseType:      core.DefenseTypeMagic,
 		ProcMask:         core.ProcMaskEmpty,
 		Flags:            core.SpellFlagMeleeMetrics,
 		ClassSpellMask:   SpellMaskJudgementOfVengeance,
 		DamageMultiplier: 1,
 		ThreatMultiplier: 1,
-		CritMultiplier:   paladin.DefaultSpellCritMultiplier(),
 		BonusCoefficient: 0.429,
 		ExtraCastCondition: func(sim *core.Simulation, target *core.Unit) bool {
 			return target.GetActiveAuraWithTag(holyVengeanceTag) != nil
@@ -748,6 +759,7 @@ func (paladin *Paladin) registerSealOfVengeance() {
 		ActionID:         core.ActionID{SpellID: 42463},
 		ClassSpellMask:   SpellMaskSealOfVengeance,
 		SpellSchool:      core.SpellSchoolHoly,
+		DefenseType:      core.DefenseTypeMagic,
 		ProcMask:         core.ProcMaskEmpty,
 		Flags:            core.SpellFlagPassiveSpell,
 		DamageMultiplier: 1,
@@ -762,6 +774,7 @@ func (paladin *Paladin) registerSealOfVengeance() {
 		ActionID:         core.ActionID{SpellID: 31803},
 		ClassSpellMask:   SpellMaskSealOfVengeance,
 		SpellSchool:      core.SpellSchoolHoly,
+		DefenseType:      core.DefenseTypeMagic,
 		ProcMask:         core.ProcMaskEmpty,
 		Flags:            core.SpellFlagPassiveSpell | core.SpellFlagMeleeMetrics,
 		DamageMultiplier: 1,
@@ -826,6 +839,7 @@ func (paladin *Paladin) registerSealOfVengeance() {
 		ActionID:       core.ActionID{SpellID: 31801},
 		ClassSpellMask: SpellMaskSealOfVengeance,
 		SpellSchool:    core.SpellSchoolHoly,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskEmpty,
 		Flags:          core.SpellFlagAPL,
 		ManaCost: core.ManaCostOptions{
@@ -855,14 +869,16 @@ func (paladin *Paladin) registerSealOfCommandRank(seal seal) {
 	minDamage := seal.judge.minDamage
 	maxDamage := seal.judge.maxDamage
 	judgeSpell := paladin.RegisterSpell(core.SpellConfig{
-		ActionID:         core.ActionID{SpellID: seal.judge.spellID},
-		SpellSchool:      core.SpellSchoolHoly,
+		ActionID:    core.ActionID{SpellID: seal.judge.spellID},
+		SpellSchool: core.SpellSchoolHoly,
+		// The judgement spell itself (20425 .. 27172) is a dummy that triggers the damage spell
+		// (20467, 20963 .. 20966, 27171), and that one is Melee in SpellCategories.
+		DefenseType:      core.DefenseTypeMelee,
 		ProcMask:         core.ProcMaskMeleeMHSpecial,
 		Flags:            core.SpellFlagMeleeMetrics,
 		ClassSpellMask:   SpellMaskJudgementOfCommand,
 		DamageMultiplier: 1,
 		ThreatMultiplier: 1,
-		CritMultiplier:   paladin.DefaultMeleeCritMultiplier(),
 		BonusCoefficient: seal.judge.coeff,
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
 			baseDamage := sim.Roll(minDamage, maxDamage)
@@ -882,11 +898,11 @@ func (paladin *Paladin) registerSealOfCommandRank(seal seal) {
 		ActionID:         core.ActionID{SpellID: seal.proc.spellID},
 		ClassSpellMask:   SpellMaskSealOfCommand,
 		SpellSchool:      core.SpellSchoolHoly,
+		DefenseType:      core.DefenseTypeMelee,
 		ProcMask:         core.ProcMaskMeleeMHSpecial | core.ProcMaskMeleeProc,
 		Flags:            core.SpellFlagMeleeMetrics | core.SpellFlagPassiveSpell,
 		DamageMultiplier: 1,
 		ThreatMultiplier: 1,
-		CritMultiplier:   paladin.DefaultMeleeCritMultiplier(),
 		BonusCoefficient: seal.proc.coeff,
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
 			baseDamage := spell.Unit.MHWeaponDamage(sim, spell.MeleeAttackPower(target)) * seal.proc.value
@@ -922,6 +938,7 @@ func (paladin *Paladin) registerSealOfCommandRank(seal seal) {
 		ActionID:       aura.ActionID,
 		ClassSpellMask: SpellMaskSealOfCommand,
 		SpellSchool:    core.SpellSchoolHoly,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskEmpty,
 		Flags:          core.SpellFlagAPL,
 		Rank:           seal.rank,

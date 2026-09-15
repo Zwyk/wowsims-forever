@@ -141,10 +141,13 @@ func (shaman *Shaman) applyElementalFury() {
 	if !shaman.Talents.ElementalFury {
 		return
 	}
+	// The talent's class mask (16089) also covers Flametongue Attack (bit 21) and Frostbrand
+	// Attack (bit 24): shamans' Flametongue Weapon hits crit for 2.0x in logs while the same
+	// attack granted by Flametongue Totem crits for 1.5x on other players.
 	shaman.AddStaticMod(core.SpellModConfig{
 		Kind:       core.SpellMod_CritMultiplier_Flat,
 		FloatValue: 1.0,
-		ClassMask:  SpellMaskFireTotem | SpellMaskFire | SpellMaskNature | SpellMaskFrost,
+		ClassMask:  SpellMaskFireTotem | SpellMaskFire | SpellMaskNature | SpellMaskFrost | SpellMaskFlametongueWeapon | SpellMaskFrostbrandWeapon,
 	})
 }
 func (shaman *Shaman) applyElementalMastery() {
@@ -175,6 +178,7 @@ func (shaman *Shaman) applyElementalMastery() {
 	spell := shaman.RegisterSpell(core.SpellConfig{
 		ActionID:    core.ActionID{SpellID: 16166},
 		SpellSchool: core.SpellSchoolNature,
+		DefenseType: core.DefenseTypeMagic,
 		Flags:       core.SpellFlagAPL | core.SpellFlagNoOnCastComplete | SpellFlagInstant,
 		Cast: core.CastConfig{
 			CD: core.Cooldown{

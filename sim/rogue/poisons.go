@@ -24,13 +24,13 @@ func (rogue *Rogue) registerDeadlyPoisonSpell() {
 	rogue.DeadlyPoison = rogue.GetOrRegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 27187},
 		SpellSchool:    core.SpellSchoolNature,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamageProc,
 		ClassSpellMask: RogueSpellDeadlyPoison,
 		Flags:          core.SpellFlagPoison | core.SpellFlagPassiveSpell,
 
 		DamageMultiplier:         1,
 		DamageMultiplierAdditive: 1,
-		CritMultiplier:           1,
 		ThreatMultiplier:         1,
 
 		Dot: core.DotConfig{
@@ -73,13 +73,13 @@ func (rogue *Rogue) registerDeadlyPoisonSpell() {
 	rogue.ShivDeadlyPoison = rogue.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 27187, Tag: 1},
 		SpellSchool:    core.SpellSchoolNature,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamageProc,
 		ClassSpellMask: RogueSpellDeadlyPoison,
 		Flags:          core.SpellFlagPoison | core.SpellFlagPassiveSpell,
 
 		DamageMultiplier:         1,
 		DamageMultiplierAdditive: 1,
-		CritMultiplier:           1,
 		ThreatMultiplier:         1,
 
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
@@ -124,13 +124,13 @@ func (rogue *Rogue) registerWoundPoisonSpell() {
 	wpConfig := core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 27189},
 		SpellSchool:    core.SpellSchoolNature,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamageProc,
 		ClassSpellMask: RogueSpellWoundPoison,
 		Flags:          core.SpellFlagPoison | core.SpellFlagPassiveSpell,
 
 		DamageMultiplier:         1,
 		DamageMultiplierAdditive: 1,
-		CritMultiplier:           rogue.DefaultSpellCritMultiplier(),
 		ThreatMultiplier:         1,
 
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
@@ -159,13 +159,13 @@ func (rogue *Rogue) registerInstantPoisonSpell() {
 	ipConfig := core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 26890},
 		SpellSchool:    core.SpellSchoolNature,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamageProc,
 		ClassSpellMask: RogueSpellInstantPoison,
 		Flags:          core.SpellFlagPoison | core.SpellFlagPassiveSpell,
 
 		DamageMultiplier:         1,
 		DamageMultiplierAdditive: 1,
-		CritMultiplier:           rogue.DefaultSpellCritMultiplier(),
 		ThreatMultiplier:         1,
 
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {

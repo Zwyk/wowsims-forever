@@ -10,6 +10,7 @@ func (hunter *Hunter) registerArcaneShotSpell() {
 	hunter.ArcaneShot = hunter.RegisterRangedSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 27019},
 		SpellSchool:    core.SpellSchoolArcane,
+		DefenseType:    core.DefenseTypeRanged,
 		ClassSpellMask: HunterSpellArcaneShot,
 		ProcMask:       core.ProcMaskRangedSpecial,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagAPL,
@@ -36,5 +37,5 @@ func (hunter *Hunter) registerArcaneShotSpell() {
 				spell.DealDamage(sim, result)
 			})
 		},
-	}, true)
+	})
 }

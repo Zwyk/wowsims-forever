@@ -10,6 +10,7 @@ func (hunter *Hunter) registerRaptorStrikeSpell() {
 	hunter.RaptorStrike = hunter.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 27014},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ClassSpellMask: HunterSpellRaptorStrike,
 		ProcMask:       core.ProcMaskMeleeMH,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagNoOnCastComplete,
@@ -31,7 +32,6 @@ func (hunter *Hunter) registerRaptorStrikeSpell() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   hunter.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier: 1,
 
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {

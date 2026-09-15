@@ -23,6 +23,7 @@ func (shaman *Shaman) registerFireElementalTotem() {
 
 	shaman.FireElementalTotem = shaman.RegisterSpell(core.SpellConfig{
 		ActionID:       actionID,
+		DefenseType:    core.DefenseTypeMagic,
 		Flags:          core.SpellFlagAPL | SpellFlagInstant,
 		ClassSpellMask: SpellMaskFireElementalTotem,
 		ManaCost: core.ManaCostOptions{

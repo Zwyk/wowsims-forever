@@ -23,6 +23,7 @@ func (druid *Druid) registerMangleCatSpell() {
 	druid.MangleCat = druid.RegisterSpell(Cat, core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 33983},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		ClassSpellMask: DruidSpellMangleCat,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagAPL,
@@ -39,7 +40,6 @@ func (druid *Druid) registerMangleCatSpell() {
 		},
 
 		DamageMultiplier: 1.6,
-		CritMultiplier:   druid.FeralCritMultiplier(),
 		ThreatMultiplier: 1,
 		MaxRange:         core.MaxMeleeRange,
 
@@ -72,6 +72,7 @@ func (druid *Druid) registerMangleBearSpell() {
 	druid.MangleBear = druid.RegisterSpell(Bear, core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 33987},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		ClassSpellMask: DruidSpellMangleBear,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagAPL,
@@ -92,7 +93,6 @@ func (druid *Druid) registerMangleBearSpell() {
 		},
 
 		DamageMultiplier: 1.15,
-		CritMultiplier:   druid.FeralCritMultiplier(),
 		ThreatMultiplier: 1.5 / 1.15,
 		MaxRange:         core.MaxMeleeRange,
 

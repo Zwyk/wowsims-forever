@@ -59,7 +59,6 @@ func TestAutoAttackWeaponSourcesDoNotDependOnProcMask(t *testing.T) {
 	agent.EnableAutoAttacks(agent, AutoAttackOptions{
 		MainHand: Weapon{
 			SwingSpeed:        2.6,
-			CritMultiplier:    2,
 			AttackPowerPerDPS: DefaultAttackPowerPerDPS,
 		},
 		ProcMask: sharedProcMask,
@@ -82,6 +81,13 @@ func TestAutoAttackWeaponSourcesDoNotDependOnProcMask(t *testing.T) {
 			}
 			if test.config.ProcMask != sharedProcMask {
 				t.Fatalf("proc mask = %d, want %d", test.config.ProcMask, sharedProcMask)
+			}
+			wantDefenseType := DefenseTypeMelee
+			if test.want == WeaponAttackSourceRanged {
+				wantDefenseType = DefenseTypeRanged
+			}
+			if test.config.DefenseType != wantDefenseType {
+				t.Fatalf("defense type = %d, want %d", test.config.DefenseType, wantDefenseType)
 			}
 		})
 	}
@@ -137,7 +143,7 @@ func TestWeaponFromItemPreservesClassification(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			weapon := newWeaponFromItem(&test.item, 2, 0)
+			weapon := newWeaponFromItem(&test.item, 0)
 			want := weaponClassification{
 				kind:             weaponClassificationEquippedItem,
 				weaponType:       test.item.WeaponType,
@@ -230,7 +236,7 @@ func TestWeaponAttackContextReadsLivePlayerEquipment(t *testing.T) {
 	character := &Character{Unit: Unit{Type: PlayerUnit}}
 	character.AutoAttacks.character = character
 	cachedItem := Item{ID: 1, Type: proto.ItemType_ItemTypeWeapon, WeaponType: proto.WeaponType_WeaponTypeSword, SwingSpeed: 2.6}
-	character.AutoAttacks.mh.Weapon = newWeaponFromItem(&cachedItem, 2, 0)
+	character.AutoAttacks.mh.Weapon = newWeaponFromItem(&cachedItem, 0)
 
 	currentItem := Item{ID: 2, Type: proto.ItemType_ItemTypeWeapon, WeaponType: proto.WeaponType_WeaponTypeMace, HandType: proto.HandType_HandTypeTwoHand, SwingSpeed: 3.6}
 	character.Equipment[proto.ItemSlot_ItemSlotMainHand] = currentItem
@@ -239,7 +245,7 @@ func TestWeaponAttackContextReadsLivePlayerEquipment(t *testing.T) {
 	if context.classification != want {
 		t.Fatalf("live main-hand classification = %+v, want %+v", context.classification, want)
 	}
-	character.AutoAttacks.mh.Weapon = newWeaponFromUnarmed(2)
+	character.AutoAttacks.mh.Weapon = newWeaponFromUnarmed()
 	context = (&Spell{Unit: &character.Unit, weaponAttackSource: WeaponAttackSourceMainHand}).weaponAttackContext()
 	if context.classification != want {
 		t.Fatalf("equipped main hand after unarmed cache = %+v, want %+v", context.classification, want)
@@ -306,7 +312,7 @@ func TestWeaponAttackContextKeepsSyntheticWeaponAuthoritative(t *testing.T) {
 func TestWeaponAttackContextKeepsUnarmedDistinctFromMissing(t *testing.T) {
 	character := &Character{Unit: Unit{Type: PlayerUnit, PseudoStats: stats.NewPseudoStats()}}
 	character.AutoAttacks.character = character
-	character.AutoAttacks.mh.Weapon = newWeaponFromUnarmed(2)
+	character.AutoAttacks.mh.Weapon = newWeaponFromUnarmed()
 	character.addWeaponSkillBonus(proto.WeaponSkillCategory_WeaponSkillCategoryUnarmed, 3)
 
 	context := (&Spell{Unit: &character.Unit, weaponAttackSource: WeaponAttackSourceMainHand}).weaponAttackContext()

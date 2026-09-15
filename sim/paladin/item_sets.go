@@ -47,6 +47,7 @@ var ItemSetCrystalforgeBattlegear = core.NewItemSet(core.ItemSet{
 			divineLightHeal := paladin.RegisterSpell(core.SpellConfig{
 				ActionID:    core.ActionID{SpellID: 37196},
 				SpellSchool: core.SpellSchoolHoly,
+				DefenseType: core.DefenseTypeMagic,
 				ProcMask:    core.ProcMaskSpellHealing,
 				Flags:       core.SpellFlagHelpful | core.SpellFlagNoOnCastComplete | core.SpellFlagPassiveSpell,
 

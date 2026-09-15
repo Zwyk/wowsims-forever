@@ -12,6 +12,7 @@ func (mage *Mage) frostBoltConfig(config core.SpellConfig) core.SpellConfig {
 	return core.SpellConfig{
 		ActionID:       config.ActionID,
 		SpellSchool:    core.SpellSchoolFrost,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		Flags:          config.Flags,
 		ClassSpellMask: MageSpellFrostbolt,
@@ -21,7 +22,6 @@ func (mage *Mage) frostBoltConfig(config core.SpellConfig) core.SpellConfig {
 		Cast:     config.Cast,
 
 		DamageMultiplier: config.DamageMultiplier,
-		CritMultiplier:   mage.DefaultSpellCritMultiplier(),
 		BonusCoefficient: frostboltCoefficient,
 		ThreatMultiplier: 1,
 

@@ -14,6 +14,7 @@ func (hunter *Hunter) registerScorpidStingSpell() {
 	hunter.ScorpidSting = hunter.RegisterRangedSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 3043},
 		SpellSchool:    core.SpellSchoolNature,
+		DefenseType:    core.DefenseTypeRanged,
 		ProcMask:       core.ProcMaskProc,
 		ClassSpellMask: HunterSpellScorpidSting,
 		Flags:          core.SpellFlagAPL,
@@ -37,5 +38,5 @@ func (hunter *Hunter) registerScorpidStingSpell() {
 				spell.DealOutcome(sim, result)
 			})
 		},
-	}, false)
+	})
 }

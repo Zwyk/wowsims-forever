@@ -12,6 +12,7 @@ func (rogue *Rogue) registerGarrote() {
 	rogue.Garrote = rogue.GetOrRegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 26884},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		Flags:          core.SpellFlagMeleeMetrics | SpellFlagBuilder | core.SpellFlagAPL,
 		ClassSpellMask: RogueSpellGarrote,
@@ -32,7 +33,6 @@ func (rogue *Rogue) registerGarrote() {
 
 		DamageMultiplierAdditive: 1,
 		DamageMultiplier:         1,
-		CritMultiplier:           rogue.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier:         1,
 
 		Dot: core.DotConfig{

@@ -12,6 +12,7 @@ func (warlock *Warlock) registerUnstableAffliction() {
 	warlock.UnstableAffliction = warlock.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 30405},
 		SpellSchool:    core.SpellSchoolShadow,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		Flags:          core.SpellFlagAPL,
 		ClassSpellMask: WarlockSpellUnstableAffliction,
@@ -24,7 +25,6 @@ func (warlock *Warlock) registerUnstableAffliction() {
 			},
 		},
 
-		CritMultiplier:           1,
 		DamageMultiplierAdditive: 1,
 		ThreatMultiplier:         1,
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
@@ -60,7 +60,7 @@ func (warlock *Warlock) registerUnstableAffliction() {
 				result.Damage /= dot.TickPeriod().Seconds()
 				return result
 			} else {
-				result := spell.CalcPeriodicDamage(sim, target, 1050, spell.OutcomeExpectedMagicCrit)
+				result := spell.CalcPeriodicDamage(sim, target, 1050, spell.OutcomeExpectedMagicHit)
 				result.Damage /= dot.CalcTickPeriod().Round(time.Millisecond).Seconds()
 				return result
 			}

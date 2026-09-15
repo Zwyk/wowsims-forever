@@ -139,11 +139,11 @@ func init() {
 		dfSpell := character.RegisterSpell(core.SpellConfig{
 			ActionID:    core.ActionID{SpellID: 46579},
 			SpellSchool: core.SpellSchoolFrost,
+			DefenseType: core.DefenseTypeMagic,
 			Flags:       core.SpellFlagNoOnCastComplete | core.SpellFlagPassiveSpell | core.SpellFlagSuppressEquipProcs,
 			ProcMask:    core.ProcMaskSpellProc,
 
 			DamageMultiplier: 1,
-			CritMultiplier:   character.DefaultSpellCritMultiplier(),
 			ThreatMultiplier: 1,
 
 			ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {

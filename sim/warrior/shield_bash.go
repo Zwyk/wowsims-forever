@@ -13,6 +13,7 @@ func (war *Warrior) registerShieldBash() {
 		ActionID:       actionID,
 		ClassSpellMask: SpellMaskShieldBash,
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagAPL,
 		MaxRange:       core.MaxMeleeRange,
@@ -33,7 +34,6 @@ func (war *Warrior) registerShieldBash() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   war.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier: 1.5,
 		FlatThreatBonus:  192,
 

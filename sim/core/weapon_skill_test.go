@@ -403,9 +403,10 @@ func TestWeaponSkillBonusesAreInertForInheritedOutcomes(t *testing.T) {
 		table := newAttackTableWithRuleset(&character.Unit, defender, rules)
 		spell := &Spell{
 			Unit:                   &character.Unit,
+			DefenseType:            DefenseTypeMelee,
 			ProcMask:               ProcMaskMelee,
 			weaponAttackSource:     WeaponAttackSourceMainHand,
-			CritMultiplier:         2,
+			CritMultiplierPct:      1,
 			CritMultiplierAdditive: 0,
 		}
 		result := &SpellResult{Target: defender, Damage: 100}

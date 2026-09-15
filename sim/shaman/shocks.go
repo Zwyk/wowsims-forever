@@ -13,6 +13,7 @@ func (shaman *Shaman) newShockSpellConfig(spellID int32, spellSchool core.SpellS
 	return core.SpellConfig{
 		ActionID:    actionID,
 		SpellSchool: spellSchool,
+		DefenseType: core.DefenseTypeMagic,
 		ProcMask:    core.ProcMaskSpellDamage,
 		Flags:       SpellFlagShamanSpell | SpellFlagShock | core.SpellFlagAPL | SpellFlagInstant,
 
@@ -30,7 +31,6 @@ func (shaman *Shaman) newShockSpellConfig(spellID int32, spellSchool core.SpellS
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   shaman.DefaultSpellCritMultiplier(),
 		BonusCoefficient: bonusCoefficient,
 		ThreatMultiplier: 1,
 	}
@@ -67,11 +67,11 @@ func (shaman *Shaman) registerFlameShockSpell(shockTimer *core.Timer) {
 	shaman.FlameShock.RelatedDotSpell = shaman.RegisterSpell(core.SpellConfig{
 		ActionID:         core.ActionID{SpellID: 25457, Tag: 1},
 		SpellSchool:      core.SpellSchoolFire,
+		DefenseType:      core.DefenseTypeMagic,
 		ProcMask:         core.ProcMaskSpellDamage,
 		Flags:            config.Flags & ^core.SpellFlagAPL | core.SpellFlagPassiveSpell,
 		ClassSpellMask:   SpellMaskFlameShockDot,
 		DamageMultiplier: 1,
-		CritMultiplier:   shaman.DefaultSpellCritMultiplier(),
 		ThreatMultiplier: 1,
 
 		Dot: core.DotConfig{

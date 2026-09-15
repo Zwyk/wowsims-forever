@@ -41,12 +41,12 @@ func (shaman *Shaman) newStormstrikeHitSpellConfig(spellID int32, isMH bool) cor
 	return core.SpellConfig{
 		ActionID:         core.ActionID{SpellID: spellID}.WithTag(actionTag),
 		SpellSchool:      core.SpellSchoolPhysical,
+		DefenseType:      core.DefenseTypeMelee,
 		ProcMask:         procMask,
 		Flags:            core.SpellFlagMeleeMetrics,
 		ClassSpellMask:   SpellMaskStormstrikeDamage,
 		ThreatMultiplier: 1,
 		DamageMultiplier: 1,
-		CritMultiplier:   shaman.DefaultMeleeCritMultiplier(),
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
 			weaponDamage := core.Ternary(isMH, spell.Unit.MHWeaponDamage, spell.Unit.OHWeaponDamage)
 			baseDamage := weaponDamage(sim, spell.MeleeAttackPower(target))
@@ -63,6 +63,7 @@ func (shaman *Shaman) newStormstrikeSpellConfig(spellID int32, ssDebuffAuras *co
 	stormstrikeSpellConfig := core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: spellID},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskEmpty,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagAPL,
 		ClassSpellMask: SpellMaskStormstrikeCast,

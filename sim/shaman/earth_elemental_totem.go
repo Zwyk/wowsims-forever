@@ -19,6 +19,7 @@ func (shaman *Shaman) registerEarthElementalTotem() {
 
 	shaman.EarthElementalTotem = shaman.RegisterSpell(core.SpellConfig{
 		ActionID:       actionID,
+		DefenseType:    core.DefenseTypeMagic,
 		Flags:          core.SpellFlagAPL | SpellFlagInstant,
 		ClassSpellMask: SpellMaskEarthElementalTotem,
 		ManaCost: core.ManaCostOptions{
