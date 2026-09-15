@@ -12,7 +12,7 @@ import (
 const usageText = `usage: go run ./tools/foreverdata <command> [options]
 
 Commands:
-  verify  validate the committed snapshot and manifest without network access
+  verify  validate the committed evidence and inactive core-rule catalog offline
   check   compare the live source (or --source file) with the committed snapshot
   update  replace the snapshot after validation and print a bounded change summary
   rebuild-manifest  migrate the derived manifest offline after a reviewed tool change
@@ -60,6 +60,11 @@ func runCLI(ctx context.Context, args []string, stdout, stderr io.Writer, now fu
 			fmt.Fprintln(stderr, "verify does not accept command options")
 			return 1
 		}
+		catalog := foreverCoreRules()
+		if err := validateForeverCoreRules(catalog); err != nil {
+			fmt.Fprintf(stderr, "Forever core-rule catalog verification failed: %v\n", err)
+			return 1
+		}
 		state, err := readCommittedState(paths)
 		if err != nil {
 			fmt.Fprintf(stderr, "forever data verification failed: %v\n", err)
@@ -67,6 +72,7 @@ func runCLI(ctx context.Context, args []string, stdout, stderr io.Writer, now fu
 		}
 		fmt.Fprintf(stdout, "verified talentsforever snapshot %s (generated %s, %d bytes)\n",
 			shortHash(state.manifest.Snapshot.RawSHA256), state.manifest.Source.Generated, state.manifest.Snapshot.Bytes)
+		fmt.Fprintf(stdout, "verified %d reviewed-inactive Forever core facts\n", catalog.factCount())
 		return 0
 
 	case "rebuild-manifest":

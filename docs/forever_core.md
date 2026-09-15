@@ -33,6 +33,14 @@ The first extraction contains the inherited TBC level bands and both attack-tabl
 
 All extracted values still reproduce the inherited TBC engine exactly. Armor, resistance, weapon skill, class base stats, talents and UI values stay outside this profile until each surface can move in a focused pull request. A later Forever profile will be added alongside the inherited profile, then activated only with matching level-60 base-stat data and UI changes.
 
+### Reviewed inactive facts
+
+`tools/foreverdata/core_rules.go` records the narrow global claims accepted from Blizzard's announcements as typed, value-only facts with a document, section locator, evidence basis, and review state. The tool is a `package main`, so the simulation cannot import the catalog. “Reviewed inactive” means only that a claim and its provenance passed review; it does not make that claim runtime behavior.
+
+The catalog currently contains six claims: the announced leveling journey has an upper bound of 60; spell, melee, and ranged Hit chances are combined, as are their Crit chances; weapon skill remains relevant; announced item effects can reduce parry chance or dodge chance; and bonus healing includes exactly 1/3 as much bonus damage. Channel sets record only the chance categories named together by Blizzard; they do not claim a storage model, a conversion formula, or merged outcome tables. The ratio is stored as an exact rational value rather than a floating-point approximation.
+
+Unknown values are omitted rather than copied from Classic or TBC. In particular, the catalog does not contain a default boss level, rating conversions, attack tables, caps, rounding rules, base stats, armor or resistance formulas, or weapon-skill effects. Promoting any fact into `sim/core` requires a separate reviewed change and a complete runtime profile for the affected surface.
+
 ### Weapon attack context
 
 Spells can declare a currently inert weapon source: none, main hand, off hand or ranged. The zero value is a separate unspecified state, so a future activation audit can distinguish intentionally non-weapon spells from missing annotations. This source is separate from `ProcMask`, because proc routing and hit-table categories do not reliably identify the weapon used. Core auto attacks set it explicitly, and item-backed `Weapon` values retain the equipped weapon, hand and ranged classifications whenever they are built or rebuilt from equipment. Class abilities remain unspecified until they can be audited before weapon-skill mechanics are activated.
@@ -61,21 +69,23 @@ These values are bonuses only: the engine does not yet define whether Forever ex
 
 | Rule | Engine decision | Status |
 | --- | --- | --- |
-| Maximum player level is 60 | Level 60 and default boss level 63 will be installed atomically with matching base-stat data | Not implemented |
-| Melee, ranged, and spell hit are one item stat | `StatHitRating` is a shared source feeding separate physical and spell hit percentages | Foundation implemented |
-| Melee, ranged, and spell crit are one item stat | `StatCritRating` is a shared source feeding separate physical and spell crit percentages | Foundation implemented |
-| Weapon skill remains relevant | Preserve category-specific bonus data and weapon context; do not treat current TBC expertise as the final model | Inactive foundation implemented; effects await beta data |
-| Some items reduce dodge/parry chance | Keep dodge and parry reduction distinct internally, even if one item stat eventually feeds both | Awaiting beta data |
-| Bonus healing contributes one-third as much bonus damage | Add once at the item-data boundary, with a regression test against double counting | Not implemented |
+| The announced leveling journey runs from 1 to 60 | Treat level 60 as the likely player cap only when a complete profile is installed; choose a default boss level only with evidence and matching base-stat data | Reviewed in inactive catalog; runtime unchanged |
+| Spell, melee, and ranged hit chance are combined | `StatHitRating` is a shared source feeding separate physical and spell hit percentages | Foundation implemented; announcement reviewed in inactive catalog |
+| Spell, melee, and ranged crit chance are combined | `StatCritRating` is a shared source feeding separate physical and spell crit percentages | Foundation implemented; announcement reviewed in inactive catalog |
+| Weapon skill remains relevant | Preserve category-specific bonus data and weapon context; do not treat current TBC expertise as the final model | Inactive foundation implemented; claim reviewed; effects await beta data |
+| Some items can reduce parry chance or dodge chance | Keep dodge and parry reduction distinct until evidence establishes whether one source feeds both | Claim reviewed in inactive catalog; mechanics await beta data |
+| Bonus healing contributes one-third as much bonus damage | Add once at the item-data boundary, with a regression test against double counting | Claim reviewed in inactive catalog; runtime implementation pending |
 
 The generic source stats do **not** merge physical and spell outcome tables. Base miss chances, caps, suppression, talents, school modifiers, and attack-specific bonuses remain independent.
 
 ## Deliberately unresolved
 
+- Whether level 60 is explicitly the hard player cap rather than only the announced leveling-journey upper bound, and which default boss levels the simulator should offer.
 - Whether Hit and Crit use direct percentage points or ratings, and every level-60 conversion value.
-- The name, unit, conversion, cap, and rounding behavior of the announced dodge/parry-reduction item stat.
+- The name, unit, conversion, cap, and rounding behavior of the announced parry/dodge-reduction effects, and whether one shared stat or separate stats feed them.
 - Exact weapon-skill effects on miss, dodge, parry, glancing chance, glancing damage, and critical suppression.
 - Whether Forever uses Classic or TBC armor and resistance formulas in every case.
+- Whether the bonus-healing damage contribution is precomputed in item data or derived at runtime, and where any fractional rounding occurs.
 
 Until those values are confirmed, the runnable branch still uses inherited TBC conversion constants and combat tables. Characterization tests pin those placeholders so a later evidence-backed rules update produces an explicit reviewable diff.
 
@@ -92,7 +102,7 @@ Weapon-skill categories and bonuses are now represented by an inactive seam in t
 
 The rolling source snapshot lives in `third_party/talentsforever/` with its
 license notice and a derived integrity manifest. `make forever-data-verify`
-checks the committed snapshot offline; `make forever-data-check` reports live
+checks the committed snapshot and reviewed-inactive core facts offline; `make forever-data-check` reports live
 section and record changes without writing; and `make forever-data-update`
 validates and replaces the snapshot. The updater preserves the exact source
 bytes and keeps separate hashes for the parsed document, evidence-bearing
