@@ -7,6 +7,15 @@ import (
 	"github.com/wowsims/tbc/sim/core/stats"
 )
 
+func TestInheritedTBCLevelBaseline(t *testing.T) {
+	if CharacterLevel != 70 {
+		t.Fatalf("character level: got %d, want 70", CharacterLevel)
+	}
+	if DefaultBossLevel != 73 {
+		t.Fatalf("default boss level: got %d, want 73", DefaultBossLevel)
+	}
+}
+
 // These tests intentionally pin the inherited TBC combat table before any
 // Forever formulas are installed. A later rules-data change should update the
 // table and these expectations together, using beta evidence.
@@ -51,6 +60,41 @@ func TestInheritedPlayerVsEnemyAttackTables(t *testing.T) {
 	}
 }
 
+func TestInheritedEnemyVsPlayerAttackTables(t *testing.T) {
+	player := Unit{Type: PlayerUnit, Level: CharacterLevel}
+
+	tests := []struct {
+		name         string
+		level        int32
+		spellMiss    float64
+		physicalMiss float64
+		block        float64
+		dodge        float64
+		parry        float64
+		crush        float64
+	}{
+		{"minus-two", CharacterLevel - 2, 0.05, 0.054, 0.054, 0.004, 0.054, 0.00},
+		{"same-level", CharacterLevel, 0.05, 0.050, 0.050, 0.000, 0.050, 0.00},
+		{"plus-one", CharacterLevel + 1, 0.05, 0.048, 0.048, -0.002, 0.048, 0.00},
+		{"plus-two", CharacterLevel + 2, 0.05, 0.046, 0.046, -0.004, 0.046, 0.00},
+		{"boss", DefaultBossLevel, 0.05, 0.044, 0.044, -0.006, 0.044, 0.15},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			enemy := Unit{Type: EnemyUnit, Level: test.level}
+			table := NewAttackTable(&enemy, &player)
+
+			assertFloat64(t, "spell miss", table.BaseSpellMissChance, test.spellMiss)
+			assertFloat64(t, "physical miss", table.BaseMissChance, test.physicalMiss)
+			assertFloat64(t, "block", table.BaseBlockChance, test.block)
+			assertFloat64(t, "dodge", table.BaseDodgeChance, test.dodge)
+			assertFloat64(t, "parry", table.BaseParryChance, test.parry)
+			assertFloat64(t, "crush", table.BaseCrushChance, test.crush)
+		})
+	}
+}
+
 func TestDefaultTargetUsesBossLevel(t *testing.T) {
 	target := NewTarget(&proto.Target{}, 0)
 	if target.Level != DefaultBossLevel {
@@ -60,23 +104,46 @@ func TestDefaultTargetUsesBossLevel(t *testing.T) {
 
 func TestInheritedExpertiseQuarterPercentFloor(t *testing.T) {
 	tests := []struct {
-		name   string
-		rating float64
-		want   float64
+		name        string
+		rating      float64
+		bonusRating float64
+		want        float64
 	}{
-		{"below-first-step", ExpertisePerQuarterPercentReduction - 0.000001, 0},
-		{"first-step", ExpertisePerQuarterPercentReduction, 0.0025},
-		{"below-second-step", 2*ExpertisePerQuarterPercentReduction - 0.000001, 0.0025},
-		{"second-step", 2 * ExpertisePerQuarterPercentReduction, 0.005},
+		{"below-first-step", 3.942307, 0, 0},
+		{"first-step", 3.942308, 0, 0.0025},
+		{"below-second-step", 7.884615, 0, 0.0025},
+		{"second-step", 7.884616, 0, 0.005},
+		{"spell-bonus-rating", 0, 3.942308, 0.0025},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			unit := Unit{stats: stats.Stats{stats.ExpertiseRating: test.rating}}
-			spell := Spell{Unit: &unit}
+			spell := Spell{Unit: &unit, BonusExpertiseRating: test.bonusRating}
 			assertFloat64(t, "avoidance suppression", spell.DodgeParrySuppression(), test.want)
 		})
 	}
+}
+
+func TestInheritedDodgeReductionRemainsSeparateFromParry(t *testing.T) {
+	attacker := Unit{
+		Type:        PlayerUnit,
+		Level:       CharacterLevel,
+		stats:       stats.Stats{stats.ExpertiseRating: 3.942308},
+		PseudoStats: stats.NewPseudoStats(),
+	}
+	attacker.PseudoStats.InFrontOfTarget = true
+	attacker.PseudoStats.DodgeReduction = 0.02
+	defender := Unit{
+		Type:        EnemyUnit,
+		Level:       DefaultBossLevel,
+		PseudoStats: stats.NewPseudoStats(),
+	}
+	table := NewAttackTable(&attacker, &defender)
+	spell := Spell{Unit: &attacker}
+
+	assertFloat64(t, "dodge", defender.GetTotalDodgeChanceAsDefender(&spell, table), 0.0425)
+	assertFloat64(t, "parry", defender.GetTotalParryChanceAsDefender(&spell, table), 0.1375)
 }
 
 func assertFloat64(t *testing.T, field string, got float64, want float64) {
