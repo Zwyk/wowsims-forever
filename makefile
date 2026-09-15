@@ -288,6 +288,10 @@ fmt: tsfmt
 	gofmt -w ./sim
 	gofmt -w ./tools
 
+.PHONY: check-workflows
+check-workflows:
+	./tools/ci/check_workflow_policy.sh
+
 .PHONY: tsfmt
 tsfmt:
 	npx oxfmt ui
@@ -295,7 +299,8 @@ tsfmt:
 # one time setup to install pre-commit hook for gofmt and npm install needed packages
 setup:
 	cp pre-commit .git/hooks
-	chmod +x .git/hooks/pre-commit
+	cp pre-push .git/hooks
+	chmod +x .git/hooks/pre-commit .git/hooks/pre-push
 	! command -v air && curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin || true
 
 # Host a local server, for dev testing

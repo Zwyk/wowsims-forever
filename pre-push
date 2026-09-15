@@ -1,0 +1,5 @@
+#!/bin/sh
+
+set -eu
+
+./tools/ci/check_workflow_policy.sh

@@ -1,10 +1,13 @@
 name: Run Tests
 on:
+    push:
+        branches:
+            - forever
     pull_request:
         branches:
-            - master
-    # Reusable from other workflows (deploy, release). Their runs on master also
-    # prime the Go/npm caches that pull request runs restore from.
+            - forever
+    workflow_dispatch:
+    # Kept reusable for future workflows after they have been reviewed for this fork.
     workflow_call:
         inputs:
             ref:
@@ -14,12 +17,23 @@ on:
 permissions:
     contents: read
 jobs:
+    workflow-policy:
+        runs-on: ubuntu-latest
+        timeout-minutes: 2
+        steps:
+            - name: Checkout
+              uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+            - name: Verify workflow policy 🔒
+              run: ./tools/ci/check_workflow_policy.sh
+
     build-ui:
+        needs: workflow-policy
         runs-on: ubuntu-latest
         timeout-minutes: 20
         steps:
             - name: Checkout 🛎️
-              uses: actions/checkout@v5
+              uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
               with:
                   ref: ${{ inputs.ref }}
 
@@ -31,35 +45,67 @@ jobs:
                   fi
 
             - name: Install Go
-              uses: actions/setup-go@v6
+              uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
               with:
-                  go-version: 1.25.x
+                  go-version: 1.25.4
 
             - name: Install Protoc
-              uses: arduino/setup-protoc@v3
+              uses: arduino/setup-protoc@c65c819552d16ad3c9b72d9dfd5ba5237b9c906b # v3
               with:
-                  version: 3.x
+                  version: '29.3'
                   repo-token: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Install Protoc Go plugin
-              run: go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+              run: go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.10
 
             - name: Install Node
-              uses: actions/setup-node@v5
+              uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
               with:
-                  node-version: 22
+                  node-version-file: .nvmrc
                   cache: npm
+
+            - name: Check Go formatting
+              run: |
+                  # Go ignores source files whose names begin with '_' or '.'.
+                  # Apply the same rule so archived source does not break CI.
+                  unformatted="$(
+                      while IFS= read -r -d '' file; do
+                          filename="${file##*/}"
+                          if [[ "$filename" != _* && "$filename" != .* ]]; then
+                              gofmt -l "$file"
+                          fi
+                      done < <(git ls-files -z '*.go')
+                  )"
+                  if [[ -n "$unformatted" ]]; then
+                      printf 'The following Go files need gofmt:\n%s\n' "$unformatted"
+                      exit 1
+                  fi
 
             - name: Test Locales 💬
               run: |
                   npm ci
                   npm run test:locales
+                  npm run lint
+
+            - name: Generate Go protos
+              run: make sim/core/proto/api.pb.go
+
+            - name: Test repository tooling
+              run: |
+                  # tools/tooltip requires gitignored client-extracted DBC inputs.
+                  # Keep this explicit until that package has self-contained fixtures.
+                  go test \
+                      ./tools/database/dbc \
+                      ./tools/db2tool/dbd \
+                      ./tools/db2tool/sqlite \
+                      ./tools/db2tool/wdc
 
             - name: Build 🔧
               run: |
                   make dist/tbc/.dirstamp
 
     test:
+        needs: workflow-policy
         runs-on: ubuntu-latest
         timeout-minutes: 30
         strategy:
@@ -68,28 +114,28 @@ jobs:
                 shard: [0, 1, 2, 3]
         steps:
             - name: Checkout 🛎️
-              uses: actions/checkout@v5
+              uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
               with:
                   ref: ${{ inputs.ref }}
 
             - name: Install Go
-              uses: actions/setup-go@v6
+              uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6
               with:
-                  go-version: 1.25.x
+                  go-version: 1.25.4
 
             - name: Install Protoc
-              uses: arduino/setup-protoc@v3
+              uses: arduino/setup-protoc@c65c819552d16ad3c9b72d9dfd5ba5237b9c906b # v3
               with:
-                  version: 3.x
+                  version: '29.3'
                   repo-token: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Install Protoc Go plugin
-              run: go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+              run: go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.10
 
             - name: Install Node
-              uses: actions/setup-node@v5
+              uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
               with:
-                  node-version: 22
+                  node-version-file: .nvmrc
                   cache: npm
 
             # TestProtoVersioning in sim/core shells out to `npx buf`, which needs node_modules.
