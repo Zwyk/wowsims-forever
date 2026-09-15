@@ -59,6 +59,14 @@ The engine carries an inactive, fixed-size weapon-skill bonus vector. Its catego
 
 These values are bonuses only: the engine does not yet define whether Forever expresses them as skill points, rating, percentage points or some other unit. Nothing converts them to inherited Expertise Rating, and no production outcome reads them; only the inactive Classic reference policy below can project their possible effects. Current item data also leaves every bonus at zero; populating a checked, provenance-backed Forever data overlay is a separate step.
 
+### Classic level-60 offensive chance-input reference
+
+The engine now compiles an inactive overlay for the four well-supported Hit and Crit conversions in [`wowsims/classic` commit `7779ebbf79dc7f1341e6ab939b28a3402c9a730a`](https://github.com/wowsims/classic/blob/7779ebbf79dc7f1341e6ab939b28a3402c9a730a/sim/core/base_stats_auto_gen.go#L12-L15). That implementation stores physical Hit, spell Hit, physical Crit and spell Crit as percentage points: one input unit contributes one percentage point. Its outcome code divides those stored values by 100 when producing physical and spell probabilities ([physical Hit/Crit](https://github.com/wowsims/classic/blob/7779ebbf79dc7f1341e6ab939b28a3402c9a730a/sim/core/spell_result.go#L115-L129), [spell Hit/Crit](https://github.com/wowsims/classic/blob/7779ebbf79dc7f1341e6ab939b28a3402c9a730a/sim/core/spell_result.go#L195-L230)). The overlay accepts only a profile whose own character level is the fixed Classic level of 60 and replaces only those four divisors in its copied rules value; all other fields are preserved rather than inferred.
+
+The existing dependency seam can inject that value into characterization tests without selecting it for production. Scoped physical and spell inputs remain scoped, while the fork's shared `StatHitRating` and `StatCritRating` sources feed both outcome channels additively. The shared fan-out is a Forever architecture decision based on Blizzard's announcement, not a claim that Classic had shared stats. Likewise, the current `Rating` suffix is a provisional transport name and does not establish that Forever will use combat ratings.
+
+This reference deliberately excludes Haste, Expertise, Defense, Dodge, Parry, Block and Resilience. The pinned Classic haste paths have asymmetric equipment behavior; its Expertise semantics are SoD-specific; its generated defense-family constants conflict with their source table; and Resilience is not consumed by combat and disagrees between backend and UI. It also excludes race/class base stats and attribute conversions: those tables cover only the original combinations, contain class-specific wiring exceptions, and cannot safely predict Forever's expanded combinations. No production profile, item data, UI or runtime outcome path selects this overlay.
+
 ### Classic level-60 weapon-skill reference
 
 The engine now compiles an inactive physical attack-table policy that reproduces the player-versus-enemy formulas in [`wowsims/classic` commit `7779ebbf79dc7f1341e6ab939b28a3402c9a730a`](https://github.com/wowsims/classic/blob/7779ebbf79dc7f1341e6ab939b28a3402c9a730a/sim/core/target.go#L192-L349). Literal reference vectors cover a level-60 attacker against equal-level through `+3` targets, including the `+4`/`+5` hit-suppression breakpoint and the `+8` glancing-damage caps. The policy preserves the complete glancing multiplier range; its mean is available only for characterization, not as a replacement for the independent random roll used by Classic.
@@ -80,8 +88,8 @@ The active inherited TBC profile explicitly keeps this model disabled, and no pr
 | Rule | Engine decision | Status |
 | --- | --- | --- |
 | The announced leveling journey runs from 1 to 60 | Treat level 60 as the likely player cap only when a complete profile is installed; choose a default boss level only with evidence and matching base-stat data | Reviewed in inactive catalog; runtime unchanged |
-| Spell, melee, and ranged hit chance are combined | `StatHitRating` is a shared source feeding separate physical and spell hit percentages | Foundation implemented; announcement reviewed in inactive catalog |
-| Spell, melee, and ranged crit chance are combined | `StatCritRating` is a shared source feeding separate physical and spell crit percentages | Foundation implemented; announcement reviewed in inactive catalog |
+| Spell, melee, and ranged hit chance are combined | `StatHitRating` is a shared source feeding separate physical and spell hit percentages | Foundation implemented; inactive Classic direct-percentage fallback characterized |
+| Spell, melee, and ranged crit chance are combined | `StatCritRating` is a shared source feeding separate physical and spell crit percentages | Foundation implemented; inactive Classic direct-percentage fallback characterized |
 | Weapon skill remains relevant | Preserve category-specific bonus data and weapon context; do not treat current TBC expertise as the final model | Inactive foundation implemented; claim reviewed; effects await beta data |
 | Some items can reduce parry chance or dodge chance | Keep dodge and parry reduction distinct until evidence establishes whether one source feeds both | Claim reviewed in inactive catalog; mechanics await beta data |
 | Bonus healing contributes one-third as much bonus damage | Add once at the item-data boundary, with a regression test against double counting | Claim reviewed in inactive catalog; runtime implementation pending |
@@ -91,7 +99,7 @@ The generic source stats do **not** merge physical and spell outcome tables. Bas
 ## Deliberately unresolved
 
 - Whether level 60 is explicitly the hard player cap rather than only the announced leveling-journey upper bound, and which default boss levels the simulator should offer.
-- Whether Hit and Crit use direct percentage points or ratings, and every level-60 conversion value.
+- Whether Forever keeps Classic's direct Hit/Crit percentage points or introduces ratings, including any level scaling, caps, rounding and display rules; the compiled direct-percentage policy is only a pinned comparison fallback.
 - The name, unit, conversion, cap, and rounding behavior of the announced parry/dodge-reduction effects, and whether one shared stat or separate stats feed them.
 - Exact Forever weapon-skill effects on miss, dodge, parry, glancing chance, glancing damage, and critical suppression; the compiled Classic level-60 policy is only a pinned comparison fallback.
 - Whether Forever uses Classic or TBC armor and resistance formulas in every case.
@@ -99,7 +107,7 @@ The generic source stats do **not** merge physical and spell outcome tables. Bas
 
 Until those values are confirmed, the runnable branch still uses inherited TBC conversion constants and combat tables. Characterization tests pin those placeholders so a later evidence-backed rules update produces an explicit reviewable diff.
 
-Weapon-skill categories and bonuses are now represented by an inactive seam in the modern engine. A source-pinned Classic level-60 reference policy and regression vectors characterize one possible fallback, while Forever units, populated data and live combat effects remain deliberately unresolved.
+Shared Hit/Crit inputs plus weapon-skill categories and bonuses are now represented by inactive seams in the modern engine. Source-pinned Classic level-60 reference policies and regression vectors characterize possible fallbacks, while Forever units, populated data and live combat effects remain deliberately unresolved.
 
 ## Evidence
 
