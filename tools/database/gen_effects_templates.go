@@ -98,7 +98,12 @@ func RegisterAllProcs() {
 				ItemID:  {{ .ID }},
 				SpellID: {{ $entry.Damage.SpellID }},
 				School:  {{ $entry.Damage.SchoolMask | asCoreSpellSchool }},
+				{{- if or $entry.Damage.HasDefenseType (ne $entry.Damage.DefenseType 0) }}
 				DefenseType: {{ $entry.Damage.DefenseType | asCoreDefenseType }},
+				{{- end}}
+				{{- if and $entry.Damage.HasDefenseType (eq $entry.Damage.DefenseType 0) }}
+				HasDefenseType: true,
+				{{- end}}
 				MinDmg:  {{ $entry.Damage.MinDamage }},
 				MaxDmg:  {{ $entry.Damage.MaxDamage }},
 				{{- if $entry.DamageCannotCrit }}

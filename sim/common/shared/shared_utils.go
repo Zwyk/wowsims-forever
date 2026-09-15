@@ -34,9 +34,13 @@ type ProcStatBonusEffect struct {
 }
 
 type DamageEffect struct {
-	SpellID          int32
-	School           core.SpellSchool
-	DefenseType      core.DefenseType // From SpellCategories. Left unset, it is inferred from School and IsMelee.
+	SpellID int32
+	School  core.SpellSchool
+	// From SpellCategories. HasDefenseType distinguishes an explicit None from an omitted value;
+	// non-None values are always treated as set for backwards compatibility. An omitted value is
+	// inferred from School and IsMelee.
+	DefenseType      core.DefenseType
+	HasDefenseType   bool
 	MinDmg           float64
 	MaxDmg           float64
 	BonusCoefficient float64
@@ -65,8 +69,8 @@ type CustomProcHandler func(sim *core.Simulation, procAura *core.StatBuffAura)
 // SpellCategories table) wins. Otherwise the school decides: anything non-physical rolls against the
 // spell tables, and IsMelee stays honoured for a caller that means melee damage without saying so
 // through the school.
-func damageDefenseType(defenseType core.DefenseType, school core.SpellSchool, isMelee bool) core.DefenseType {
-	if defenseType != core.DefenseTypeNone {
+func damageDefenseType(defenseType core.DefenseType, hasDefenseType bool, school core.SpellSchool, isMelee bool) core.DefenseType {
+	if hasDefenseType || defenseType != core.DefenseTypeNone {
 		return defenseType
 	}
 
@@ -85,6 +89,8 @@ func damageOutcome(defenseType core.DefenseType, cannotCrit bool, outcome Outcom
 	}
 
 	switch defenseType {
+	case core.DefenseTypeNone:
+		return OutcomeAlwaysHit
 	case core.DefenseTypeMelee:
 		if cannotCrit {
 			return OutcomeMeleeNoCrit
@@ -115,7 +121,7 @@ func NewProcStatBonusEffectWithDamageProc(config ProcStatBonusEffect, damage Dam
 	factory_StatBonusEffect(config, func(agent core.Agent) ExtraSpellInfo {
 		character := agent.GetCharacter()
 
-		defenseType := damageDefenseType(damage.DefenseType, damage.School, damage.IsMelee)
+		defenseType := damageDefenseType(damage.DefenseType, damage.HasDefenseType, damage.School, damage.IsMelee)
 		procSpell := character.RegisterSpell(core.SpellConfig{
 			ActionID:                 core.ActionID{SpellID: damage.SpellID},
 			SpellSchool:              damage.School,
@@ -672,8 +678,11 @@ type ProcDamageEffect struct {
 	Trigger    core.ProcTrigger
 	TriggerDPM func(*core.Character) *core.DynamicProcManager
 	School     core.SpellSchool
-	// From SpellCategories. Left unset, it is inferred from School and IsMelee.
+	// From SpellCategories. HasDefenseType distinguishes an explicit None from an omitted value;
+	// non-None values are always treated as set for backwards compatibility. An omitted value is
+	// inferred from School and IsMelee.
 	DefenseType      core.DefenseType
+	HasDefenseType   bool
 	MinDmg           float64
 	MaxDmg           float64
 	BonusCoefficient float64
@@ -735,7 +744,7 @@ func NewProcDamageEffect(config ProcDamageEffect) {
 		minDmg := config.MinDmg
 		maxDmg := config.MaxDmg
 
-		defenseType := damageDefenseType(config.DefenseType, config.School, config.IsMelee)
+		defenseType := damageDefenseType(config.DefenseType, config.HasDefenseType, config.School, config.IsMelee)
 
 		// Per-character copy. config is captured once at registration and this body runs for
 		// every character the effect applies to, so filling the trigger in place would hand

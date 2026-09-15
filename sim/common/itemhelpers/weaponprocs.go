@@ -60,8 +60,10 @@ type WeaponProcDamage struct {
 
 	SpellID int32
 	School  core.SpellSchool
-	// From SpellCategories. Picks the hit table and crit multiplier.
+	// From SpellCategories. Picks the hit table and crit multiplier. Set HasDefenseType when None
+	// is intentional; non-None values are always treated as set.
 	DefenseType      core.DefenseType
+	HasDefenseType   bool
 	MinDmg           float64
 	MaxDmg           float64
 	BonusCoefficient float64
@@ -77,6 +79,7 @@ func CreateWeaponProcDamage(config WeaponProcDamage) {
 		SpellID:          config.SpellID,
 		School:           config.School,
 		DefenseType:      config.DefenseType,
+		HasDefenseType:   config.HasDefenseType,
 		MinDmg:           config.MinDmg,
 		MaxDmg:           config.MaxDmg,
 		BonusCoefficient: config.BonusCoefficient,
