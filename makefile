@@ -83,6 +83,20 @@ ifeq ($(shell uname -s), FreeBSD)
 	fi
 endif
 
+.PHONY: forever-data-verify forever-data-check forever-data-update forever-data-rebuild-manifest
+
+forever-data-verify:
+	go run ./tools/foreverdata verify
+
+forever-data-check:
+	go run ./tools/foreverdata check
+
+forever-data-update:
+	go run ./tools/foreverdata update
+
+forever-data-rebuild-manifest:
+	go run ./tools/foreverdata rebuild-manifest
+
 package-lock.json:
 	npm install
 

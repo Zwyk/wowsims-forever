@@ -83,3 +83,17 @@ Weapon-skill categories and bonuses are now represented by an inactive seam in t
 ## Secondary evidence
 
 - [talentsforever.com data export](https://talentsforever.com/data.json) is a fan-maintained, CC BY 4.0 transcription of demo footage and Blizzard slides. Its source metadata distinguishes confirmed tooltip ranks from estimates and Classic fallbacks. It is useful for later class, talent, spell and racial work, but it is not authoritative evidence for undocumented global combat formulas.
+
+The rolling source snapshot lives in `third_party/talentsforever/` with its
+license notice and a derived integrity manifest. `make forever-data-verify`
+checks the committed snapshot offline; `make forever-data-check` reports live
+section and record changes without writing; and `make forever-data-update`
+validates and replaces the snapshot. The updater preserves the exact source
+bytes and keeps separate hashes for the parsed document, evidence-bearing
+sections, source metadata, and individual top-level sections.
+
+This snapshot is quarantined evidence, not accepted game data. No runtime,
+database generator, or class implementation consumes it. A future adapter must
+promote individual values in a separate reviewed change while retaining their
+source path and confidence: direct demo observation, estimated rank, Classic
+fallback, completeness, and simulator acceptance are distinct states.

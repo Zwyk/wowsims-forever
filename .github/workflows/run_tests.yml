@@ -99,7 +99,9 @@ jobs:
                       ./tools/database/dbc \
                       ./tools/db2tool/dbd \
                       ./tools/db2tool/sqlite \
-                      ./tools/db2tool/wdc
+                      ./tools/db2tool/wdc \
+                      ./tools/foreverdata
+                  go run ./tools/foreverdata verify
 
             - name: Build 🔧
               run: |
