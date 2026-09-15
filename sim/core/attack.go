@@ -37,7 +37,10 @@ func (weapon *Weapon) DPS() float64 {
 func newWeaponFromUnarmed(critMultiplier float64) Weapon {
 	// These numbers are probably wrong but nobody cares.
 	return Weapon{
-		classification:       weaponClassification{kind: weaponClassificationUnarmed},
+		classification: weaponClassification{
+			kind:          weaponClassificationUnarmed,
+			skillCategory: proto.WeaponSkillCategory_WeaponSkillCategoryUnarmed,
+		},
 		BaseDamageMin:        0,
 		BaseDamageMax:        0,
 		SwingSpeed:           1,

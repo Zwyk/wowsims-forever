@@ -58,7 +58,7 @@ func (druid *Druid) weaponImbueFlatDamage() float64 {
 func (druid *Druid) GetCatWeapon() core.Weapon {
 	unscaledWeapon := druid.WeaponFromMainHand(0)
 	imbueBonus := druid.weaponImbueFlatDamage()
-	return core.Weapon{
+	return core.FeralCombatWeapon(core.Weapon{
 		BaseDamageMin:        (unscaledWeapon.BaseDamageMin + imbueBonus) / unscaledWeapon.SwingSpeed,
 		BaseDamageMax:        (unscaledWeapon.BaseDamageMax + imbueBonus) / unscaledWeapon.SwingSpeed,
 		SwingSpeed:           1.0,
@@ -66,13 +66,13 @@ func (druid *Druid) GetCatWeapon() core.Weapon {
 		CritMultiplier:       druid.FeralCritMultiplier(),
 		AttackPowerPerDPS:    core.DefaultAttackPowerPerDPS,
 		MaxRange:             core.MaxMeleeRange,
-	}
+	})
 }
 
 func (druid *Druid) GetBearWeapon() core.Weapon {
 	unscaledWeapon := druid.WeaponFromMainHand(0)
 	imbueBonus := druid.weaponImbueFlatDamage()
-	return core.Weapon{
+	return core.FeralCombatWeapon(core.Weapon{
 		BaseDamageMin:        (unscaledWeapon.BaseDamageMin + imbueBonus) / unscaledWeapon.SwingSpeed * 2.5,
 		BaseDamageMax:        (unscaledWeapon.BaseDamageMax + imbueBonus) / unscaledWeapon.SwingSpeed * 2.5,
 		SwingSpeed:           2.5,
@@ -80,7 +80,7 @@ func (druid *Druid) GetBearWeapon() core.Weapon {
 		CritMultiplier:       druid.FeralCritMultiplier(),
 		AttackPowerPerDPS:    core.DefaultAttackPowerPerDPS,
 		MaxRange:             core.MaxMeleeRange,
-	}
+	})
 }
 
 func (druid *Druid) RegisterCatFormAura() {

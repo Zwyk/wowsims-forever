@@ -354,6 +354,30 @@ enum WeaponType {
 	WeaponTypeSword = 9;
 }
 
+// Stable indices for category-specific weapon-skill bonuses. Values 0-15
+// preserve the Classic WoWSims layout so its item data can be migrated without
+// reindexing. The enum does not define the bonus unit or any combat formula.
+// NextIndex: 17
+enum WeaponSkillCategory {
+	WeaponSkillCategoryUnspecified = 0;
+	WeaponSkillCategoryAxes = 1;
+	WeaponSkillCategorySwords = 2;
+	WeaponSkillCategoryMaces = 3;
+	WeaponSkillCategoryDaggers = 4;
+	WeaponSkillCategoryUnarmed = 5;
+	WeaponSkillCategoryTwoHandedAxes = 6;
+	WeaponSkillCategoryTwoHandedSwords = 7;
+	WeaponSkillCategoryTwoHandedMaces = 8;
+	WeaponSkillCategoryPolearms = 9;
+	WeaponSkillCategoryStaves = 10;
+	WeaponSkillCategoryThrown = 11;
+	WeaponSkillCategoryBows = 12;
+	WeaponSkillCategoryCrossbows = 13;
+	WeaponSkillCategoryGuns = 14;
+	WeaponSkillCategoryFeralCombat = 15;
+	WeaponSkillCategoryWands = 16;
+}
+
 enum HandType {
 	HandTypeUnknown = 0;
 	HandTypeMainHand = 1;

@@ -30,14 +30,15 @@ const (
 	weaponClassificationSynthetic
 )
 
-// weaponClassification preserves the equipped item's weapon categories while
-// leaving room for synthetic weapons (forms, pets and unarmed attacks) to gain
-// an explicit skill category when those rules are implemented.
+// weaponClassification preserves the equipped item's weapon categories and
+// carries an explicit skill category for audited synthetic weapons. Generic
+// pet, NPC and other synthetic weapons remain unspecified.
 type weaponClassification struct {
 	kind             weaponClassificationKind
 	weaponType       proto.WeaponType
 	handType         proto.HandType
 	rangedWeaponType proto.RangedWeaponType
+	skillCategory    proto.WeaponSkillCategory
 }
 
 func weaponClassificationFromItem(item *Item) weaponClassification {
@@ -49,6 +50,7 @@ func weaponClassificationFromItem(item *Item) weaponClassification {
 		weaponType:       item.WeaponType,
 		handType:         item.HandType,
 		rangedWeaponType: item.RangedWeaponType,
+		skillCategory:    weaponSkillCategoryFromItem(item),
 	}
 }
 
@@ -69,8 +71,9 @@ func (weapon *Weapon) normalizeClassification() {
 // weaponAttackContext is resolved from the corresponding AutoAttack slot at
 // calculation time. It is a value snapshot and never caches item pointers.
 type weaponAttackContext struct {
-	source         WeaponAttackSource
-	classification weaponClassification
+	source           WeaponAttackSource
+	classification   weaponClassification
+	weaponSkillBonus float64
 }
 
 func (spell *Spell) weaponAttackContext() weaponAttackContext {
@@ -89,18 +92,16 @@ func (spell *Spell) weaponAttackContext() weaponAttackContext {
 		weapon = spell.Unit.AutoAttacks.Ranged()
 	}
 
+	character := spell.weaponAttackCharacter()
 	if weapon != nil && weapon.classification.kind == weaponClassificationSynthetic {
 		context.classification = weapon.classification
-		return context
-	}
-
-	if character := spell.weaponAttackCharacter(); character != nil {
+	} else if character != nil {
 		context.classification = character.equippedWeaponClassification(spell.weaponAttackSource)
-		return context
-	}
-
-	if weapon != nil {
+	} else if weapon != nil {
 		context.classification = weapon.classification
+	}
+	if character != nil {
+		context.weaponSkillBonus = character.weaponSkillBonus(context.classification.skillCategory)
 	}
 	return context
 }
@@ -128,12 +129,17 @@ func (character *Character) equippedWeaponClassification(source WeaponAttackSour
 	case WeaponAttackSourceMainHand:
 		item = character.GetMHWeapon()
 		if item == nil {
-			return weaponClassification{kind: weaponClassificationUnarmed}
+			return weaponClassification{
+				kind:          weaponClassificationUnarmed,
+				skillCategory: proto.WeaponSkillCategory_WeaponSkillCategoryUnarmed,
+			}
 		}
 	case WeaponAttackSourceOffHand:
 		item = character.GetOHWeapon()
 	case WeaponAttackSourceRanged:
 		item = character.GetRangedWeapon()
 	}
-	return weaponClassificationFromItem(item)
+	classification := weaponClassificationFromItem(item)
+	classification.skillCategory = weaponSkillCategoryFromEquippedItem(item, source)
+	return classification
 }

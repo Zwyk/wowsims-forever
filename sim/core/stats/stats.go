@@ -489,6 +489,10 @@ type PseudoStats struct {
 	BonusOHDps     float64
 	BonusRangedDps float64
 
+	// Category-specific bonuses kept outside the serialized stat vectors.
+	// No combat outcome consumes these until a ruleset defines their meaning.
+	WeaponSkillBonuses WeaponSkillBonuses
+
 	DisableDWMissPenalty bool // Used by Heroic Strike and Cleave
 
 	IncreasedMissChance float64 // Insect Swarm and Scorpid Sting

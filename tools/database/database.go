@@ -100,6 +100,10 @@ func (db *WowDatabase) MergeItem(src *proto.UIItem) {
 			dst.SocketBonus = src.SocketBonus
 			src.SocketBonus = nil
 		}
+		if src.WeaponSkillBonuses != nil {
+			dst.WeaponSkillBonuses = src.WeaponSkillBonuses
+			src.WeaponSkillBonuses = nil
+		}
 		googleProto.Merge(dst, src)
 	} else {
 		db.Items[src.Id] = src

@@ -405,20 +405,20 @@ func (swap *ItemSwap) SwapItems(sim *Simulation, swapSet proto.APLActionItemSwap
 
 func (swap *ItemSwap) swapItem(sim *Simulation, slot proto.ItemSlot, isPrepull bool, isReset bool) {
 	oldItem := *swap.GetEquippedItemBySlot(slot)
+	character := swap.character
 
 	if isReset {
-		swap.character.Equipment[slot] = swap.originalEquip[slot]
+		character.Equipment[slot] = swap.originalEquip[slot]
 	} else {
-		swap.character.Equipment[slot] = swap.unEquippedItems[slot]
+		character.Equipment[slot] = swap.unEquippedItems[slot]
 	}
 
 	swap.unEquippedItems[slot] = oldItem
+	character.addWeaponSkillBonuses(character.Equipment[slot].effectiveWeaponSkillBonuses().Subtract(oldItem.effectiveWeaponSkillBonuses()))
 
 	if isPrepull {
 		return
 	}
-
-	character := swap.character
 
 	switch slot {
 	case proto.ItemSlot_ItemSlotRanged:

@@ -45,7 +45,7 @@ message UINPC {
 // Contains all information about an Item needed by the UI.
 // Generally this will include everything needed by the sim, plus some
 // additional data for displaying / filtering.
-// Next tag: 34.
+// Next tag: 35.
 message UIItem {
 	int32 id = 1;
 	string name = 2;
@@ -98,6 +98,10 @@ message UIItem {
 	FactionRestriction faction_restriction = 25;
 	map<int32, ScalingItemProperties> scaling_options = 29; // keys are the other ilvl variants that this item could potentially have
 	repeated ItemEffect item_effects = 30;
+
+	// Indexed by WeaponSkillCategory. This is separate from regular Stats
+	// because its unit and combat effects are ruleset-owned.
+	repeated double weapon_skill_bonuses = 34;
 }
 
 enum Expansion {
