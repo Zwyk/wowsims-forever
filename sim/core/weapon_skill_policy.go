@@ -17,8 +17,6 @@ const (
 	weaponSkillModelClassicReference
 )
 
-const classicReferenceCharacterLevel int32 = 60
-
 // physicalAttackTableView keeps weapon-specific values out of the shared,
 // mutable AttackTable for an attacker/defender pair. A future activation must
 // route every relevant physical outcome through one such view atomically.
