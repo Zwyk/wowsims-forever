@@ -55,9 +55,19 @@ Weapon context distinguishes unspecified, absent, equipped-item, unarmed and syn
 
 ### Weapon-skill categories and bonuses
 
-The engine carries an inactive, fixed-size weapon-skill bonus vector. Its category indices 0-15 intentionally preserve the Classic WoWSims layout. Wand is a forward-compatible engine extension at category 16 because it is distinct from the imported ranged categories; it was not present in the Classic reference simulator and is not a claim about confirmed Forever behavior. Item transport, character aggregation and item-swap deltas all preserve these values independently of regular stats. Fist weapons map to Unarmed, and cat/bear weapons are explicitly tagged as Feral Combat. Missing, malformed, non-weapon, wrong-slot and unclassified synthetic contexts fail closed to the unspecified category.
+The engine carries an inactive, fixed-size weapon-skill bonus vector. Its category indices 0-15 intentionally preserve the Classic WoWSims layout. Wands is a forward-compatible engine skill category at index 16 because it is distinct from the imported ranged categories; that skill category and lookup case are absent from the Classic reference simulator, and its presence here is not a claim about confirmed Forever behavior. Item transport, character aggregation and item-swap deltas all preserve these values independently of regular stats. Fist weapons map to Unarmed, and cat/bear weapons are explicitly tagged as Feral Combat. Missing, malformed, non-weapon, wrong-slot and unclassified synthetic contexts fail closed to the unspecified category.
 
-These values are bonuses only: the engine does not yet define whether Forever expresses them as skill points, rating, percentage points or some other unit. Nothing converts them to inherited Expertise Rating, and no hit, dodge, parry, critical, glancing or damage formula reads them. Current item data also leaves every bonus at zero; populating a checked, provenance-backed Forever data overlay is a separate step.
+These values are bonuses only: the engine does not yet define whether Forever expresses them as skill points, rating, percentage points or some other unit. Nothing converts them to inherited Expertise Rating, and no production outcome reads them; only the inactive Classic reference policy below can project their possible effects. Current item data also leaves every bonus at zero; populating a checked, provenance-backed Forever data overlay is a separate step.
+
+### Classic level-60 weapon-skill reference
+
+The engine now compiles an inactive physical attack-table policy that reproduces the player-versus-enemy formulas in [`wowsims/classic` commit `7779ebbf79dc7f1341e6ab939b28a3402c9a730a`](https://github.com/wowsims/classic/blob/7779ebbf79dc7f1341e6ab939b28a3402c9a730a/sim/core/target.go#L192-L349). Literal reference vectors cover a level-60 attacker against equal-level through `+3` targets, including the `+4`/`+5` hit-suppression breakpoint and the `+8` glancing-damage caps. The policy preserves the complete glancing multiplier range; its mean is available only for characterization, not as a replacement for the independent random roll used by Classic.
+
+The resolver creates a short-lived value view for a spell and never mutates the shared attacker/defender `AttackTable`. It accepts only explicitly sourced, classified player weapons against enemies, with a melee or ranged defense type matching the source. Missing or unaudited weapon sources, malformed source/category pairs, generic synthetic weapons, pets, player defenders and Wand all fail closed. Wand is excluded because the pinned Classic implementation has neither a Wands skill category nor a Wand case in its weapon-skill lookup. Equipped fist weapons use the Unarmed bonus, while a truly empty main hand ignores that bonus to match Classic's nil-weapon path. The characterized scope deliberately rejects lower-level targets, whose upstream raw formula can produce a negative glance chance. Finite fractional and negative modifiers retain source behavior, but a negative modifier does not model training a weapon from below the assumed capped base skill.
+
+This policy is a comparison fallback, not accepted Forever behavior. In the Classic reference, positive weapon skill changes miss, hit suppression, dodge and glancing damage, but does not change parry, glancing frequency or melee critical suppression. The implementation assumes capped base skill of `5 * attacker level`; it does not model training a weapon from below cap. Its fixed 14% parry chance against a `+3` enemy and its `+1`/`+2` interpolation remain beta-verification targets. It also adds 1.8 percentage points of boss critical suppression to total crit even though the [upstream history](https://github.com/wowsims/sod/pull/170) documents that this approximation should apply only to aura-derived crit.
+
+The active inherited TBC profile explicitly keeps this model disabled, and no production outcome calls the resolver. Live simulations therefore retain their existing fixed attack tables and scalar glancing multiplier. Activation requires authoritative Forever measurements plus an audit of every weapon ability; currently only core auto attacks declare a weapon source. When activated, miss, hit suppression, dodge, parry, glancing chance and damage, and melee crit suppression must consume the same transient view in one reviewed change so the engine cannot produce a hybrid table.
 
 ### Known inherited quirks
 
@@ -83,13 +93,13 @@ The generic source stats do **not** merge physical and spell outcome tables. Bas
 - Whether level 60 is explicitly the hard player cap rather than only the announced leveling-journey upper bound, and which default boss levels the simulator should offer.
 - Whether Hit and Crit use direct percentage points or ratings, and every level-60 conversion value.
 - The name, unit, conversion, cap, and rounding behavior of the announced parry/dodge-reduction effects, and whether one shared stat or separate stats feed them.
-- Exact weapon-skill effects on miss, dodge, parry, glancing chance, glancing damage, and critical suppression.
+- Exact Forever weapon-skill effects on miss, dodge, parry, glancing chance, glancing damage, and critical suppression; the compiled Classic level-60 policy is only a pinned comparison fallback.
 - Whether Forever uses Classic or TBC armor and resistance formulas in every case.
 - Whether the bonus-healing damage contribution is precomputed in item data or derived at runtime, and where any fractional rounding occurs.
 
 Until those values are confirmed, the runnable branch still uses inherited TBC conversion constants and combat tables. Characterization tests pin those placeholders so a later evidence-backed rules update produces an explicit reviewable diff.
 
-Weapon-skill categories and bonuses are now represented by an inactive seam in the modern engine. Their units, populated data and combat effects remain deliberately unresolved.
+Weapon-skill categories and bonuses are now represented by an inactive seam in the modern engine. A source-pinned Classic level-60 reference policy and regression vectors characterize one possible fallback, while Forever units, populated data and live combat effects remain deliberately unresolved.
 
 ## Evidence
 
