@@ -149,11 +149,22 @@ func TestWeaponFromItemPreservesClassification(t *testing.T) {
 }
 
 func TestWeaponClassificationRequiresValidItem(t *testing.T) {
-	if got := weaponClassificationFromItem(nil); got != (weaponClassification{}) {
+	want := weaponClassification{kind: weaponClassificationAbsent}
+	if got := weaponClassificationFromItem(nil); got != want {
 		t.Fatalf("nil item classification = %+v, want absent", got)
 	}
-	if got := weaponClassificationFromItem(&Item{WeaponType: proto.WeaponType_WeaponTypeSword}); got != (weaponClassification{}) {
+	if got := weaponClassificationFromItem(&Item{WeaponType: proto.WeaponType_WeaponTypeSword}); got != want {
 		t.Fatalf("zero-ID item classification = %+v, want absent", got)
+	}
+}
+
+func TestWeaponClassificationZeroValueIsUnspecified(t *testing.T) {
+	var classification weaponClassification
+	if classification.kind != weaponClassificationUnspecified {
+		t.Fatalf("zero classification kind = %d, want unspecified", classification.kind)
+	}
+	if classification.kind == weaponClassificationAbsent {
+		t.Fatal("zero classification must not mean known absent")
 	}
 }
 
@@ -308,6 +319,6 @@ func TestWeaponAttackContextDoesNotGivePlayerEquipmentToPets(t *testing.T) {
 
 	context := (&Spell{Unit: pet, weaponAttackSource: WeaponAttackSourceRanged}).weaponAttackContext()
 	if context.classification != (weaponClassification{}) {
-		t.Fatalf("pet classification = %+v, want absent", context.classification)
+		t.Fatalf("pet classification = %+v, want unspecified", context.classification)
 	}
 }

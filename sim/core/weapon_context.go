@@ -23,7 +23,8 @@ const (
 type weaponClassificationKind uint8
 
 const (
-	weaponClassificationAbsent weaponClassificationKind = iota
+	weaponClassificationUnspecified weaponClassificationKind = iota
+	weaponClassificationAbsent
 	weaponClassificationEquippedItem
 	weaponClassificationUnarmed
 	weaponClassificationSynthetic
@@ -41,7 +42,7 @@ type weaponClassification struct {
 
 func weaponClassificationFromItem(item *Item) weaponClassification {
 	if item == nil || item.ID == 0 {
-		return weaponClassification{}
+		return weaponClassification{kind: weaponClassificationAbsent}
 	}
 	return weaponClassification{
 		kind:             weaponClassificationEquippedItem,
@@ -55,7 +56,12 @@ func weaponClassificationFromItem(item *Item) weaponClassification {
 // Until they receive a specific skill category, mark them as synthetic so a
 // player form or natural weapon never falls back to equipped item metadata.
 func (weapon *Weapon) normalizeClassification() {
-	if weapon.classification.kind == weaponClassificationAbsent && weapon.SwingSpeed != 0 {
+	if weapon.classification.kind != weaponClassificationUnspecified {
+		return
+	}
+	if weapon.SwingSpeed == 0 {
+		weapon.classification.kind = weaponClassificationAbsent
+	} else {
 		weapon.classification.kind = weaponClassificationSynthetic
 	}
 }

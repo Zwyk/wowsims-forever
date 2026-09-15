@@ -37,7 +37,7 @@ Spells can declare a currently inert weapon source: none, main hand, off hand or
 
 The engine continues to keep one mutable `AttackTable` per attacker/defender pair. It does not copy Classic's per-cast-type table maps, which would duplicate pair-wide aura state. Future weapon-skill rules will resolve a short-lived context from the spell, the current player equipment and any authoritative synthetic auto-attack weapon instead.
 
-Weapon context distinguishes absent, equipped-item, unarmed and synthetic origins. Player equipment classification is read live, including for disabled or unpopulated auto-attack channels, while a form, pet or other synthetic weapon never falls back to an equipped item. Synthetic weapons still need explicit skill categories, such as feral combat, before any weapon-skill rule consumes the context.
+Weapon context distinguishes unspecified, absent, equipped-item, unarmed and synthetic origins. Player equipment classification is read live, including for disabled or unpopulated auto-attack channels, while a form, pet or other synthetic weapon never falls back to an equipped item. Synthetic weapons still need explicit skill categories, such as feral combat, before any weapon-skill rule consumes the context.
 
 ### Known inherited quirks
 
