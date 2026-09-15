@@ -58,7 +58,7 @@ stat_weights_results: {
  key: "TestFeralCat-StatWeights-Default"
  value: {
   weights: 2.19992
-  weights: 3.16202
+  weights: 3.16204
   weights: 0
   weights: 0
   weights: 0
@@ -78,10 +78,10 @@ stat_weights_results: {
   weights: 0
   weights: 0.99993
   weights: 0
-  weights: 2.10972
-  weights: 1.8266
-  weights: 0.43674
-  weights: 2.38174
+  weights: 2.10973
+  weights: 1.82656
+  weights: 0.43675
+  weights: 2.38175
   weights: 0
   weights: 0
   weights: 0
@@ -554,8 +554,8 @@ dps_results: {
 dps_results: {
  key: "TestFeralCat-AllItems-Dragonmaw-28438"
  value: {
-  dps: 2213.97011
-  tps: 1131.17476
+  dps: 2213.93547
+  tps: 1131.15051
   dtps: 10.57974
   hps: 66.70791
  }
@@ -563,8 +563,8 @@ dps_results: {
 dps_results: {
  key: "TestFeralCat-AllItems-DragonspineTrophy-28830"
  value: {
-  dps: 2521.95195
-  tps: 1284.35496
+  dps: 2521.9192
+  tps: 1284.33204
   dtps: 10.57974
   hps: 68.79351
  }
@@ -1949,8 +1949,8 @@ dps_results: {
 dps_results: {
  key: "TestFeralCat-Average-Default"
  value: {
-  dps: 2511.44418
-  tps: 1278.38436
+  dps: 2511.4428
+  tps: 1278.38339
   dtps: 10.58912
   hps: 69.65192
  }
