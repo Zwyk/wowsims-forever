@@ -66,7 +66,16 @@ jobs:
 
             - name: Check Go formatting
               run: |
-                  unformatted="$(git ls-files -z '*.go' | xargs -0 -r gofmt -l)"
+                  # Go ignores source files whose names begin with '_' or '.'.
+                  # Apply the same rule so archived source does not break CI.
+                  unformatted="$(
+                      while IFS= read -r -d '' file; do
+                          filename="${file##*/}"
+                          if [[ "$filename" != _* && "$filename" != .* ]]; then
+                              gofmt -l "$file"
+                          fi
+                      done < <(git ls-files -z '*.go')
+                  )"
                   if [[ -n "$unformatted" ]]; then
                       printf 'The following Go files need gofmt:\n%s\n' "$unformatted"
                       exit 1
