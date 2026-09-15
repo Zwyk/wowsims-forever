@@ -8,7 +8,7 @@ import (
 
 func TestUnifiedHitAndCritFeedSeparateOutcomeChannels(t *testing.T) {
 	unit := Unit{StatDependencyManager: stats.NewStatDependencyManager()}
-	unit.addUniversalStatDependencies()
+	unit.addUniversalStatDependenciesWithRuleset(inheritedTBCRuleset())
 
 	input := stats.Stats{
 		stats.HitRating:  100,
@@ -26,7 +26,7 @@ func TestUnifiedHitAndCritFeedSeparateOutcomeChannels(t *testing.T) {
 
 func TestScopedHitAndCritSourcesRemainScoped(t *testing.T) {
 	unit := Unit{StatDependencyManager: stats.NewStatDependencyManager()}
-	unit.addUniversalStatDependencies()
+	unit.addUniversalStatDependenciesWithRuleset(inheritedTBCRuleset())
 
 	input := stats.Stats{
 		stats.MeleeHitRating:  100,
@@ -34,15 +34,15 @@ func TestScopedHitAndCritSourcesRemainScoped(t *testing.T) {
 	}
 	got := unit.StatDependencyManager.SortAndApplyStatDependencies(input)
 
-	assertFloat64(t, "physical hit", got[stats.PhysicalHitPercent], 100/PhysicalHitRatingPerHitPercent)
-	assertFloat64(t, "physical crit", got[stats.PhysicalCritPercent], 100/PhysicalCritRatingPerCritPercent)
+	assertFloat64(t, "physical hit", got[stats.PhysicalHitPercent], 100/15.769233)
+	assertFloat64(t, "physical crit", got[stats.PhysicalCritPercent], 100/22.076923)
 	assertFloat64(t, "spell hit", got[stats.SpellHitPercent], 0)
 	assertFloat64(t, "spell crit", got[stats.SpellCritPercent], 0)
 }
 
 func TestUnifiedAndScopedHitAndCritSourcesAreAdditive(t *testing.T) {
 	unit := Unit{StatDependencyManager: stats.NewStatDependencyManager()}
-	unit.addUniversalStatDependencies()
+	unit.addUniversalStatDependenciesWithRuleset(inheritedTBCRuleset())
 
 	input := stats.Stats{
 		stats.HitRating:       100,

@@ -3,6 +3,27 @@ package core
 const (
 	inheritedTBCCharacterLevel        = 70
 	inheritedTBCDefaultBossLevelDelta = 3
+
+	inheritedTBCExpertisePerQuarterPercentReduction     = 3.942308
+	inheritedTBCDefenseRatingPerDefenseLevel            = 2.365385
+	inheritedTBCDodgeRatingPerDodgePercent              = 18.923079
+	inheritedTBCParryRatingPerParryPercent              = 23.653847
+	inheritedTBCBlockRatingPerBlockPercent              = 7.884615
+	inheritedTBCPhysicalHitRatingPerHitPercent          = 15.769233
+	inheritedTBCSpellHitRatingPerHitPercent             = 12.615385
+	inheritedTBCPhysicalCritRatingPerCritPercent        = 22.076923
+	inheritedTBCSpellCritRatingPerCritPercent           = 22.076923
+	inheritedTBCPhysicalHasteRatingPerHastePercent      = 15.769233
+	inheritedTBCSpellHasteRatingPerHastePercent         = 15.76923
+	inheritedTBCDefenseChancePerDefenseLevelPercent     = 0.04
+	inheritedTBCResilienceRatingPerCritReductionPercent = 39.4231
+
+	inheritedTBCExpertiseAvoidanceStepsPerUnit     = 400.0
+	inheritedTBCDualWieldMissPenalty               = 0.19
+	inheritedTBCMinimumSpellMissChance             = 0.01
+	inheritedTBCEnemyCritDamageMultiplier          = 2.0
+	inheritedTBCResilienceCritDamageReductionScale = 0.5
+	inheritedTBCCrushingBlowDamageMultiplier       = 1.5
 )
 
 // inheritedTBCRuleset is the behavior imported from tbc-new v0.0.137. These
@@ -14,7 +35,37 @@ func inheritedTBCRuleset() rulesetProfile {
 			characterLevel:        inheritedTBCCharacterLevel,
 			defaultBossLevelDelta: inheritedTBCDefaultBossLevelDelta,
 		},
+		ratings: ratingRules{
+			expertisePerQuarterPercentReduction:     inheritedTBCExpertisePerQuarterPercentReduction,
+			defenseRatingPerDefenseLevel:            inheritedTBCDefenseRatingPerDefenseLevel,
+			dodgeRatingPerDodgePercent:              inheritedTBCDodgeRatingPerDodgePercent,
+			parryRatingPerParryPercent:              inheritedTBCParryRatingPerParryPercent,
+			blockRatingPerBlockPercent:              inheritedTBCBlockRatingPerBlockPercent,
+			physicalHitRatingPerHitPercent:          inheritedTBCPhysicalHitRatingPerHitPercent,
+			spellHitRatingPerHitPercent:             inheritedTBCSpellHitRatingPerHitPercent,
+			physicalCritRatingPerCritPercent:        inheritedTBCPhysicalCritRatingPerCritPercent,
+			spellCritRatingPerCritPercent:           inheritedTBCSpellCritRatingPerCritPercent,
+			physicalHasteRatingPerHastePercent:      inheritedTBCPhysicalHasteRatingPerHastePercent,
+			spellHasteRatingPerHastePercent:         inheritedTBCSpellHasteRatingPerHastePercent,
+			defenseChancePerDefenseLevelPercent:     inheritedTBCDefenseChancePerDefenseLevelPercent,
+			resilienceRatingPerCritReductionPercent: inheritedTBCResilienceRatingPerCritReductionPercent,
+		},
 		combat: combatRules{
+			targetPhysicalCritByLevel: [levelBandCount]float64{
+				levelBandCharacterMinusTwo:  4.6,
+				levelBandCharacter:          5.0,
+				levelBandCharacterPlusOne:   5.2,
+				levelBandCharacterPlusTwo:   5.4,
+				levelBandCharacterPlusThree: 5.6,
+			},
+			outcomes: outcomeRules{
+				expertiseAvoidanceStepsPerUnit:     inheritedTBCExpertiseAvoidanceStepsPerUnit,
+				dualWieldMissPenalty:               inheritedTBCDualWieldMissPenalty,
+				minimumSpellMissChance:             inheritedTBCMinimumSpellMissChance,
+				enemyCritDamageMultiplier:          inheritedTBCEnemyCritDamageMultiplier,
+				resilienceCritDamageReductionScale: inheritedTBCResilienceCritDamageReductionScale,
+				crushingBlowDamageMultiplier:       inheritedTBCCrushingBlowDamageMultiplier,
+			},
 			versusEnemy: attackTableByLevel{
 				levelBandCharacterMinusTwo: {
 					baseMissChance:      0.04,

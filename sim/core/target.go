@@ -162,6 +162,10 @@ type Target struct {
 }
 
 func NewTarget(options *proto.Target, targetIndex int32) *Target {
+	return newTargetWithRuleset(options, targetIndex, currentRuleset())
+}
+
+func newTargetWithRuleset(options *proto.Target, targetIndex int32, rules rulesetProfile) *Target {
 	unitStats := stats.Stats{}
 	if options.Stats != nil {
 		unitStats = stats.FromProtoArray(options.Stats)
@@ -187,7 +191,7 @@ func NewTarget(options *proto.Target, targetIndex int32) *Target {
 	target.GCD = target.NewTimer()
 	target.RotationTimer = target.NewTimer()
 	if target.Level == 0 {
-		target.Level = DefaultBossLevel
+		target.Level = rules.levels.defaultBossLevel()
 	}
 
 	// Default Crit chance for NPCs depends only on their level relative to the level of their
@@ -195,11 +199,11 @@ func NewTarget(options *proto.Target, targetIndex int32) *Target {
 	// accomplished by specifying the extra (or reduced) Crit within the CritRating field of the
 	// proto stats array. Any specified CritRating will be applied as an OFFSET to the default
 	// level-based values, rather than as a replacement.
-	target.stats[stats.PhysicalCritPercent] += UnitLevelFloat64(target.Level, 4.6, 5.0, 5.2, 5.4, 5.6)
+	target.stats[stats.PhysicalCritPercent] += rules.targetPhysicalCritPercent(target.Level)
 	target.stats[stats.BlockValue] = 54
-	target.addUniversalStatDependencies()
+	target.addUniversalStatDependenciesWithRuleset(rules)
 
-	if target.Level == DefaultBossLevel && options.SuppressDodge {
+	if target.Level == rules.levels.defaultBossLevel() && options.SuppressDodge {
 		// Sunwell boss Dodge Suppression. -20% dodge and -5% miss chance.
 		target.PseudoStats.DodgeReduction += 0.2
 		target.PseudoStats.IncreasedMissChance -= 0.05
@@ -335,8 +339,11 @@ type DynamicThreatDoneByCaster DynamicDamageDoneByCaster
 // Holds cached values for outcome/damage calculations, for a specific attacker+defender pair.
 // These are updated dynamically when attacker or defender stats change.
 type AttackTable struct {
-	Attacker *Unit
-	Defender *Unit
+	Attacker         *Unit
+	Defender         *Unit
+	ratings          ratingRules
+	outcomes         outcomeRules
+	rulesInitialized bool
 
 	BaseMissChance      float64
 	BaseSpellMissChance float64
@@ -379,8 +386,11 @@ func NewAttackTable(attacker *Unit, defender *Unit) *AttackTable {
 
 func newAttackTableWithRuleset(attacker *Unit, defender *Unit, rules rulesetProfile) *AttackTable {
 	table := &AttackTable{
-		Attacker: attacker,
-		Defender: defender,
+		Attacker:         attacker,
+		Defender:         defender,
+		ratings:          rules.ratings,
+		outcomes:         rules.combat.outcomes,
+		rulesInitialized: true,
 
 		CritMultiplier:              1,
 		DamageDealtMultiplier:       1,
@@ -394,6 +404,22 @@ func newAttackTableWithRuleset(attacker *Unit, defender *Unit, rules rulesetProf
 	rules.attackTableBase(attacker, defender).applyTo(table)
 
 	return table
+}
+
+// These fallbacks preserve the historical behavior of externally constructed
+// AttackTable values. Engine-created tables always cache the selected profile.
+func (table *AttackTable) resolvedRatingRules() ratingRules {
+	if table.rulesInitialized {
+		return table.ratings
+	}
+	return currentRuleset().ratings
+}
+
+func (table *AttackTable) resolvedOutcomeRules() outcomeRules {
+	if table.rulesInitialized {
+		return table.outcomes
+	}
+	return currentRuleset().combat.outcomes
 }
 
 func EnableDamageDoneByCaster(index int, maxIndex int, attackTable *AttackTable, handler DynamicDamageDoneByCaster) {

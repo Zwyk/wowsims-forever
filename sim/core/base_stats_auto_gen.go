@@ -9,18 +9,6 @@ import (
 	"github.com/wowsims/tbc/sim/core/stats"
 )
 
-const ExpertisePerQuarterPercentReduction = 3.942308
-const DefenseRatingPerDefenseLevel = 2.365385
-const DodgeRatingPerDodgePercent = 18.923079
-const ParryRatingPerParryPercent = 23.653847
-const BlockRatingPerBlockPercent = 7.884615
-const PhysicalHitRatingPerHitPercent = 15.769233
-const SpellHitRatingPerHitPercent = 12.615385
-const PhysicalCritRatingPerCritPercent = 22.076923
-const SpellCritRatingPerCritPercent = 22.076923
-const PhysicalHasteRatingPerHastePercent = 15.769233
-const SpellHasteRatingPerHastePercent = 15.76923
-
 var CritPerAgiMaxLevel = map[proto.Class]float64{
 	proto.Class_ClassUnknown: 0.0,
 	proto.Class_ClassWarrior: 0.03030000,
