@@ -15,14 +15,15 @@ type CanCastCondition func(sim *Simulation, target *Unit) bool
 type SpellConfig struct {
 	// See definition of Spell (below) for comments on these.
 	ActionID
-	SpellSchool    SpellSchool
-	ProcMask       ProcMask
-	Flags          SpellFlag
-	MissileSpeed   float64
-	BaseCost       float64
-	MetricSplits   int
-	ClassSpellMask int64
-	Rank           int32
+	SpellSchool        SpellSchool
+	ProcMask           ProcMask
+	WeaponAttackSource WeaponAttackSource
+	Flags              SpellFlag
+	MissileSpeed       float64
+	BaseCost           float64
+	MetricSplits       int
+	ClassSpellMask     int64
+	Rank               int32
 
 	ManaCost   ManaCostOptions
 	EnergyCost EnergyCostOptions
@@ -86,6 +87,8 @@ type Spell struct {
 
 	// Controls which effects can proc from this spell.
 	ProcMask ProcMask
+	// Declares which current weapon, if any, supplies future weapon-specific context.
+	weaponAttackSource WeaponAttackSource
 
 	// Flags
 	Flags SpellFlag
@@ -218,14 +221,15 @@ func (unit *Unit) RegisterSpell(config SpellConfig) *Spell {
 	}
 
 	spell := &Spell{
-		ActionID:       config.ActionID,
-		Rank:           config.Rank,
-		Unit:           unit,
-		SpellSchool:    config.SpellSchool,
-		ProcMask:       config.ProcMask,
-		Flags:          config.Flags,
-		MissileSpeed:   config.MissileSpeed,
-		ClassSpellMask: config.ClassSpellMask,
+		ActionID:           config.ActionID,
+		Rank:               config.Rank,
+		Unit:               unit,
+		SpellSchool:        config.SpellSchool,
+		ProcMask:           config.ProcMask,
+		weaponAttackSource: config.WeaponAttackSource,
+		Flags:              config.Flags,
+		MissileSpeed:       config.MissileSpeed,
+		ClassSpellMask:     config.ClassSpellMask,
 
 		DefaultCast:        config.Cast.DefaultCast,
 		CD:                 config.Cast.CD,

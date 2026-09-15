@@ -15,6 +15,7 @@ type ReplaceMHSwing func(sim *Simulation, mhSwingSpell *Spell) *Spell
 // Represents a generic weapon. Pets / unarmed / various other cases don't use
 // actual weapon items so this is an abstraction of a Weapon.
 type Weapon struct {
+	classification       weaponClassification
 	BaseDamageMin        float64
 	BaseDamageMax        float64
 	AttackPowerPerDPS    float64
@@ -36,6 +37,7 @@ func (weapon *Weapon) DPS() float64 {
 func newWeaponFromUnarmed(critMultiplier float64) Weapon {
 	// These numbers are probably wrong but nobody cares.
 	return Weapon{
+		classification:       weaponClassification{kind: weaponClassificationUnarmed},
 		BaseDamageMin:        0,
 		BaseDamageMax:        0,
 		SwingSpeed:           1,
@@ -84,6 +86,7 @@ func newWeaponFromItem(item *Item, critMultiplier float64, bonusDps float64) Wea
 	}
 
 	return Weapon{
+		classification:       weaponClassificationFromItem(item),
 		BaseDamageMin:        item.WeaponDamageMin + bonusDps*item.SwingSpeed,
 		BaseDamageMax:        item.WeaponDamageMax + bonusDps*item.SwingSpeed,
 		SwingSpeed:           item.SwingSpeed,
@@ -334,6 +337,7 @@ func (wa *WeaponAttack) getWeapon() *Weapon {
 }
 
 func (wa *WeaponAttack) setWeapon(weapon Weapon) {
+	weapon.normalizeClassification()
 	wa.Weapon = weapon
 	wa.spell.CritMultiplier = weapon.CritMultiplier
 	wa.updateSwingDuration(wa.curSwingSpeed)
@@ -426,6 +430,10 @@ type AutoAttackOptions struct {
 }
 
 func (unit *Unit) EnableAutoAttacks(agent Agent, options AutoAttackOptions) {
+	options.MainHand.normalizeClassification()
+	options.OffHand.normalizeClassification()
+	options.Ranged.normalizeClassification()
+
 	if options.MainHand.AttackPowerPerDPS == 0 {
 		options.MainHand.AttackPowerPerDPS = DefaultAttackPowerPerDPS
 	}
@@ -461,10 +469,11 @@ func (unit *Unit) EnableAutoAttacks(agent Agent, options AutoAttackOptions) {
 	}
 
 	unit.AutoAttacks.mh.config = SpellConfig{
-		ActionID:    ActionID{OtherID: proto.OtherAction_OtherActionAttack, Tag: 1},
-		SpellSchool: options.MainHand.GetSpellSchool(),
-		ProcMask:    Ternary(options.ProcMask == ProcMaskUnknown, ProcMaskMeleeMHAuto, options.ProcMask),
-		Flags:       SpellFlagMeleeMetrics | SpellFlagIncludeTargetBonusDamage | SpellFlagNoOnCastComplete,
+		ActionID:           ActionID{OtherID: proto.OtherAction_OtherActionAttack, Tag: 1},
+		SpellSchool:        options.MainHand.GetSpellSchool(),
+		ProcMask:           Ternary(options.ProcMask == ProcMaskUnknown, ProcMaskMeleeMHAuto, options.ProcMask),
+		WeaponAttackSource: WeaponAttackSourceMainHand,
+		Flags:              SpellFlagMeleeMetrics | SpellFlagIncludeTargetBonusDamage | SpellFlagNoOnCastComplete,
 
 		DamageMultiplier:         1,
 		DamageMultiplierAdditive: 1,
@@ -486,10 +495,11 @@ func (unit *Unit) EnableAutoAttacks(agent Agent, options AutoAttackOptions) {
 	}
 
 	unit.AutoAttacks.oh.config = SpellConfig{
-		ActionID:    ActionID{OtherID: proto.OtherAction_OtherActionAttack, Tag: 2},
-		SpellSchool: options.OffHand.GetSpellSchool(),
-		ProcMask:    Ternary(options.ProcMask == ProcMaskUnknown, ProcMaskMeleeOHAuto, options.ProcMask),
-		Flags:       SpellFlagMeleeMetrics | SpellFlagIncludeTargetBonusDamage | SpellFlagNoOnCastComplete,
+		ActionID:           ActionID{OtherID: proto.OtherAction_OtherActionAttack, Tag: 2},
+		SpellSchool:        options.OffHand.GetSpellSchool(),
+		ProcMask:           Ternary(options.ProcMask == ProcMaskUnknown, ProcMaskMeleeOHAuto, options.ProcMask),
+		WeaponAttackSource: WeaponAttackSourceOffHand,
+		Flags:              SpellFlagMeleeMetrics | SpellFlagIncludeTargetBonusDamage | SpellFlagNoOnCastComplete,
 
 		DamageMultiplier:         1,
 		DamageMultiplierAdditive: 1,
@@ -506,13 +516,14 @@ func (unit *Unit) EnableAutoAttacks(agent Agent, options AutoAttackOptions) {
 	}
 
 	unit.AutoAttacks.ranged.config = SpellConfig{
-		ActionID:     ActionID{OtherID: proto.OtherAction_OtherActionShoot},
-		SpellSchool:  options.Ranged.GetSpellSchool(),
-		ProcMask:     Ternary(options.ProcMask == ProcMaskUnknown, ProcMaskRangedAuto, options.ProcMask),
-		Flags:        SpellFlagMeleeMetrics | SpellFlagIncludeTargetBonusDamage,
-		MissileSpeed: 40,
-		MinRange:     unit.AutoAttacks.ranged.MinRange,
-		MaxRange:     unit.AutoAttacks.ranged.MaxRange,
+		ActionID:           ActionID{OtherID: proto.OtherAction_OtherActionShoot},
+		SpellSchool:        options.Ranged.GetSpellSchool(),
+		ProcMask:           Ternary(options.ProcMask == ProcMaskUnknown, ProcMaskRangedAuto, options.ProcMask),
+		WeaponAttackSource: WeaponAttackSourceRanged,
+		Flags:              SpellFlagMeleeMetrics | SpellFlagIncludeTargetBonusDamage,
+		MissileSpeed:       40,
+		MinRange:           unit.AutoAttacks.ranged.MinRange,
+		MaxRange:           unit.AutoAttacks.ranged.MaxRange,
 
 		Cast: CastConfig{
 			DefaultCast: Cast{
