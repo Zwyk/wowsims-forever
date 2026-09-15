@@ -75,11 +75,25 @@ func (druid *Druid) applyPredatoryInstincts() {
 		return
 	}
 
-	druid.AddStaticMod(core.SpellModConfig{
+	predatoryInstinctsMod := druid.AddDynamicMod(core.SpellModConfig{
 		Kind:       core.SpellMod_CritMultiplier_Pct,
 		School:     core.SpellSchoolPhysical,
 		FloatValue: 0.02 * float64(druid.Talents.PredatoryInstincts),
 	})
+
+	for _, formAura := range []*core.Aura{druid.CatFormAura, druid.BearFormAura} {
+		formAura.ApplyOnGain(func(_ *core.Aura, _ *core.Simulation) {
+			predatoryInstinctsMod.Activate()
+		})
+		formAura.ApplyOnExpire(func(_ *core.Aura, _ *core.Simulation) {
+			predatoryInstinctsMod.Deactivate()
+		})
+	}
+
+	// Starting-form auras can gain during the build phase, before talents are applied.
+	if druid.InForm(Cat | Bear) {
+		predatoryInstinctsMod.Activate()
+	}
 }
 
 func (druid *Druid) applyForceOfNature() {

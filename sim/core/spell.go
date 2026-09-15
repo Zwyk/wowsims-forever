@@ -766,22 +766,38 @@ func (spell *Spell) ExpectedTickDamageFromCurrentSnapshot(sim *Simulation, targe
 	return result.Damage
 }
 
-// The damage multiplier of a critical strike. The base comes from the DefenseType: spells crit
-// for 150%, melee and ranged attacks for 200%. Multiplicative modifiers (the 3% meta gems, the
-// slaying talents on the attack table, SpellMod_CritMultiplier_Pct) scale that base; additive
-// ones (Ruin, Impale, SpellMod_CritMultiplier_Flat) scale only the bonus part above 100%.
+// The damage multiplier of a critical strike. DefenseType selects the rules-profile base: the
+// inherited profile makes spells crit for 150%, and melee/ranged attacks for 200%.
+// Multiplicative modifiers (the 3% meta gems, the slaying talents on the attack table,
+// SpellMod_CritMultiplier_Pct) scale that base; additive ones (Ruin, Impale,
+// SpellMod_CritMultiplier_Flat) scale only the bonus part above 100%.
 // https://web.archive.org/web/20081014064638/http://elitistjerks.com/f31/t12595-relentless_earthstorm_diamond_-_melee_only/p4/
 func (spell *Spell) CritDamageMultiplier(at *AttackTable) float64 {
+	outcomes := currentRuleset().combat.outcomes
+	attackTableMultiplier := 1.0
+	if at != nil {
+		outcomes = at.resolvedOutcomeRules()
+		attackTableMultiplier = at.CritMultiplier
+	}
+
 	var base float64
 	switch spell.DefenseType {
 	case DefenseTypeNone:
 		panic(fmt.Sprintf("CritDamageMultiplier() called for %s which has no DefenseType", spell.ActionID))
 	case DefenseTypeMagic:
-		base = 1.5
+		base = outcomes.magicCritDamageMultiplier
+	case DefenseTypeMelee:
+		base = outcomes.meleeCritDamageMultiplier
+	case DefenseTypeRanged:
+		base = outcomes.rangedCritDamageMultiplier
 	default:
-		base = 2.0
+		panic(fmt.Sprintf("CritDamageMultiplier() called for %s with invalid DefenseType %d", spell.ActionID, spell.DefenseType))
 	}
-	return (base*spell.CritMultiplierPct*spell.Unit.PseudoStats.CritDamageMultiplier*at.CritMultiplier-1)*(spell.CritMultiplierAdditive+1) + 1
+
+	// Healing outcomes have no offensive attacker/defender relationship, so they intentionally
+	// call this without an attack table. Target-specific damage modifiers such as Monster Slaying
+	// must not increase healing crits.
+	return (base*spell.CritMultiplierPct*spell.Unit.PseudoStats.CritDamageMultiplier*attackTableMultiplier-1)*(spell.CritMultiplierAdditive+1) + 1
 }
 
 // Time until either the cast is finished or GCD is ready again, whichever is longer

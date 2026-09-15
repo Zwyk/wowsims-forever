@@ -120,6 +120,9 @@ type outcomeRules struct {
 	expertiseAvoidanceStepsPerUnit     float64
 	dualWieldMissPenalty               float64
 	minimumSpellMissChance             float64
+	magicCritDamageMultiplier          float64
+	meleeCritDamageMultiplier          float64
+	rangedCritDamageMultiplier         float64
 	enemyCritDamageMultiplier          float64
 	resilienceCritDamageReductionScale float64
 	crushingBlowDamageMultiplier       float64

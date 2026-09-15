@@ -703,6 +703,8 @@ func GetOutcome(spell *core.Spell, outcome OutcomeType) core.OutcomeApplier {
 		return spell.OutcomeMagicHit
 	case OutcomeRangedCanCrit:
 		return spell.OutcomeRangedHitAndCrit
+	case OutcomeRangedNoCrit:
+		return spell.OutcomeRangedHit
 	case OutcomeAlwaysHit:
 		return spell.OutcomeAlwaysHit
 	default:
