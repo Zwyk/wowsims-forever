@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "canonicalizerVersion": 1,
+  "evidenceTier": "community_secondary",
+  "runtimeStatus": "reference_only",
+  "source": {
+    "url": "https://talentsforever.com/data.json",
+    "license": "CC-BY-4.0",
+    "attribution": "Data from talentsforever.com (https://talentsforever.com)",
+    "generated": "2026-09-15",
+    "retrievedAt": "2026-09-15T17:24:21Z",
+    "lastModified": "Tue, 15 Sep 2026 17:24:21 GMT"
+  },
+  "snapshot": {
+    "path": "third_party/talentsforever/data.json",
+    "bytes": 585544,
+    "rawSha256": "11cab87a32e6cd44e66f7674cd017e2339d0852dbcb1d25f8a79c447f5f307b6",
+    "documentBytes": 411527,
+    "documentSha256": "6b5a34a53951444f697cc63feadb51ddda59d9bfb75b691ce0884afc689fdf33",
+    "evidenceSha256": "a558af53afbdbff93db713df7d0325a6db835e9e8c4315e7ded78ef2e2de57fc",
+    "sourceMetadataSha256": "284bb13ceb3b0ae86014ef79f4ef16a02da27f7ea1678fa56f595937e482d208"
+  },
+  "sections": {
+    "changelog": {
+      "type": "array",
+      "entries": 37,
+      "sha256": "698ea15071d33b20c1c3ced9be7850969dca3312deae828c796c19558487a934"
+    },
+    "class_abilities": {
+      "type": "object",
+      "entries": 9,
+      "sha256": "0d3a90bf693a641b73e712ba264cfc4e4d8336c8a37a1a3a18389a4701f8f914"
+    },
+    "class_racials": {
+      "type": "object",
+      "entries": 1,
+      "sha256": "a5405f9adeab628f457572efaf3d77ef38863fb65e649d8cc098cc3f86d999b0"
+    },
+    "legacy": {
+      "type": "object",
+      "entries": 2,
+      "sha256": "8b8f3996042b9ca011f4540989bbf92c6521cd72ee4bc72289d4c6c8988143cf"
+    },
+    "racials": {
+      "type": "object",
+      "entries": 2,
+      "sha256": "0ff5dc9a082b2a30f091914ff3107a6b32924b4e0bff4d350a8c950482f2b0c2"
+    },
+    "spell_desc": {
+      "type": "object",
+      "entries": 366,
+      "sha256": "fe3a70d49606374993f02d324b332442707601f3916a1b1cee448d201278d9b1"
+    },
+    "spellbooks": {
+      "type": "object",
+      "entries": 9,
+      "sha256": "3f28be40c9f1ab0f75cfe31bc8765c01144bcb75a1e4c5f91f254e457528c9bc"
+    },
+    "talents": {
+      "type": "object",
+      "entries": 9,
+      "sha256": "2b42f098a4c4f113564e3535c8c178be899eda1cae8ab32496cdabb1efdbb440"
+    }
+  },
+  "metrics": {
+    "classes": 9,
+    "talentTrees": 27,
+    "talents": 470,
+    "completeTalents": 187,
+    "talentsWithConfirmedRank": 33,
+    "spellbookEntries": 401,
+    "spellDescriptions": 366,
+    "demoSpellDescriptions": 229,
+    "classicSpellDescriptions": 137,
+    "racialAbilities": 40,
+    "classRacialAbilities": 12,
+    "classAbilities": 37,
+    "legacyPerks": 20,
+    "changelogEntries": 37
+  }
+}
