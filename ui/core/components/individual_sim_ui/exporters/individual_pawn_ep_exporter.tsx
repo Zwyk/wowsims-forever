@@ -82,6 +82,8 @@ export class IndividualPawnEPExporter<SpecType extends Spec> extends IndividualE
 		[Stat.StatMeleeHitRating]: '',
 		[Stat.StatMeleeCritRating]: '',
 		[Stat.StatMeleeHasteRating]: '',
+		[Stat.StatHitRating]: 'HitRating',
+		[Stat.StatCritRating]: 'CritRating',
 		[Stat.StatArmorPenetration]: '',
 		[Stat.StatDefenseRating]: '',
 		[Stat.StatBlockRating]: '',

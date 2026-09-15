@@ -80,6 +80,8 @@ export class Individual60UEPExporter<SpecType extends Spec> extends IndividualEx
 		[Stat.StatMeleeHitRating]: 'hitRating',
 		[Stat.StatMeleeCritRating]: 'critRating',
 		[Stat.StatMeleeHasteRating]: 'hasteRating',
+		[Stat.StatHitRating]: 'hitRating',
+		[Stat.StatCritRating]: 'critRating',
 		[Stat.StatArmorPenetration]: 'armorPen',
 		[Stat.StatDefenseRating]: 'defense',
 		[Stat.StatBlockRating]: 'block',

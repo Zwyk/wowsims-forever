@@ -680,6 +680,14 @@ func (unit *Unit) addUniversalStatDependencies() {
 	unit.AddStatDependency(stats.SpellHitRating, stats.SpellHitPercent, 1/SpellHitRatingPerHitPercent)
 	unit.AddStatDependency(stats.MeleeCritRating, stats.PhysicalCritPercent, 1/PhysicalCritRatingPerCritPercent)
 	unit.AddStatDependency(stats.SpellCritRating, stats.SpellCritPercent, 1/SpellCritRatingPerCritPercent)
+
+	// Forever combines the item sources for Hit and Crit, but the derived
+	// physical and spell stats stay separate because their combat tables,
+	// caps, and contextual bonuses are different.
+	unit.AddStatDependency(stats.HitRating, stats.PhysicalHitPercent, 1/PhysicalHitRatingPerHitPercent)
+	unit.AddStatDependency(stats.HitRating, stats.SpellHitPercent, 1/SpellHitRatingPerHitPercent)
+	unit.AddStatDependency(stats.CritRating, stats.PhysicalCritPercent, 1/PhysicalCritRatingPerCritPercent)
+	unit.AddStatDependency(stats.CritRating, stats.SpellCritPercent, 1/SpellCritRatingPerCritPercent)
 }
 
 func (unit *Unit) finalize() {

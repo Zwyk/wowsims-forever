@@ -78,12 +78,16 @@ func MapBonusStatIndexToStat(index int) (proto.Stat, bool) {
 		return proto.Stat_StatResilienceRating, true
 
 	// Secondary ratings
-	case ITEM_MOD_HIT_MELEE_RATING, ITEM_MOD_HIT_RANGED_RATING, ITEM_MOD_HIT_RATING:
+	case ITEM_MOD_HIT_MELEE_RATING, ITEM_MOD_HIT_RANGED_RATING:
 		return proto.Stat_StatMeleeHitRating, true
+	case ITEM_MOD_HIT_RATING:
+		return proto.Stat_StatHitRating, true
 	case ITEM_MOD_HIT_SPELL_RATING:
 		return proto.Stat_StatSpellHitRating, true
-	case ITEM_MOD_CRIT_MELEE_RATING, ITEM_MOD_CRIT_RANGED_RATING, ITEM_MOD_CRIT_RATING:
+	case ITEM_MOD_CRIT_MELEE_RATING, ITEM_MOD_CRIT_RANGED_RATING:
 		return proto.Stat_StatMeleeCritRating, true
+	case ITEM_MOD_CRIT_RATING:
+		return proto.Stat_StatCritRating, true
 	case ITEM_MOD_CRIT_SPELL_RATING:
 		return proto.Stat_StatSpellCritRating, true
 	case ITEM_MOD_HASTE_MELEE_RATING, ITEM_MOD_HASTE_RANGED_RATING, ITEM_MOD_HASTE_RATING:

@@ -32,6 +32,8 @@ var safeDepsOrder = []Stat{
 	SpellHitRating,
 	SpellCritRating,
 	SpellHasteRating,
+	HitRating,
+	CritRating,
 	BlockPercent,
 	DodgeRating,
 	ParryRating,

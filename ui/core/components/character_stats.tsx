@@ -31,6 +31,7 @@ const statGroups = new Map<string, Array<DisplayStat>>([
 			{ stat: UnitStat.fromStat(Stat.StatSpirit) },
 		],
 	],
+	['Universal', [{ stat: UnitStat.fromStat(Stat.StatHitRating) }, { stat: UnitStat.fromStat(Stat.StatCritRating) }]],
 	[
 		'Physical',
 		[

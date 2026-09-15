@@ -61,6 +61,8 @@ const (
 	NatureResistance
 	ShadowResistance
 	PhysicalDamage
+	HitRating
+	CritRating
 	// end of Stat enum in proto/common.proto
 
 	// The remaining stats below are stored as PseudoStats rather than as
@@ -222,6 +224,10 @@ func (s Stat) StatName() string {
 		return "ShadowResistance"
 	case PhysicalDamage:
 		return "PhysicalDamage"
+	case HitRating:
+		return "HitRating"
+	case CritRating:
+		return "CritRating"
 	}
 
 	return "none"

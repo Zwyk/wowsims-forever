@@ -164,7 +164,7 @@ enum Profession {
 // the Go Stats array to be larger than the size of the Stat enum proto, but the
 // shared indices between the two must exactly match.
 //
-// NextIndex: 42;
+// NextIndex: 44;
 enum Stat {
 	// Primary attributes ("main stat")
 	StatStrength = 0;
@@ -224,6 +224,12 @@ enum Stat {
 	StatShadowResistance = 40;
 
 	StatPhysicalDamage = 41;
+
+	// Forever item stats which contribute to both physical and spell
+	// outcome channels. The rating-to-percent conversions remain provisional
+	// until they can be measured in a Forever client build.
+	StatHitRating = 42;
+	StatCritRating = 43;
 
 	// DO NOT add new stats here without discussing it first; new stats come
 	// with a performance penalty.

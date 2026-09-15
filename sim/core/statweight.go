@@ -183,6 +183,8 @@ func buildStatWeightRequests(swr *proto.StatWeightsRequest) *proto.StatWeightReq
 			statModsLow[stats.MeleeHitRating] = 0
 		} else if stat.EqualsStat(stats.SpellHitRating) {
 			statModsLow[stats.SpellHitRating] = 0
+		} else if stat.EqualsStat(stats.HitRating) {
+			statModsLow[stats.HitRating] = 0
 		} else if stat.EqualsStat(stats.ExpertiseRating) {
 			statModsLow[stats.ExpertiseRating] = 0
 		}

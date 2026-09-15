@@ -17,7 +17,7 @@ The inherited deployment, release, database-update, labeling, and webhook workfl
 
 ## Development
 
-See the [installation guide](docs/installation.md) and [development commands](docs/commands.md). Work should be based on a feature branch; keep `master` available for syncing the upstream `tbc-new` baseline.
+See the [core rules ledger](docs/forever_core.md), [installation guide](docs/installation.md), and [development commands](docs/commands.md). Work should be based on a feature branch; keep `master` available for syncing the upstream `tbc-new` baseline.
 
 ## Community and attribution
 

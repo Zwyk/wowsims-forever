@@ -416,6 +416,8 @@ export const displayStatOrder: Array<UnitStat> = [
 	UnitStat.fromStat(Stat.StatHolyDamage),
 	UnitStat.fromStat(Stat.StatNatureDamage),
 	UnitStat.fromStat(Stat.StatShadowDamage),
+	UnitStat.fromStat(Stat.StatHitRating),
+	UnitStat.fromStat(Stat.StatCritRating),
 	UnitStat.fromPseudoStat(PseudoStat.PseudoStatSpellHitPercent),
 	UnitStat.fromPseudoStat(PseudoStat.PseudoStatSchoolHitPercentArcane),
 	UnitStat.fromPseudoStat(PseudoStat.PseudoStatSchoolHitPercentFire),
