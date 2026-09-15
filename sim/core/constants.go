@@ -7,6 +7,7 @@ import (
 )
 
 const CharacterLevel = 70
+const DefaultBossLevel = CharacterLevel + 3
 const MinIlvl = 60
 const MaxIlvl = 600
 

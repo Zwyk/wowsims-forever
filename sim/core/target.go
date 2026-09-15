@@ -184,11 +184,10 @@ func NewTarget(options *proto.Target, targetIndex int32) *Target {
 			enabled:               !options.DisabledAtStart,
 		},
 	}
-	defaultRaidBossLevel := int32(CharacterLevel + 3)
 	target.GCD = target.NewTimer()
 	target.RotationTimer = target.NewTimer()
 	if target.Level == 0 {
-		target.Level = defaultRaidBossLevel
+		target.Level = DefaultBossLevel
 	}
 
 	// Default Crit chance for NPCs depends only on their level relative to the level of their
@@ -200,7 +199,7 @@ func NewTarget(options *proto.Target, targetIndex int32) *Target {
 	target.stats[stats.BlockValue] = 54
 	target.addUniversalStatDependencies()
 
-	if target.Level == 73 && options.SuppressDodge {
+	if target.Level == DefaultBossLevel && options.SuppressDodge {
 		// Sunwell boss Dodge Suppression. -20% dodge and -5% miss chance.
 		target.PseudoStats.DodgeReduction += 0.2
 		target.PseudoStats.IncreasedMissChance -= 0.05
@@ -389,7 +388,7 @@ func NewAttackTable(attacker *Unit, defender *Unit) *AttackTable {
 	}
 
 	if defender.Type == EnemyUnit {
-		// Assumes attacker (the Player) is level 70.
+		// Assumes attacker (the Player) is at CharacterLevel.
 		table.BaseSpellMissChance = UnitLevelFloat64(defender.Level, 0.02, 0.04, 0.05, 0.06, 0.17)
 		table.BaseMissChance = UnitLevelFloat64(defender.Level, 0.04, 0.05, 0.055, 0.06, 0.08)
 		table.BaseBlockChance = 0.05
@@ -402,7 +401,7 @@ func NewAttackTable(attacker *Unit, defender *Unit) *AttackTable {
 		table.MeleeCritSuppression = UnitLevelFloat64(defender.Level, 0, 0, 0.01, 0.02, 0.048)
 		table.SpellCritSuppression = UnitLevelFloat64(defender.Level, 0, 0, 0, 0.003, 0.021)
 	} else {
-		// Assumes defender (the Player) is level 70.
+		// Assumes defender (the Player) is at CharacterLevel.
 		table.BaseSpellMissChance = 0.05
 		table.BaseMissChance = UnitLevelFloat64(attacker.Level, 0.054, 0.05, 0.048, 0.046, 0.044)
 		table.BaseBlockChance = UnitLevelFloat64(attacker.Level, 0.054, 0.05, 0.048, 0.046, 0.044)
