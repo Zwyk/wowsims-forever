@@ -1200,7 +1200,8 @@ func ScanSpells(rows *sql.Rows) (dbc.Spell, error) {
 	var stringAuraIFlags string            //2
 	var stringChannelInterruptFlags string // 2
 	var stringShapeShift string            //2
-	var iconId int                         //
+	var hasDefenseType int32
+	var iconId int
 	err := rows.Scan(
 		&spell.NameLang,
 		&spell.ID,
@@ -1227,6 +1228,7 @@ func ScanSpells(rows *sql.Rows) (dbc.Spell, error) {
 		&spell.CategoryTypeMask,
 		&spell.Category,
 		&spell.DefenseType,
+		&hasDefenseType,
 		&spell.Duration,
 		&spell.ProcChance,
 		&spell.ProcCharges,
@@ -1250,6 +1252,7 @@ func ScanSpells(rows *sql.Rows) (dbc.Spell, error) {
 	if err != nil {
 		return spell, fmt.Errorf("scanning spell data: %w", err)
 	}
+	spell.HasDefenseType = hasDefenseType != 0
 
 	spell.Attributes, err = parseIntArrayField(stringAttr, 17)
 	if err != nil {
@@ -1308,6 +1311,7 @@ func LoadAndWriteSpells(dbHelper *DBHelper, inputsDir string) ([]dbc.Spell, erro
 	COALESCE(ssc.TypeMask, 0),
 	COALESCE(scs.Category, 0),
 	COALESCE(scs.DefenseType, 0),
+	CASE WHEN scs.SpellID IS NULL THEN 0 ELSE 1 END,
 	COALESCE(sd.Duration, 0),
 	COALESCE(sao.ProcChance, 0),
 	COALESCE(sao.ProcCharges, 0),

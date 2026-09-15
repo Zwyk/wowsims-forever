@@ -39,6 +39,8 @@ Spells can declare a currently inert weapon source: none, main hand, off hand or
 
 Upstream's `DefenseType` is orthogonal to weapon source: it selects the physical, ranged or magical outcome table and base critical multiplier from client spell-category data, but it does not say which equipped weapon supplies skill context. Auto attacks therefore carry both fields independently. The inherited 1.5 magical and 2.0 melee/ranged critical multipliers live in the rules profile rather than outcome code, ready for evidence-backed Forever values.
 
+Shared proc-damage configs preserve whether `DefenseType` was present in client data. A present category zero remains `None` and defaults to an always-land, non-critical outcome, matching the Classic and SoD weapon-proc helpers. An omitted zero retains the legacy school/`IsMelee` inference, while nonzero values remain unambiguously explicit. This distinction is carried from the `SpellCategories` database row through generated proc configs so missing data is not silently reclassified as an explicit rule.
+
 The engine continues to keep one mutable `AttackTable` per attacker/defender pair. It does not copy Classic's per-cast-type table maps, which would duplicate pair-wide aura state. Future weapon-skill rules will resolve a short-lived context from the spell, the current player equipment and any authoritative synthetic auto-attack weapon instead.
 
 Weapon context distinguishes unspecified, absent, equipped-item, unarmed and synthetic origins. Player equipment classification is read live, including for disabled or unpopulated auto-attack channels, while a form, pet or other synthetic weapon never falls back to an equipped item.

@@ -25,6 +25,7 @@ type Spell struct {
 	CategoryTypeMask      int32
 	Category              int32
 	DefenseType           int32 // SpellCategories.DefenseType: 0 none, 1 magic, 2 melee, 3 ranged
+	HasDefenseType        bool  `json:",omitempty"` // whether the spell has a SpellCategories.DefenseType value
 	Duration              int32
 	ProcChance            float32
 	ProcCharges           int32
