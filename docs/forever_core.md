@@ -31,6 +31,14 @@ The first extraction contains the inherited TBC level bands and both attack-tabl
 
 All extracted values still reproduce the inherited TBC engine exactly. Armor, resistance, weapon skill, class base stats, talents and UI values stay outside this profile until each surface can move in a focused pull request. A later Forever profile will be added alongside the inherited profile, then activated only with matching level-60 base-stat data and UI changes.
 
+### Weapon attack context
+
+Spells can declare a currently inert weapon source: none, main hand, off hand or ranged. The zero value is a separate unspecified state, so a future activation audit can distinguish intentionally non-weapon spells from missing annotations. This source is separate from `ProcMask`, because proc routing and hit-table categories do not reliably identify the weapon used. Core auto attacks set it explicitly, and item-backed `Weapon` values retain the equipped weapon, hand and ranged classifications whenever they are built or rebuilt from equipment. Class abilities remain unspecified until they can be audited before weapon-skill mechanics are activated.
+
+The engine continues to keep one mutable `AttackTable` per attacker/defender pair. It does not copy Classic's per-cast-type table maps, which would duplicate pair-wide aura state. Future weapon-skill rules will resolve a short-lived context from the spell, the current player equipment and any authoritative synthetic auto-attack weapon instead.
+
+Weapon context distinguishes unspecified, absent, equipped-item, unarmed and synthetic origins. Player equipment classification is read live, including for disabled or unpopulated auto-attack channels, while a form, pet or other synthetic weapon never falls back to an equipped item. Synthetic weapons still need explicit skill categories, such as feral combat, before any weapon-skill rule consumes the context.
+
 ### Known inherited quirks
 
 - A level-69 target is not offered by the inherited encounter picker. Direct API input at that level falls through to the `+3` lookup values because the level table has no `-1` entry; this unsupported-input behavior is documented but deliberately not made a desired invariant.
