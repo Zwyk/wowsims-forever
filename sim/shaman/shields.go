@@ -64,6 +64,7 @@ func (shaman *Shaman) registerWaterShieldSpell() {
 	shaman.RegisterSpell(core.SpellConfig{
 		ActionID:    actionID,
 		SpellSchool: core.SpellSchoolNature,
+		DefenseType: core.DefenseTypeMagic,
 		Flags:       core.SpellFlagAPL | SpellFlagInstant,
 		Cast: core.CastConfig{
 			DefaultCast: core.Cast{
@@ -85,12 +86,12 @@ func (shaman *Shaman) registerLightningShieldSpell() {
 	lsDamage := shaman.RegisterSpell(core.SpellConfig{
 		ActionID:         core.ActionID{SpellID: 25472},
 		SpellSchool:      core.SpellSchoolNature,
+		DefenseType:      core.DefenseTypeMagic,
 		ProcMask:         core.ProcMaskEmpty,
 		Flags:            SpellFlagShamanSpell,
 		ClassSpellMask:   SpellMaskLightningShield,
 		DamageMultiplier: 1,
 		ThreatMultiplier: 1,
-		CritMultiplier:   shaman.DefaultSpellCritMultiplier(),
 		BonusCoefficient: 0.26699998975,
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
 			baseDamage := 287.0
@@ -117,6 +118,7 @@ func (shaman *Shaman) registerLightningShieldSpell() {
 	shaman.RegisterSpell(core.SpellConfig{
 		ActionID:    actionID,
 		SpellSchool: core.SpellSchoolNature,
+		DefenseType: core.DefenseTypeMagic,
 		Flags:       core.SpellFlagAPL | SpellFlagInstant,
 		ManaCost: core.ManaCostOptions{
 			FlatCost: 400,

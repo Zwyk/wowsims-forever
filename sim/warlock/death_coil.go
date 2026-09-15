@@ -11,6 +11,7 @@ func (warlock *Warlock) registerDeathCoil() {
 	warlock.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 27223},
 		SpellSchool:    core.SpellSchoolShadow,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		Flags:          core.SpellFlagAPL,
 		ClassSpellMask: WarlockSpellDeathCoil,
@@ -29,7 +30,6 @@ func (warlock *Warlock) registerDeathCoil() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   warlock.DefaultSpellCritMultiplier(),
 		ThreatMultiplier: 1,
 		BonusCoefficient: 0.214,
 

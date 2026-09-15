@@ -12,6 +12,7 @@ func (rogue *Rogue) registerSinisterStrikeSpell() {
 	rogue.SinisterStrike = rogue.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 26862},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		Flags:          core.SpellFlagMeleeMetrics | SpellFlagBuilder | core.SpellFlagAPL,
 		ClassSpellMask: RogueSpellSinisterStrike,
@@ -29,7 +30,6 @@ func (rogue *Rogue) registerSinisterStrikeSpell() {
 
 		DamageMultiplier:         1,
 		DamageMultiplierAdditive: 1,
-		CritMultiplier:           rogue.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier:         1,
 
 		BonusCoefficient: 1,

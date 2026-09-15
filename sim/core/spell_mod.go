@@ -18,6 +18,7 @@ type SpellModConfig struct {
 	ClassMask         int64
 	Kind              SpellModType
 	School            SpellSchool
+	DefenseType       DefenseType // Only apply to spells with a matching DefenseType
 	ProcMask          ProcMask
 	SpellFlag         SpellFlag
 	ResourceType      proto.ResourceType
@@ -35,6 +36,7 @@ type SpellMod struct {
 	ClassMask      int64
 	Kind           SpellModType
 	School         SpellSchool
+	DefenseType    DefenseType
 	ProcMask       ProcMask
 	SpellFlag      SpellFlag
 	ResourceType   proto.ResourceType
@@ -96,6 +98,7 @@ func buildMod(unit *Unit, config SpellModConfig) *SpellMod {
 		ClassMask:    config.ClassMask,
 		Kind:         config.Kind,
 		School:       config.School,
+		DefenseType:  config.DefenseType,
 		ProcMask:     config.ProcMask,
 		SpellFlag:    config.SpellFlag,
 		ResourceType: config.ResourceType,
@@ -181,6 +184,10 @@ func shouldApply(spell *Spell, mod *SpellMod) bool {
 	}
 
 	if mod.School > 0 && !mod.School.Matches(spell.SpellSchool) {
+		return false
+	}
+
+	if mod.DefenseType > 0 && spell.DefenseType != mod.DefenseType {
 		return false
 	}
 
@@ -302,11 +309,11 @@ const (
 	// Uses FloatValue
 	SpellMod_Cooldown_Multiplier
 
-	// Will increase the AdditiveCritMultiplier. +100% = 1.0
+	// Will increase the CritMultiplierAdditive. +100% = 1.0
 	// Uses FloatValue
 	SpellMod_CritMultiplier_Flat
 
-	// Will increase the CritMultiplier. x100% = 1.0
+	// Will multiply the CritMultiplierPct. +3% = 0.03
 	// Uses FloatValue
 	SpellMod_CritMultiplier_Pct
 
@@ -624,11 +631,11 @@ func removeCritMultiplierFlat(mod *SpellMod, spell *Spell) {
 }
 
 func applyCritMultiplierPct(mod *SpellMod, spell *Spell) {
-	spell.CritMultiplier *= (1 + mod.floatValue)
+	spell.CritMultiplierPct *= (1 + mod.floatValue)
 }
 
 func removeCritMultiplierPct(mod *SpellMod, spell *Spell) {
-	spell.CritMultiplier /= (1 + mod.floatValue)
+	spell.CritMultiplierPct /= (1 + mod.floatValue)
 }
 
 func applyCastTimePercent(mod *SpellMod, spell *Spell) {

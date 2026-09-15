@@ -13,6 +13,7 @@ func (mage *Mage) registerConeOfColdSpell() {
 	mage.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 27087},
 		SpellSchool:    core.SpellSchoolFrost,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		Flags:          core.SpellFlagAPL | core.SpellFlagBinary,
 		ClassSpellMask: MageSpellConeOfCold,
@@ -32,7 +33,6 @@ func (mage *Mage) registerConeOfColdSpell() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   mage.DefaultSpellCritMultiplier(),
 		BonusCoefficient: coneOfColdCoefficient,
 		ThreatMultiplier: 1,
 

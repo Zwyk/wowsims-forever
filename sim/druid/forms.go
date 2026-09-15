@@ -56,28 +56,26 @@ func (druid *Druid) weaponImbueFlatDamage() float64 {
 }
 
 func (druid *Druid) GetCatWeapon() core.Weapon {
-	unscaledWeapon := druid.WeaponFromMainHand(0)
+	unscaledWeapon := druid.WeaponFromMainHand()
 	imbueBonus := druid.weaponImbueFlatDamage()
 	return core.FeralCombatWeapon(core.Weapon{
 		BaseDamageMin:        (unscaledWeapon.BaseDamageMin + imbueBonus) / unscaledWeapon.SwingSpeed,
 		BaseDamageMax:        (unscaledWeapon.BaseDamageMax + imbueBonus) / unscaledWeapon.SwingSpeed,
 		SwingSpeed:           1.0,
 		NormalizedSwingSpeed: 1.0,
-		CritMultiplier:       druid.FeralCritMultiplier(),
 		AttackPowerPerDPS:    core.DefaultAttackPowerPerDPS,
 		MaxRange:             core.MaxMeleeRange,
 	})
 }
 
 func (druid *Druid) GetBearWeapon() core.Weapon {
-	unscaledWeapon := druid.WeaponFromMainHand(0)
+	unscaledWeapon := druid.WeaponFromMainHand()
 	imbueBonus := druid.weaponImbueFlatDamage()
 	return core.FeralCombatWeapon(core.Weapon{
 		BaseDamageMin:        (unscaledWeapon.BaseDamageMin + imbueBonus) / unscaledWeapon.SwingSpeed * 2.5,
 		BaseDamageMax:        (unscaledWeapon.BaseDamageMax + imbueBonus) / unscaledWeapon.SwingSpeed * 2.5,
 		SwingSpeed:           2.5,
 		NormalizedSwingSpeed: 2.5,
-		CritMultiplier:       druid.FeralCritMultiplier(),
 		AttackPowerPerDPS:    core.DefaultAttackPowerPerDPS,
 		MaxRange:             core.MaxMeleeRange,
 	})
@@ -171,7 +169,7 @@ func (druid *Druid) RegisterCatFormAura() {
 			}
 
 			if !druid.Env.MeasuringStats {
-				druid.AutoAttacks.SetMH(druid.WeaponFromMainHand(druid.DefaultMeleeCritMultiplier()))
+				druid.AutoAttacks.SetMH(druid.WeaponFromMainHand())
 				druid.AutoAttacks.EnableAutoSwing(sim)
 				druid.UpdateManaRegenRates()
 			}
@@ -280,7 +278,7 @@ func (druid *Druid) RegisterBearFormAura() {
 
 			if !druid.Env.MeasuringStats {
 				druid.RemoveHealth(sim, druid.CurrentHealth()-healthFrac*druid.MaxHealth())
-				druid.AutoAttacks.SetMH(druid.WeaponFromMainHand(druid.DefaultMeleeCritMultiplier()))
+				druid.AutoAttacks.SetMH(druid.WeaponFromMainHand())
 				druid.AutoAttacks.EnableAutoSwing(sim)
 				druid.UpdateManaRegenRates()
 			}

@@ -10,6 +10,7 @@ func (war *Warrior) registerRend() {
 	war.Rend = war.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 25208},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ClassSpellMask: SpellMaskRend,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		Flags:          core.SpellFlagNoOnCastComplete | core.SpellFlagAPL,
@@ -30,7 +31,6 @@ func (war *Warrior) registerRend() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   war.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier: 1,
 
 		Dot: core.DotConfig{

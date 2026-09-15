@@ -38,8 +38,11 @@ func (paladin *Paladin) registerHolyShock(rankConfig shared.SpellRankConfig) {
 	healingCoeff := 1.267
 
 	paladin.RegisterSpell(core.SpellConfig{
-		ActionID:       core.ActionID{SpellID: spellID},
-		SpellSchool:    core.SpellSchoolHoly,
+		ActionID:    core.ActionID{SpellID: spellID},
+		SpellSchool: core.SpellSchoolHoly,
+		// The cast (20473 .. 33072) is a dummy; the damage (25912 .. 33073) and heal (25914 .. 33074)
+		// spells it triggers are Magic in SpellCategories.
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		Flags:          core.SpellFlagAPL,
 		ClassSpellMask: SpellMaskHolyShock,
@@ -47,7 +50,6 @@ func (paladin *Paladin) registerHolyShock(rankConfig shared.SpellRankConfig) {
 
 		DamageMultiplier: 1,
 		ThreatMultiplier: 1,
-		CritMultiplier:   paladin.DefaultSpellCritMultiplier(),
 
 		MaxRange: 20,
 

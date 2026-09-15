@@ -10,6 +10,7 @@ func (druid *Druid) registerHurricaneSpell() {
 	druid.Hurricane = druid.RegisterSpell(Humanoid|Moonkin, core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 27012},
 		SpellSchool:    core.SpellSchoolNature,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		Flags:          core.SpellFlagChanneled | core.SpellFlagAPL,
 		ClassSpellMask: DruidSpellHurricane,
@@ -47,10 +48,10 @@ func (druid *Druid) registerHurricaneSpell() {
 	druid.Hurricane.RelatedDotSpell = druid.Unit.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 42230},
 		SpellSchool:    core.SpellSchoolNature,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellProc,
 		ClassSpellMask: DruidSpellHurricane,
 
-		CritMultiplier:   druid.DefaultSpellCritMultiplier(),
 		DamageMultiplier: 1,
 		ThreatMultiplier: 1,
 		BonusCoefficient: 0.129,

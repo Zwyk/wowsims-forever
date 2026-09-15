@@ -14,6 +14,7 @@ func (rogue *Rogue) registerEviscerate() {
 	rogue.Eviscerate = rogue.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 26865},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		Flags:          core.SpellFlagMeleeMetrics | SpellFlagFinisher | core.SpellFlagAPL,
 		MetricSplits:   6,
@@ -39,7 +40,6 @@ func (rogue *Rogue) registerEviscerate() {
 
 		DamageMultiplier:         1,
 		DamageMultiplierAdditive: 1,
-		CritMultiplier:           rogue.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier:         1,
 
 		BonusCoefficient: 1,

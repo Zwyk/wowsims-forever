@@ -37,6 +37,7 @@ func (paladin *Paladin) registerHolyWrath(rankConfig shared.SpellRankConfig) {
 	paladin.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: spellID},
 		SpellSchool:    core.SpellSchoolHoly,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		Flags:          core.SpellFlagAPL,
 		ClassSpellMask: SpellMaskHolyWrath,
@@ -44,7 +45,6 @@ func (paladin *Paladin) registerHolyWrath(rankConfig shared.SpellRankConfig) {
 
 		DamageMultiplier: 1,
 		ThreatMultiplier: 1,
-		CritMultiplier:   paladin.DefaultSpellCritMultiplier(),
 
 		MaxRange:     20,
 		MissileSpeed: 20,

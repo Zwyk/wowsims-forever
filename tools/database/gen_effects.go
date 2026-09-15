@@ -127,6 +127,7 @@ func GenerateEffectsFile(groups []*Group, outFile string, templateString string)
 		"asCoreProcMask":    asCoreProcMask,
 		"asCoreOutcome":     asCoreOutcome,
 		"asCoreSpellSchool": asCoreSpellSchool,
+		"asCoreDefenseType": asCoreDefenseType,
 		"formatStrings":     formatStrings,
 	}
 	tmpl := template.Must(template.New("effects").Funcs(funcMap).Parse(templateString))
@@ -1058,6 +1059,22 @@ var coreSpellSchoolNames = map[dbc.SpellSchool]string{
 
 // The core constant naming a damage spell's school. A mask with more than one school set resolves
 // to its lowest bit; no item damage effect in the data carries one.
+var coreDefenseTypeNames = map[int32]string{
+	0: "core.DefenseTypeNone",
+	1: "core.DefenseTypeMagic",
+	2: "core.DefenseTypeMelee",
+	3: "core.DefenseTypeRanged",
+}
+
+// Renders a SpellCategories.DefenseType as its core constant.
+func asCoreDefenseType(defenseType int32) string {
+	if name, ok := coreDefenseTypeNames[defenseType]; ok {
+		return name
+	}
+
+	panic(fmt.Sprintf("unknown DefenseType %d", defenseType))
+}
+
 func asCoreSpellSchool(mask int32) string {
 	for _, school := range []dbc.SpellSchool{dbc.PHYSICAL, dbc.HOLY, dbc.FIRE, dbc.NATURE, dbc.FROST, dbc.SHADOW, dbc.ARCANE} {
 		if dbc.SpellSchool(mask).Has(school) {

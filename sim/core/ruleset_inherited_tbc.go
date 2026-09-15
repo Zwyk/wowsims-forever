@@ -21,6 +21,9 @@ const (
 	inheritedTBCExpertiseAvoidanceStepsPerUnit     = 400.0
 	inheritedTBCDualWieldMissPenalty               = 0.19
 	inheritedTBCMinimumSpellMissChance             = 0.01
+	inheritedTBCMagicCritDamageMultiplier          = 1.5
+	inheritedTBCMeleeCritDamageMultiplier          = 2.0
+	inheritedTBCRangedCritDamageMultiplier         = 2.0
 	inheritedTBCEnemyCritDamageMultiplier          = 2.0
 	inheritedTBCResilienceCritDamageReductionScale = 0.5
 	inheritedTBCCrushingBlowDamageMultiplier       = 1.5
@@ -62,6 +65,9 @@ func inheritedTBCRuleset() rulesetProfile {
 				expertiseAvoidanceStepsPerUnit:     inheritedTBCExpertiseAvoidanceStepsPerUnit,
 				dualWieldMissPenalty:               inheritedTBCDualWieldMissPenalty,
 				minimumSpellMissChance:             inheritedTBCMinimumSpellMissChance,
+				magicCritDamageMultiplier:          inheritedTBCMagicCritDamageMultiplier,
+				meleeCritDamageMultiplier:          inheritedTBCMeleeCritDamageMultiplier,
+				rangedCritDamageMultiplier:         inheritedTBCRangedCritDamageMultiplier,
 				enemyCritDamageMultiplier:          inheritedTBCEnemyCritDamageMultiplier,
 				resilienceCritDamageReductionScale: inheritedTBCResilienceCritDamageReductionScale,
 				crushingBlowDamageMultiplier:       inheritedTBCCrushingBlowDamageMultiplier,

@@ -13,6 +13,7 @@ func (rogue *Rogue) registerBackstabSpell() {
 	rogue.Backstab = rogue.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 26863},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		Flags:          core.SpellFlagMeleeMetrics | SpellFlagBuilder | core.SpellFlagAPL,
 		ClassSpellMask: RogueSpellBackstab,
@@ -33,7 +34,6 @@ func (rogue *Rogue) registerBackstabSpell() {
 
 		DamageMultiplierAdditive: weaponDamage,
 		DamageMultiplier:         1,
-		CritMultiplier:           rogue.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier:         1,
 
 		BonusCoefficient: 1,

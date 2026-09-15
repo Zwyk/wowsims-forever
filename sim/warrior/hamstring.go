@@ -8,6 +8,7 @@ func (war *Warrior) registerHamstring() {
 	war.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 25212},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagAPL,
 		ClassSpellMask: SpellMaskHamstring,
@@ -25,7 +26,6 @@ func (war *Warrior) registerHamstring() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   war.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier: 1.25,
 		FlatThreatBonus:  167.5,
 

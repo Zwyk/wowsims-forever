@@ -13,6 +13,7 @@ func (war *Warrior) registerSlam() {
 	war.RegisterSpell(core.SpellConfig{
 		ActionID:       actionID,
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagAPL,
 		ClassSpellMask: SpellMaskSlam,
@@ -35,7 +36,6 @@ func (war *Warrior) registerSlam() {
 			},
 		},
 
-		CritMultiplier:   war.DefaultMeleeCritMultiplier(),
 		DamageMultiplier: 1,
 		ThreatMultiplier: 1,
 

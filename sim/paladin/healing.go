@@ -41,6 +41,7 @@ func (paladin *Paladin) registerHolyLight(rankConfig shared.SpellRankConfig) {
 	paladin.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: spellID},
 		SpellSchool:    core.SpellSchoolHoly,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellHealing,
 		Flags:          core.SpellFlagAPL | core.SpellFlagHelpful,
 		Rank:           rankConfig.Rank,
@@ -48,7 +49,6 @@ func (paladin *Paladin) registerHolyLight(rankConfig shared.SpellRankConfig) {
 
 		DamageMultiplier: 1,
 		ThreatMultiplier: 1,
-		CritMultiplier:   paladin.DefaultSpellCritMultiplier(),
 
 		MaxRange: 40,
 
@@ -94,6 +94,7 @@ func (paladin *Paladin) registerFlashOfLight(rankConfig shared.SpellRankConfig) 
 	paladin.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: spellID},
 		SpellSchool:    core.SpellSchoolHoly,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellHealing,
 		Flags:          core.SpellFlagAPL | core.SpellFlagHelpful,
 		Rank:           rankConfig.Rank,
@@ -101,7 +102,6 @@ func (paladin *Paladin) registerFlashOfLight(rankConfig shared.SpellRankConfig) 
 
 		DamageMultiplier: 1,
 		ThreatMultiplier: 1,
-		CritMultiplier:   paladin.DefaultSpellCritMultiplier(),
 
 		MaxRange: 40,
 
@@ -149,6 +149,7 @@ func (paladin *Paladin) registerLayOnHands(rankConfig shared.SpellRankConfig) {
 	paladin.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: spellID},
 		SpellSchool:    core.SpellSchoolHoly,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellHealing,
 		Flags:          core.SpellFlagAPL | core.SpellFlagHelpful,
 		Rank:           rankConfig.Rank,
@@ -156,7 +157,6 @@ func (paladin *Paladin) registerLayOnHands(rankConfig shared.SpellRankConfig) {
 
 		DamageMultiplier: 1,
 		ThreatMultiplier: 1,
-		CritMultiplier:   paladin.DefaultSpellCritMultiplier(),
 
 		MaxRange: 40,
 

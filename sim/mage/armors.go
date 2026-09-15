@@ -24,6 +24,7 @@ func (mage *Mage) registerArmorSpells() {
 	mage.RegisterSpell(core.SpellConfig{
 		ActionID:       moltenArmorActionId,
 		SpellSchool:    core.SpellSchoolFire,
+		DefenseType:    core.DefenseTypeMagic,
 		Flags:          core.SpellFlagAPL | core.SpellFlagHelpful,
 		ClassSpellMask: MageSpellMoltenArmor,
 		ManaCost: core.ManaCostOptions{
@@ -64,6 +65,7 @@ func (mage *Mage) registerArmorSpells() {
 	mage.RegisterSpell(core.SpellConfig{
 		ActionID:       mageArmorActionId,
 		SpellSchool:    core.SpellSchoolArcane,
+		DefenseType:    core.DefenseTypeMagic,
 		Flags:          core.SpellFlagAPL | core.SpellFlagHelpful,
 		ClassSpellMask: MageSpellMageArmor,
 		ManaCost: core.ManaCostOptions{
@@ -97,6 +99,7 @@ func (mage *Mage) registerArmorSpells() {
 	mage.RegisterSpell(core.SpellConfig{
 		ActionID:       iceArmorActionId,
 		SpellSchool:    core.SpellSchoolFrost,
+		DefenseType:    core.DefenseTypeMagic,
 		Flags:          core.SpellFlagAPL | core.SpellFlagHelpful,
 		ClassSpellMask: MageSpellFrostArmor,
 		ManaCost: core.ManaCostOptions{

@@ -24,8 +24,9 @@ func (druid *Druid) registerBarkskin() {
 	})
 
 	druid.Barkskin = druid.RegisterSpell(Any, core.SpellConfig{
-		ActionID: actionId,
-		Flags:    core.SpellFlagAPL,
+		ActionID:    actionId,
+		DefenseType: core.DefenseTypeMagic,
+		Flags:       core.SpellFlagAPL,
 
 		Cast: core.CastConfig{
 			CD: core.Cooldown{

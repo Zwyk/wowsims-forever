@@ -65,8 +65,6 @@ type Character struct {
 	bonusOHDps     float64
 	bonusRangedDps float64
 
-	spellCritMultiplier float64
-
 	professions [2]proto.Profession
 
 	// Used for effects like "Increased Armor Value from Items"
@@ -129,7 +127,6 @@ func NewCharacter(party *Party, partyIndex int, player *proto.Player) Character 
 
 		majorCooldownManager: newMajorCooldownManager(player.Cooldowns),
 	}
-	character.spellCritMultiplier = character.DefaultSpellCritMultiplier()
 	character.GCD = character.NewTimer()
 	character.RotationTimer = character.NewTimer()
 
@@ -175,7 +172,7 @@ func NewCharacter(party *Party, partyIndex int, player *proto.Player) Character 
 	character.PseudoStats.InFrontOfTarget = player.InFrontOfTarget
 
 	if player.EnableItemSwap && player.ItemSwap != nil {
-		character.enableItemSwap(player.ItemSwap, character.DefaultMeleeCritMultiplier(), character.DefaultMeleeCritMultiplier(), character.DefaultMeleeCritMultiplier())
+		character.enableItemSwap(player.ItemSwap)
 	}
 
 	character.EquipScalingManager = character.NewEquipScalingManager()
@@ -364,16 +361,6 @@ func (character *Character) AddPet(pet PetAgent) {
 
 func (character *Character) GetBaseStats() stats.Stats {
 	return character.baseStats
-}
-
-func (character *Character) DefaultSpellCritMultiplier() float64 {
-	return 1.5
-}
-func (character *Character) DefaultMeleeCritMultiplier() float64 {
-	return 2.0
-}
-func (character *Character) DefaultHealingCritMultiplier() float64 {
-	return 2.0
 }
 
 func (character *Character) AddRaidBuffs(_ *proto.RaidBuffs) {

@@ -17,12 +17,12 @@ func (mage *Mage) registerBlastWaveSpell() {
 		ActionID:       core.ActionID{SpellID: 33933},
 		Flags:          core.SpellFlagAPL,
 		SpellSchool:    core.SpellSchoolFire,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		ClassSpellMask: MageSpellBlastWave,
 
 		BonusCoefficient: blastWaveCoefficient,
 		DamageMultiplier: 1,
-		CritMultiplier:   mage.DefaultSpellCritMultiplier(),
 		ThreatMultiplier: 1,
 
 		ManaCost: core.ManaCostOptions{

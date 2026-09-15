@@ -89,6 +89,7 @@ func (rogue *Rogue) registerGhostlyStrike() {
 		ActionID:       core.ActionID{SpellID: 14278},
 		ClassSpellMask: RogueSpellGhostlyStrike,
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		Flags:          core.SpellFlagAPL | core.SpellFlagMeleeMetrics,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		MaxRange:       core.MaxMeleeRange,
@@ -109,7 +110,6 @@ func (rogue *Rogue) registerGhostlyStrike() {
 		},
 
 		DamageMultiplier: 1.25,
-		CritMultiplier:   rogue.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier: 1,
 
 		BonusCoefficient: 1,
@@ -248,6 +248,7 @@ func (rogue *Rogue) registerHemorrhage() {
 		ActionID:       core.ActionID{SpellID: 26864},
 		ClassSpellMask: RogueSpellHemorrhage,
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		Flags:          core.SpellFlagAPL | core.SpellFlagMeleeMetrics | SpellFlagBuilder,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		MaxRange:       core.MaxMeleeRange,
@@ -264,7 +265,6 @@ func (rogue *Rogue) registerHemorrhage() {
 		},
 
 		DamageMultiplier: 1.1,
-		CritMultiplier:   rogue.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier: 1,
 
 		BonusCoefficient: 1,

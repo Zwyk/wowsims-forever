@@ -11,6 +11,7 @@ import (
 func (shaman *Shaman) newTotemSpellConfig(flatCost int32, spellID int32, spellMask int64) core.SpellConfig {
 	return core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: spellID},
+		DefenseType:    core.DefenseTypeMagic,
 		Flags:          core.SpellFlagAPL | SpellFlagInstant,
 		ClassSpellMask: spellMask,
 

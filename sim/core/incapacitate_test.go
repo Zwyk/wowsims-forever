@@ -69,8 +69,8 @@ func NewFakeFearWarrior(char *Character, _ *proto.Player, _ *proto.Raid) Agent {
 	}
 
 	fw.EnableAutoAttacks(fw, AutoAttackOptions{
-		MainHand:       Weapon{SwingSpeed: fakeMHSwingSpeed, CritMultiplier: 2},
-		OffHand:        Weapon{SwingSpeed: fakeOHSwingSpeed, CritMultiplier: 2},
+		MainHand:       Weapon{SwingSpeed: fakeMHSwingSpeed},
+		OffHand:        Weapon{SwingSpeed: fakeOHSwingSpeed},
 		AutoSwingMelee: true,
 	})
 

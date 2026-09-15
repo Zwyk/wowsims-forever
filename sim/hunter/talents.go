@@ -318,6 +318,7 @@ func (hunter *Hunter) registerAimedShot() {
 	hunter.AimedShot = hunter.RegisterRangedSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 27065},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeRanged,
 		ClassSpellMask: HunterSpellAimedShot,
 		ProcMask:       core.ProcMaskRangedSpecial,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagAPL,
@@ -350,7 +351,7 @@ func (hunter *Hunter) registerAimedShot() {
 				spell.DealDamage(sim, result)
 			})
 		},
-	}, true)
+	})
 }
 
 func (hunter *Hunter) registerRapidKilling() {

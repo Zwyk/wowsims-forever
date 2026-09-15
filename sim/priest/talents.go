@@ -264,6 +264,7 @@ func (priest *Priest) applyInnerFocus() {
 
 	innerFocusSpell = priest.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 14751},
+		DefenseType:    core.DefenseTypeMagic,
 		Flags:          core.SpellFlagNoOnCastComplete | core.SpellFlagAPL,
 		ClassSpellMask: PriestSpellFlagNone,
 		Cast: core.CastConfig{
@@ -506,6 +507,7 @@ func (priest *Priest) applyVampiricEmbrace() {
 
 	priest.VampiricEmbrace = priest.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 15286},
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskEmpty,
 		Flags:          core.SpellFlagAPL,
 		ClassSpellMask: PriestSpellVampiricEmbrace,

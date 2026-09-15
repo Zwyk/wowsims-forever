@@ -76,6 +76,7 @@ func applyRaceEffects(agent Agent) {
 			Flags:       SpellFlagAPL | SpellFlagHelpful | SpellFlagIgnoreModifiers,
 			ProcMask:    ProcMaskSpellHealing,
 			SpellSchool: SpellSchoolHoly,
+			DefenseType: DefenseTypeMagic,
 
 			MaxRange: 40,
 
@@ -90,7 +91,6 @@ func applyRaceEffects(agent Agent) {
 			},
 
 			DamageMultiplier: 1.0,
-			CritMultiplier:   character.DefaultSpellCritMultiplier(),
 			ThreatMultiplier: 1.0,
 
 			Hot: DotConfig{

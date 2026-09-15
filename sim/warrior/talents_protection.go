@@ -245,6 +245,7 @@ func (war *Warrior) registerConcussionBlow() {
 		ActionID:       core.ActionID{SpellID: 12809},
 		ClassSpellMask: SpellMaskConcussionBlow,
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagAPL,
 		MaxRange:       core.MaxMeleeRange,
@@ -352,6 +353,7 @@ func (war *Warrior) registerShieldSlam() {
 		ActionID:       core.ActionID{SpellID: 30356},
 		ClassSpellMask: SpellMaskShieldSlam,
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagAPL,
 		MaxRange:       core.MaxMeleeRange,
@@ -375,7 +377,6 @@ func (war *Warrior) registerShieldSlam() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   war.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier: 1,
 		FlatThreatBonus:  305,
 
@@ -420,6 +421,7 @@ func (war *Warrior) registerDevastate() {
 		ActionID:       core.ActionID{SpellID: 30022},
 		ClassSpellMask: SpellMaskDevastate,
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagAPL,
 		MaxRange:       core.MaxMeleeRange,
@@ -436,7 +438,6 @@ func (war *Warrior) registerDevastate() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   war.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier: 1,
 		FlatThreatBonus:  100,
 

@@ -35,11 +35,10 @@ func (shaman *Shaman) NewEarthElemental() *EarthElemental {
 	earthElemental.EnableAutoAttacks(earthElemental, core.AutoAttackOptions{
 		MainHand: core.Weapon{
 			// https://discord.com/channels/260297137554849794/1474479843428139101/1480955121394520237
-			BaseDamageMin:  174,
-			BaseDamageMax:  196,
-			SwingSpeed:     2,
-			CritMultiplier: earthElemental.DefaultMeleeCritMultiplier(),
-			SpellSchool:    core.SpellSchoolPhysical,
+			BaseDamageMin: 174,
+			BaseDamageMax: 196,
+			SwingSpeed:    2,
+			SpellSchool:   core.SpellSchoolPhysical,
 		},
 		AutoSwingMelee: true,
 	})

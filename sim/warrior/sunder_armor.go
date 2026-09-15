@@ -16,6 +16,7 @@ func (war *Warrior) registerSunderArmor() {
 		return core.SpellConfig{
 			ActionID:       config.ActionID,
 			SpellSchool:    core.SpellSchoolPhysical,
+			DefenseType:    core.DefenseTypeMelee,
 			ProcMask:       core.ProcMaskMeleeMHSpecial,
 			Flags:          config.Flags,
 			ClassSpellMask: SpellMaskSunderArmor,

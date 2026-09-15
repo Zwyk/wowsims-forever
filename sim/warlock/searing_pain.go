@@ -27,7 +27,7 @@ func (warlock *Warlock) registerSearingPain() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   warlock.DefaultSpellCritMultiplier(),
+		DefenseType:      core.DefenseTypeMagic,
 		ThreatMultiplier: 2,
 		BonusCoefficient: searingPainCoeff,
 

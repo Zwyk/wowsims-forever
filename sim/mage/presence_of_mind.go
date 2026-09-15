@@ -42,6 +42,7 @@ func (mage *Mage) registerPresenceOfMindSpell() {
 
 	pomSpell = mage.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 12043},
+		DefenseType:    core.DefenseTypeMagic,
 		Flags:          core.SpellFlagNoOnCastComplete,
 		ClassSpellMask: MageSpellPresenceOfMind,
 		Cast: core.CastConfig{

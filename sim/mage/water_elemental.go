@@ -13,8 +13,9 @@ func (mage *Mage) registerSummonWaterElementalSpell() {
 	}
 
 	mage.SummonWaterElemental = mage.RegisterSpell(core.SpellConfig{
-		ActionID: core.ActionID{SpellID: 31687},
-		Flags:    core.SpellFlagNoOnCastComplete | core.SpellFlagAPL,
+		ActionID:    core.ActionID{SpellID: 31687},
+		DefenseType: core.DefenseTypeMagic,
+		Flags:       core.SpellFlagNoOnCastComplete | core.SpellFlagAPL,
 
 		ManaCost: core.ManaCostOptions{
 			BaseCostPercent: 16,
@@ -103,6 +104,7 @@ func (we *WaterElemental) registerWaterboltSpell() {
 	we.Waterbolt = we.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 31707},
 		SpellSchool:    core.SpellSchoolFrost,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		ClassSpellMask: MageWaterElementalSpellWaterBolt,
 
@@ -118,7 +120,6 @@ func (we *WaterElemental) registerWaterboltSpell() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   we.mageOwner.DefaultSpellCritMultiplier(),
 		ThreatMultiplier: 1,
 		BonusCoefficient: waterboltCoefficient,
 

@@ -18,6 +18,7 @@ func (rogue *Rogue) registerShivSpell() {
 	rogue.Shiv = rogue.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 5938},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeOHSpecial,
 		Flags:          core.SpellFlagCannotBeDodged | core.SpellFlagMeleeMetrics | SpellFlagBuilder | core.SpellFlagAPL,
 		ClassSpellMask: RogueSpellShiv,
@@ -34,7 +35,6 @@ func (rogue *Rogue) registerShivSpell() {
 
 		DamageMultiplier:         1,
 		DamageMultiplierAdditive: 1,
-		CritMultiplier:           rogue.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier:         1,
 
 		BonusCoefficient: 1,

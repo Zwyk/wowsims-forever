@@ -35,7 +35,7 @@ func (warlock *Warlock) registerConflagrate() {
 		},
 
 		DamageMultiplier: 1.0,
-		CritMultiplier:   warlock.DefaultSpellCritMultiplier(),
+		DefenseType:      core.DefenseTypeMagic,
 		ThreatMultiplier: 1,
 		BonusCoefficient: conflagrateCoeff,
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {

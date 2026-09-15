@@ -14,6 +14,7 @@ func (mage *Mage) registerArcaneBlastSpell() {
 	mage.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 30451},
 		SpellSchool:    core.SpellSchoolArcane,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		Flags:          core.SpellFlagAPL,
 		ClassSpellMask: MageSpellArcaneBlast,
@@ -28,7 +29,6 @@ func (mage *Mage) registerArcaneBlastSpell() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   mage.DefaultSpellCritMultiplier(),
 		BonusCoefficient: arcaneBlastCoefficient,
 		ThreatMultiplier: 1,
 

@@ -25,6 +25,7 @@ func (war *Warrior) registerRecklessness() {
 
 	spell := war.RegisterSpell(core.SpellConfig{
 		ActionID:       actionID,
+		DefenseType:    core.DefenseTypeMelee,
 		Flags:          core.SpellFlagAPL | core.SpellFlagCastWhileIncapacitated,
 		ClassSpellMask: SpellMaskRecklessness,
 

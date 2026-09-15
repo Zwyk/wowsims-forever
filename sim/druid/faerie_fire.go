@@ -15,6 +15,7 @@ func (druid *Druid) registerFaerieFireSpell() {
 		ClassSpellMask: DruidSpellFaerieFire,
 		ActionID:       core.ActionID{SpellID: 26993},
 		SpellSchool:    core.SpellSchoolNature,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		Flags:          core.SpellFlagAPL,
 
@@ -55,6 +56,7 @@ func (druid *Druid) registerFaerieFireFeralSpell() {
 		ClassSpellMask: DruidSpellFaerieFireFeral,
 		ActionID:       core.ActionID{SpellID: 27011},
 		SpellSchool:    core.SpellSchoolNature,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		Flags:          core.SpellFlagAPL,
 

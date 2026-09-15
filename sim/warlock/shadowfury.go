@@ -31,7 +31,7 @@ func (warlock *Warlock) registerShadowfury() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   warlock.DefaultSpellCritMultiplier(),
+		DefenseType:      core.DefenseTypeMagic,
 		ThreatMultiplier: 1,
 		BonusCoefficient: shadowFuryCoeff,
 

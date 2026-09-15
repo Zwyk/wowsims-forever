@@ -14,6 +14,7 @@ func (druid *Druid) registerRipSpell() {
 	druid.Rip = druid.RegisterSpell(Cat, core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 27008},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		ClassSpellMask: DruidSpellRip,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagAPL,
@@ -32,7 +33,6 @@ func (druid *Druid) registerRipSpell() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   druid.FeralCritMultiplier(),
 		ThreatMultiplier: 1,
 		MaxRange:         core.MaxMeleeRange,
 
@@ -86,7 +86,7 @@ func (druid *Druid) registerRipSpell() {
 			result := spell.CalcPeriodicDamage(sim, target, tickDamage, spell.OutcomeExpectedMagicAlwaysHit)
 			attackTable := spell.Unit.AttackTables[target.UnitIndex]
 			critChance := spell.PhysicalCritChance(attackTable)
-			result.Damage *= 1 + critChance*(spell.CritMultiplier-1)
+			result.Damage *= 1 + critChance*(spell.CritDamageMultiplier(attackTable)-1)
 			return result
 		},
 	})

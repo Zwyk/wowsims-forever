@@ -8,6 +8,7 @@ import "slices"
 type DamageEffect struct {
 	SpellID          int   // spell that deals the damage
 	SchoolMask       int32 // DBC school mask of the damage spell
+	DefenseType      int32 // SpellCategories.DefenseType of the damage spell, which picks its hit table and crit multiplier
 	MinDamage        float64
 	MaxDamage        float64
 	BonusCoefficient float64 // spell power coefficient
@@ -58,6 +59,7 @@ func (w *chainWalker) resolveDamageEffect(spellID int) *DamageEffect {
 		return &DamageEffect{
 			SpellID:          spellID,
 			SchoolMask:       dbcInstance.Spells[spellID].SchoolMask,
+			DefenseType:      dbcInstance.Spells[spellID].DefenseType,
 			MinDamage:        minDamage,
 			MaxDamage:        maxDamage,
 			BonusCoefficient: se.EffectBonusCoefficient,

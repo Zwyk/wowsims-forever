@@ -244,6 +244,7 @@ func (ai *DefaultTankAI) registerCleave() {
 	ai.Cleave = ai.BossUnit.RegisterSpell(core.SpellConfig{
 		ActionID:         core.ActionID{SpellID: 30619},
 		SpellSchool:      core.SpellSchoolPhysical,
+		DefenseType:      core.DefenseTypeMelee,
 		ProcMask:         core.ProcMaskMeleeMHSpecial,
 		Flags:            core.SpellFlagMeleeMetrics,
 		DamageMultiplier: 1 + ai.Config.CleaveDamageMult,
@@ -288,6 +289,7 @@ func (ai *DefaultTankAI) registerMagicSpell() {
 	ai.MagicSpell = ai.BossUnit.RegisterSpell(core.SpellConfig{
 		ActionID:    core.ActionID{SpellID: 18282}.WithTag(bossTankID + ai.Config.MagicSpellSchool),
 		SpellSchool: spellSchool,
+		DefenseType: core.DefenseTypeMagic,
 
 		ProcMask: core.ProcMaskEmpty,
 		Flags:    core.SpellFlagBinary | core.SpellFlagAPL,

@@ -221,8 +221,8 @@ func NewWarrior(character *core.Character, options *proto.WarriorOptions, talent
 	})
 
 	warrior.EnableAutoAttacks(warrior, core.AutoAttackOptions{
-		MainHand:       warrior.WeaponFromMainHand(warrior.DefaultMeleeCritMultiplier()),
-		OffHand:        warrior.WeaponFromOffHand(warrior.DefaultMeleeCritMultiplier()),
+		MainHand:       warrior.WeaponFromMainHand(),
+		OffHand:        warrior.WeaponFromOffHand(),
 		AutoSwingMelee: true,
 		ReplaceMHSwing: warrior.TryHSOrCleave,
 	})

@@ -40,6 +40,7 @@ func (paladin *Paladin) registerHolyShield(rankConfig shared.SpellRankConfig) {
 	procSpell := paladin.RegisterSpell(core.SpellConfig{
 		ActionID:       actionID.WithTag(2),
 		SpellSchool:    core.SpellSchoolHoly,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskEmpty,
 		ClassSpellMask: SpellMaskHolyShieldProc,
 		Flags:          core.SpellFlagNoOnCastComplete | core.SpellFlagPassiveSpell | core.SpellFlagBinary,
@@ -74,6 +75,7 @@ func (paladin *Paladin) registerHolyShield(rankConfig shared.SpellRankConfig) {
 	paladin.RegisterSpell(core.SpellConfig{
 		ActionID:       actionID,
 		SpellSchool:    core.SpellSchoolHoly,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskEmpty,
 		Flags:          core.SpellFlagAPL | core.SpellFlagMeleeMetrics,
 		ClassSpellMask: SpellMaskHolyShield,

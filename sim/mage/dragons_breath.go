@@ -16,6 +16,7 @@ func (mage *Mage) registerDragonsBreathSpell() {
 	mage.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 33043},
 		SpellSchool:    core.SpellSchoolFire,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		Flags:          core.SpellFlagAPL,
 		ClassSpellMask: MageSpellDragonsBreath,
@@ -35,7 +36,6 @@ func (mage *Mage) registerDragonsBreathSpell() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   mage.DefaultSpellCritMultiplier(),
 		BonusCoefficient: dragonsBreathCoefficient,
 		ThreatMultiplier: 1,
 

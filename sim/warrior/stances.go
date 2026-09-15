@@ -23,13 +23,14 @@ func (warrior *Warrior) StanceMatches(other Stance) bool {
 	return (warrior.Stance & other) != 0
 }
 
-func (warrior *Warrior) makeStanceSpell(stance Stance, mask int64, aura *core.Aura, stanceCD *core.Timer) *core.Spell {
+func (warrior *Warrior) makeStanceSpell(stance Stance, mask int64, defenseType core.DefenseType, aura *core.Aura, stanceCD *core.Timer) *core.Spell {
 	maxRetainedRage := 10.0 + 5*float64(warrior.Talents.TacticalMastery)
 	actionID := aura.ActionID
 	rageMetrics := warrior.NewRageMetrics(actionID)
 
 	return warrior.RegisterSpell(core.SpellConfig{
 		ActionID:       actionID,
+		DefenseType:    defenseType,
 		ClassSpellMask: mask,
 		Flags:          core.SpellFlagNoOnCastComplete | core.SpellFlagAPL,
 
@@ -125,9 +126,11 @@ func (warrior *Warrior) registerStances() {
 	battleStanceAura := warrior.registerBattleStanceAura()
 	defensiveStanceAura := warrior.registerDefensiveStanceAura()
 	berserkerStanceAura := warrior.registerBerserkerStanceAura()
-	warrior.BattleStance = warrior.makeStanceSpell(BattleStance, SpellMaskBattleStance, battleStanceAura, stanceCD)
-	warrior.DefensiveStance = warrior.makeStanceSpell(DefensiveStance, SpellMaskDefensiveStance, defensiveStanceAura, stanceCD)
-	warrior.BerserkerStance = warrior.makeStanceSpell(BerserkerStance, SpellMaskBerserkerStance, berserkerStanceAura, stanceCD)
+	// DefenseType per stance's SpellCategories row: Battle Stance (2457) and Berserker Stance (2458)
+	// are Melee; Defensive Stance (71) has no row (None).
+	warrior.BattleStance = warrior.makeStanceSpell(BattleStance, SpellMaskBattleStance, core.DefenseTypeMelee, battleStanceAura, stanceCD)
+	warrior.DefensiveStance = warrior.makeStanceSpell(DefensiveStance, SpellMaskDefensiveStance, core.DefenseTypeNone, defensiveStanceAura, stanceCD)
+	warrior.BerserkerStance = warrior.makeStanceSpell(BerserkerStance, SpellMaskBerserkerStance, core.DefenseTypeMelee, berserkerStanceAura, stanceCD)
 
 	switch warrior.DefaultStance {
 	case proto.WarriorStance_WarriorStanceBattle:

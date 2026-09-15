@@ -45,6 +45,7 @@ func (mage *Mage) registerArcanePowerSpell() {
 
 	arcanePowerSpell = mage.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 12042},
+		DefenseType:    core.DefenseTypeMagic,
 		Flags:          core.SpellFlagNoOnCastComplete,
 		ClassSpellMask: MageSpellArcanePower,
 		Cast: core.CastConfig{

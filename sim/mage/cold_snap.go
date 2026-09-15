@@ -13,6 +13,7 @@ func (mage *Mage) registerColdSnapSpell() {
 
 	mage.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 11958},
+		DefenseType:    core.DefenseTypeMagic,
 		Flags:          core.SpellFlagNoOnCastComplete | core.SpellFlagAPL,
 		ClassSpellMask: MageSpellColdSnap,
 

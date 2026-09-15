@@ -127,11 +127,6 @@ func (rogue *Rogue) GetBaseDamageFromCoefficient(c float64) float64 {
 }
 
 func (rogue *Rogue) Initialize() {
-	// Update auto crit multipliers now that we have the targets.
-	rogue.AutoAttacks.MHConfig().CritMultiplier = rogue.DefaultMeleeCritMultiplier()
-	rogue.AutoAttacks.OHConfig().CritMultiplier = rogue.DefaultMeleeCritMultiplier()
-	rogue.AutoAttacks.RangedConfig().CritMultiplier = rogue.DefaultMeleeCritMultiplier()
-
 	rogue.registerAmbushSpell()
 	rogue.registerBackstabSpell()
 	rogue.registerEnvenom()
@@ -200,8 +195,8 @@ func NewRogue(character *core.Character, options *proto.Player, talents string) 
 	})
 
 	rogue.EnableAutoAttacks(rogue, core.AutoAttackOptions{
-		MainHand:       rogue.WeaponFromMainHand(0), // Set crit multiplier later when we have targets.
-		OffHand:        rogue.WeaponFromOffHand(0),  // Set crit multiplier later when we have targets.
+		MainHand:       rogue.WeaponFromMainHand(),
+		OffHand:        rogue.WeaponFromOffHand(),
 		AutoSwingMelee: true,
 	})
 

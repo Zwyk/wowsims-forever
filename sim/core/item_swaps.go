@@ -15,10 +15,7 @@ type ItemSwap struct {
 	character           *Character
 	onItemSwapCallbacks [NumItemSlots][]OnItemSwap
 
-	isFeralDruid         bool
-	mhCritMultiplier     float64
-	ohCritMultiplier     float64
-	rangedCritMultiplier float64
+	isFeralDruid bool
 
 	// Which slots to actually swap.
 	slots []proto.ItemSlot
@@ -43,11 +40,7 @@ type ItemSwapStats struct {
 	weaponSlots stats.Stats
 }
 
-/**
- * TODO All the extra parameters here and the code in multiple places for handling the Weapon struct is really messy,
- * we'll need to figure out something cleaner as this will be quite error-prone
-**/
-func (character *Character) enableItemSwap(itemSwap *proto.ItemSwap, mhCritMultiplier float64, ohCritMultiplier float64, rangedCritMultiplier float64) {
+func (character *Character) enableItemSwap(itemSwap *proto.ItemSwap) {
 	var swapItems Equipment
 	hasItemSwap := make(map[proto.ItemSlot]bool)
 
@@ -97,18 +90,15 @@ func (character *Character) enableItemSwap(itemSwap *proto.ItemSwap, mhCritMulti
 	}
 
 	character.ItemSwap = ItemSwap{
-		isFeralDruid:         character.Spec == proto.Spec_SpecFeralCatDruid || character.Spec == proto.Spec_SpecFeralBearDruid,
-		mhCritMultiplier:     mhCritMultiplier,
-		ohCritMultiplier:     ohCritMultiplier,
-		rangedCritMultiplier: rangedCritMultiplier,
-		slots:                slots,
-		originalEquip:        character.Equipment,
-		swapEquip:            swapItems,
-		unEquippedItems:      swapItems,
-		equipmentStats:       equipmentStats,
-		swapSet:              proto.APLActionItemSwap_Main,
-		itemSwapAuras:        itemSwapAuras,
-		initialized:          false,
+		isFeralDruid:    character.Spec == proto.Spec_SpecFeralCatDruid || character.Spec == proto.Spec_SpecFeralBearDruid,
+		slots:           slots,
+		originalEquip:   character.Equipment,
+		swapEquip:       swapItems,
+		unEquippedItems: swapItems,
+		equipmentStats:  equipmentStats,
+		swapSet:         proto.APLActionItemSwap_Main,
+		itemSwapAuras:   itemSwapAuras,
+		initialized:     false,
 	}
 }
 
@@ -425,20 +415,20 @@ func (swap *ItemSwap) swapItem(sim *Simulation, slot proto.ItemSlot, isPrepull b
 		// If we can get it, we equipeed a valid ranged weapon
 		if character.Ranged() != nil {
 			if character.AutoAttacks.AutoSwingRanged {
-				character.AutoAttacks.SetRanged(character.WeaponFromRanged(swap.rangedCritMultiplier))
+				character.AutoAttacks.SetRanged(character.WeaponFromRanged())
 			}
 		}
 	case proto.ItemSlot_ItemSlotMainHand:
 		// Feral's concept of Paws is handeled in the druid.go Initialize()
 		// and doesn't need MH swap handling here.
 		if character.AutoAttacks.AutoSwingMelee && !swap.isFeralDruid {
-			character.AutoAttacks.SetMH(character.WeaponFromMainHand(swap.mhCritMultiplier))
+			character.AutoAttacks.SetMH(character.WeaponFromMainHand())
 		}
 	case proto.ItemSlot_ItemSlotOffHand:
 		// OH slot handling is more involved because we need to dynamically toggle the OH weapon attack on/off
 		// depending on the updated DW status after the swap.
 		if character.AutoAttacks.AutoSwingMelee {
-			weapon := character.WeaponFromOffHand(swap.ohCritMultiplier)
+			weapon := character.WeaponFromOffHand()
 			character.AutoAttacks.SetOH(weapon)
 			character.AutoAttacks.IsDualWielding = weapon.SwingSpeed != 0
 			if !isReset {

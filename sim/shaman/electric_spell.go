@@ -39,6 +39,7 @@ func (shaman *Shaman) newElectricSpellConfig(config ShamSpellConfig) core.SpellC
 	spell := core.SpellConfig{
 		ActionID:       config.ActionID,
 		SpellSchool:    core.SpellSchoolNature,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       mask,
 		Flags:          flags,
 		ClassSpellMask: config.ClassSpellMask,
@@ -60,7 +61,6 @@ func (shaman *Shaman) newElectricSpellConfig(config ShamSpellConfig) core.SpellC
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   shaman.DefaultSpellCritMultiplier(),
 		BonusCoefficient: config.BonusCoefficient,
 		ThreatMultiplier: 1,
 	}

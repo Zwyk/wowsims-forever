@@ -10,6 +10,7 @@ func (fireElemental *FireElemental) registerFireBlast() {
 	fireElemental.FireBlast = fireElemental.RegisterSpell(core.SpellConfig{
 		ActionID:    core.ActionID{SpellID: 13339},
 		SpellSchool: core.SpellSchoolFire,
+		DefenseType: core.DefenseTypeMagic,
 		ProcMask:    core.ProcMaskSpellDamage,
 		Flags:       SpellFlagShamanSpell,
 
@@ -18,7 +19,6 @@ func (fireElemental *FireElemental) registerFireBlast() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   fireElemental.DefaultSpellCritMultiplier(),
 		ThreatMultiplier: 1,
 		ApplyEffects: func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
 			scalingCoeff := 46.977695 / 11.334235
@@ -32,6 +32,7 @@ func (fireElemental *FireElemental) registerFireNova() {
 	fireElemental.FireNova = fireElemental.RegisterSpell(core.SpellConfig{
 		ActionID:    core.ActionID{SpellID: 12470},
 		SpellSchool: core.SpellSchoolFire,
+		DefenseType: core.DefenseTypeMagic,
 		ProcMask:    core.ProcMaskSpellDamage,
 		Flags:       SpellFlagShamanSpell,
 
@@ -46,7 +47,6 @@ func (fireElemental *FireElemental) registerFireNova() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   fireElemental.DefaultSpellCritMultiplier(),
 		ThreatMultiplier: 1,
 		BonusCoefficient: 0.332, // https://discord.com/channels/260297137554849794/699626629152112730/904088040992026655
 
@@ -64,6 +64,7 @@ func (fireElemental *FireElemental) registerFireShield() {
 	fireElemental.FireShield = fireElemental.RegisterSpell(core.SpellConfig{
 		ActionID:    actionID,
 		SpellSchool: core.SpellSchoolFire,
+		DefenseType: core.DefenseTypeMagic,
 		ProcMask:    core.ProcMaskSpellDamage,
 		Flags:       SpellFlagShamanSpell,
 
@@ -72,7 +73,6 @@ func (fireElemental *FireElemental) registerFireShield() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   fireElemental.DefaultSpellCritMultiplier(),
 		ThreatMultiplier: 1,
 		BonusCoefficient: 0.0109, // https://discord.com/channels/260297137554849794/699626629152112730/904088040992026655
 		Dot: core.DotConfig{

@@ -19,6 +19,7 @@ func (mage *Mage) registerIcyVeinsSpell() {
 
 	mage.IcyVeins = mage.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 12472},
+		DefenseType:    core.DefenseTypeMagic,
 		Flags:          core.SpellFlagNoOnCastComplete,
 		ClassSpellMask: MageSpellIcyVeins,
 		Cast: core.CastConfig{

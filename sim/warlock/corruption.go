@@ -15,12 +15,12 @@ func (warlock *Warlock) registerCorruption() *core.Spell {
 	warlock.Corruption = warlock.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 27216},
 		SpellSchool:    core.SpellSchoolShadow,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		Flags:          core.SpellFlagAPL,
 		ClassSpellMask: WarlockSpellCorruption,
 
 		DamageMultiplier: 1,
-		CritMultiplier:   1,
 		ManaCost:         core.ManaCostOptions{FlatCost: 370},
 		Cast: core.CastConfig{
 			DefaultCast: core.Cast{
@@ -61,7 +61,7 @@ func (warlock *Warlock) registerCorruption() *core.Spell {
 				result.Damage /= dot.TickPeriod().Seconds()
 				return result
 			} else {
-				result := spell.CalcPeriodicDamage(sim, target, 900, spell.OutcomeExpectedMagicCrit)
+				result := spell.CalcPeriodicDamage(sim, target, 900, spell.OutcomeExpectedMagicHit)
 				result.Damage /= dot.CalcTickPeriod().Round(time.Millisecond).Seconds()
 				return result
 			}

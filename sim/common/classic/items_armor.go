@@ -16,6 +16,7 @@ func init() {
 		drainLifeSpell := character.RegisterSpell(core.SpellConfig{
 			ActionID:    drainLifeActionID,
 			SpellSchool: core.SpellSchoolShadow,
+			DefenseType: core.DefenseTypeMagic,
 			ProcMask:    core.ProcMaskEmpty,
 			Flags:       core.SpellFlagNoOnCastComplete | core.SpellFlagPassiveSpell,
 
@@ -36,6 +37,7 @@ func init() {
 		flamestrikeSpell := character.RegisterSpell(core.SpellConfig{
 			ActionID:    core.ActionID{SpellID: 18818},
 			SpellSchool: core.SpellSchoolFire,
+			DefenseType: core.DefenseTypeMagic,
 			ProcMask:    core.ProcMaskEmpty,
 			Flags:       core.SpellFlagNoOnCastComplete | core.SpellFlagPassiveSpell,
 
@@ -80,11 +82,11 @@ func init() {
 		spell := character.RegisterSpell(core.SpellConfig{
 			ActionID:    core.ActionID{ItemID: 18168},
 			SpellSchool: core.SpellSchoolNature,
+			DefenseType: core.DefenseTypeMagic, // Force Reactive Disk (22618)
 			ProcMask:    core.ProcMaskEmpty,
 			Flags:       core.SpellFlagNoOnCastComplete | core.SpellFlagPassiveSpell,
 
 			DamageMultiplier: 1,
-			CritMultiplier:   character.DefaultSpellCritMultiplier(),
 			ThreatMultiplier: 1,
 
 			ApplyEffects: func(sim *core.Simulation, _ *core.Unit, spell *core.Spell) {

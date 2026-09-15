@@ -30,7 +30,7 @@ func (warlock *Warlock) registerSeed() {
 		ClassSpellMask: WarlockSpellSeedOfCorruptionExplosion,
 
 		DamageMultiplier: 1,
-		CritMultiplier:   warlock.DefaultSpellCritMultiplier(),
+		DefenseType:      core.DefenseTypeMagic, // Seed of Corruption Explosion (27285)
 		ThreatMultiplier: 1,
 		BonusCoefficient: 0,
 
@@ -151,6 +151,7 @@ func getSeedSpellConfig(config core.SpellConfig) core.SpellConfig {
 	return core.SpellConfig{
 		ActionID:       config.ActionID,
 		SpellSchool:    core.SpellSchoolShadow,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		Flags:          core.SpellFlagAPL,
 		MissileSpeed:   28,

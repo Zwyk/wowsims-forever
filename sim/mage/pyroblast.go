@@ -15,6 +15,7 @@ func (mage *Mage) registerPyroblastSpell() {
 	mage.Pyroblast = mage.RegisterSpell(core.SpellConfig{
 		ActionID:       actionID,
 		SpellSchool:    core.SpellSchoolFire,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		Flags:          core.SpellFlagAPL,
 		ClassSpellMask: MageSpellPyroblast,
@@ -31,7 +32,6 @@ func (mage *Mage) registerPyroblastSpell() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   mage.DefaultSpellCritMultiplier(),
 		BonusCoefficient: pyroblastCoefficient,
 		ThreatMultiplier: 1,
 
@@ -51,12 +51,12 @@ func (mage *Mage) registerPyroblastSpell() {
 	mage.Pyroblast.RelatedDotSpell = mage.RegisterSpell(core.SpellConfig{
 		ActionID:       actionID.WithTag(1),
 		SpellSchool:    core.SpellSchoolFire,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		ClassSpellMask: MageSpellPyroblastDot,
 		Flags:          core.SpellFlagNoOnCastComplete | core.SpellFlagPassiveSpell,
 
 		DamageMultiplier: 1,
-		CritMultiplier:   mage.DefaultSpellCritMultiplier(),
 		ThreatMultiplier: 1,
 
 		Dot: core.DotConfig{

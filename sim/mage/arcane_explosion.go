@@ -10,6 +10,7 @@ func (mage *Mage) registerArcaneExplosionSpell() {
 	mage.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 27082},
 		SpellSchool:    core.SpellSchoolArcane,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		Flags:          core.SpellFlagAPL,
 		ClassSpellMask: MageSpellArcaneExplosion,
@@ -24,7 +25,6 @@ func (mage *Mage) registerArcaneExplosionSpell() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   mage.DefaultSpellCritMultiplier(),
 		BonusCoefficient: arcaneExplosionCoefficient,
 		ThreatMultiplier: 1,
 

@@ -14,6 +14,7 @@ func (druid *Druid) registerFerociousBiteSpell() {
 	druid.FerociousBite = druid.RegisterSpell(Cat, core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: 24248},
 		SpellSchool:    core.SpellSchoolPhysical,
+		DefenseType:    core.DefenseTypeMelee,
 		ProcMask:       core.ProcMaskMeleeMHSpecial,
 		ClassSpellMask: DruidSpellFerociousBite,
 		Flags:          core.SpellFlagMeleeMetrics | core.SpellFlagAPL,
@@ -32,7 +33,6 @@ func (druid *Druid) registerFerociousBiteSpell() {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   druid.FeralCritMultiplier(),
 		ThreatMultiplier: 1,
 		MaxRange:         core.MaxMeleeRange,
 

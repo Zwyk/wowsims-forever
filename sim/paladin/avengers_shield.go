@@ -29,6 +29,7 @@ func (paladin *Paladin) registerAvengersShield(rankConfig shared.SpellRankConfig
 	paladin.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: rankConfig.SpellID},
 		SpellSchool:    core.SpellSchoolHoly,
+		DefenseType:    core.DefenseTypeRanged,
 		ProcMask:       core.ProcMaskRangedSpecial,
 		Flags:          core.SpellFlagAPL | core.SpellFlagBinary,
 		ClassSpellMask: SpellMaskAvengersShield,
@@ -36,7 +37,6 @@ func (paladin *Paladin) registerAvengersShield(rankConfig shared.SpellRankConfig
 
 		DamageMultiplier: 1,
 		ThreatMultiplier: 1,
-		CritMultiplier:   paladin.DefaultMeleeCritMultiplier(),
 
 		MaxRange:     30,
 		MissileSpeed: 35,

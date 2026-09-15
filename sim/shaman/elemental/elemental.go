@@ -40,7 +40,7 @@ func NewElementalShaman(character *core.Character, options *proto.Player) *Eleme
 
 	//Some spells use weapon damage (Unleash Wind, ...)
 	ele.EnableAutoAttacks(ele, core.AutoAttackOptions{
-		MainHand:       ele.WeaponFromMainHand(ele.DefaultMeleeCritMultiplier()),
+		MainHand:       ele.WeaponFromMainHand(),
 		AutoSwingMelee: false,
 	})
 

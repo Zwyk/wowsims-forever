@@ -6697,12 +6697,13 @@ func RegisterAllProcs() {
 	// Adds 2 fire damage to your melee attacks.
 	// https://www.wowhead.com/tbc/spell=7712
 	shared.NewProcDamageEffect(shared.ProcDamageEffect{
-		ItemID:  17111,
-		SpellID: 7712,
-		School:  core.SpellSchoolFire,
-		MinDmg:  2,
-		MaxDmg:  2,
-		Flags:   core.SpellFlagNoOnCastComplete | core.SpellFlagPassiveSpell | core.SpellFlagNoOnDamageDealt,
+		ItemID:      17111,
+		SpellID:     7712,
+		School:      core.SpellSchoolFire,
+		DefenseType: core.DefenseTypeMagic,
+		MinDmg:      2,
+		MaxDmg:      2,
+		Flags:       core.SpellFlagNoOnCastComplete | core.SpellFlagPassiveSpell | core.SpellFlagNoOnDamageDealt,
 		Trigger: core.ProcTrigger{
 			Name:               "Blazefury Medallion",
 			ActionID:           core.ActionID{ItemID: 17111},
@@ -6717,12 +6718,13 @@ func RegisterAllProcs() {
 	// When struck in combat has a 5% chance of inflicting 65 Nature damage to the attacker.
 	// https://www.wowhead.com/tbc/spell=16782
 	shared.NewProcDamageEffect(shared.ProcDamageEffect{
-		ItemID:  18825,
-		SpellID: 16782,
-		School:  core.SpellSchoolNature,
-		MinDmg:  35,
-		MaxDmg:  65,
-		Flags:   core.SpellFlagNoOnCastComplete | core.SpellFlagPassiveSpell | core.SpellFlagNoOnDamageDealt,
+		ItemID:      18825,
+		SpellID:     16782,
+		School:      core.SpellSchoolNature,
+		DefenseType: core.DefenseTypeMagic,
+		MinDmg:      35,
+		MaxDmg:      65,
+		Flags:       core.SpellFlagNoOnCastComplete | core.SpellFlagPassiveSpell | core.SpellFlagNoOnDamageDealt,
 		Trigger: core.ProcTrigger{
 			Name:               "Grand Marshal's Aegis",
 			ActionID:           core.ActionID{ItemID: 18825},
@@ -6737,12 +6739,13 @@ func RegisterAllProcs() {
 	// When struck in combat has a 5% chance of inflicting 65 Nature damage to the attacker.
 	// https://www.wowhead.com/tbc/spell=16782
 	shared.NewProcDamageEffect(shared.ProcDamageEffect{
-		ItemID:  18826,
-		SpellID: 16782,
-		School:  core.SpellSchoolNature,
-		MinDmg:  35,
-		MaxDmg:  65,
-		Flags:   core.SpellFlagNoOnCastComplete | core.SpellFlagPassiveSpell | core.SpellFlagNoOnDamageDealt,
+		ItemID:      18826,
+		SpellID:     16782,
+		School:      core.SpellSchoolNature,
+		DefenseType: core.DefenseTypeMagic,
+		MinDmg:      35,
+		MaxDmg:      65,
+		Flags:       core.SpellFlagNoOnCastComplete | core.SpellFlagPassiveSpell | core.SpellFlagNoOnDamageDealt,
 		Trigger: core.ProcTrigger{
 			Name:               "High Warlord's Shield Wall",
 			ActionID:           core.ActionID{ItemID: 18826},
@@ -6757,12 +6760,13 @@ func RegisterAllProcs() {
 	// Adds 2 fire damage to your melee attacks.
 	// https://www.wowhead.com/tbc/spell=7712
 	shared.NewProcDamageEffect(shared.ProcDamageEffect{
-		ItemID:  19968,
-		SpellID: 7712,
-		School:  core.SpellSchoolFire,
-		MinDmg:  2,
-		MaxDmg:  2,
-		Flags:   core.SpellFlagNoOnCastComplete | core.SpellFlagPassiveSpell | core.SpellFlagNoOnDamageDealt,
+		ItemID:      19968,
+		SpellID:     7712,
+		School:      core.SpellSchoolFire,
+		DefenseType: core.DefenseTypeMagic,
+		MinDmg:      2,
+		MaxDmg:      2,
+		Flags:       core.SpellFlagNoOnCastComplete | core.SpellFlagPassiveSpell | core.SpellFlagNoOnDamageDealt,
 		Trigger: core.ProcTrigger{
 			Name:               "Fiery Retributer",
 			ActionID:           core.ActionID{ItemID: 19968},
@@ -7124,12 +7128,13 @@ func RegisterAllProcs() {
 	// Each time one of your spells deals periodic damage, there is a chance 475 additional damage will be dealt.
 	// https://www.wowhead.com/tbc/spell=45055
 	shared.NewProcDamageEffect(shared.ProcDamageEffect{
-		ItemID:  34470,
-		SpellID: 45055,
-		School:  core.SpellSchoolShadow,
-		MinDmg:  285,
-		MaxDmg:  475,
-		Flags:   core.SpellFlagNoOnCastComplete | core.SpellFlagPassiveSpell | core.SpellFlagNoOnDamageDealt,
+		ItemID:      34470,
+		SpellID:     45055,
+		School:      core.SpellSchoolShadow,
+		DefenseType: core.DefenseTypeMagic,
+		MinDmg:      285,
+		MaxDmg:      475,
+		Flags:       core.SpellFlagNoOnCastComplete | core.SpellFlagPassiveSpell | core.SpellFlagNoOnDamageDealt,
 		Trigger: core.ProcTrigger{
 			Name:               "Timbal's Focusing Crystal",
 			ActionID:           core.ActionID{ItemID: 34470},

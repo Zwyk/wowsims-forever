@@ -19,6 +19,7 @@ func (hunter *Hunter) registerAspectOfTheHawkSpell() {
 	hunter.AspectOfTheHawk = hunter.RegisterSpell(core.SpellConfig{
 		ActionID:       actionID,
 		SpellSchool:    core.SpellSchoolNature,
+		DefenseType:    core.DefenseTypeMagic,
 		ClassSpellMask: HunterSpellAspectOfTheHawk,
 		Flags:          core.SpellFlagAPL,
 
@@ -52,6 +53,7 @@ func (hunter *Hunter) registerAspectOfTheViper() {
 	hunter.AspectOfTheViper = hunter.RegisterSpell(core.SpellConfig{
 		ActionID:       actionID,
 		SpellSchool:    core.SpellSchoolNature,
+		DefenseType:    core.DefenseTypeMagic,
 		ClassSpellMask: HunterSpellAspectOfTheViper,
 		Flags:          core.SpellFlagAPL,
 

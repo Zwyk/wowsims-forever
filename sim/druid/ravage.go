@@ -14,11 +14,11 @@ func (druid *Druid) registerRavageSpell() {
 	druid.Ravage = druid.RegisterSpell(Cat, core.SpellConfig{
 		ActionID:         core.ActionID{SpellID: 6785},
 		SpellSchool:      core.SpellSchoolPhysical,
+		DefenseType:      core.DefenseTypeMelee,
 		ProcMask:         core.ProcMaskMeleeMHSpecial,
 		ClassSpellMask:   DruidSpellRavage,
 		Flags:            core.SpellFlagMeleeMetrics | core.SpellFlagAPL,
 		DamageMultiplier: weaponMultiplier,
-		CritMultiplier:   druid.DefaultMeleeCritMultiplier(),
 		ThreatMultiplier: 1,
 		BonusCoefficient: 1,
 		MaxRange:         core.MaxMeleeRange,

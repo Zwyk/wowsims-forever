@@ -25,6 +25,7 @@ func (priest *Priest) registerSmiteSpell(rankConfig shared.SpellRankConfig) {
 	spell := priest.RegisterSpell(core.SpellConfig{
 		ActionID:       core.ActionID{SpellID: rankConfig.SpellID},
 		SpellSchool:    core.SpellSchoolHoly,
+		DefenseType:    core.DefenseTypeMagic,
 		ProcMask:       core.ProcMaskSpellDamage,
 		Flags:          core.SpellFlagAPL,
 		ClassSpellMask: PriestSpellSmite,
@@ -40,7 +41,6 @@ func (priest *Priest) registerSmiteSpell(rankConfig shared.SpellRankConfig) {
 		},
 
 		DamageMultiplier: 1,
-		CritMultiplier:   priest.DefaultSpellCritMultiplier(),
 		BonusCoefficient: rankConfig.Coefficient,
 		ThreatMultiplier: 1,
 
