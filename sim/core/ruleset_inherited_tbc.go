@@ -62,6 +62,7 @@ func inheritedTBCRuleset() rulesetProfile {
 				levelBandCharacterPlusThree: 5.6,
 			},
 			outcomes: outcomeRules{
+				weaponSkillModel:                   weaponSkillModelDisabled,
 				expertiseAvoidanceStepsPerUnit:     inheritedTBCExpertiseAvoidanceStepsPerUnit,
 				dualWieldMissPenalty:               inheritedTBCDualWieldMissPenalty,
 				minimumSpellMissChance:             inheritedTBCMinimumSpellMissChance,

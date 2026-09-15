@@ -117,6 +117,7 @@ type ratingRules struct {
 // value copy is cached on each AttackTable so an injected profile cannot mix
 // its table seeds with values from the active build-time profile.
 type outcomeRules struct {
+	weaponSkillModel                   weaponSkillModel
 	expertiseAvoidanceStepsPerUnit     float64
 	dualWieldMissPenalty               float64
 	minimumSpellMissChance             float64
