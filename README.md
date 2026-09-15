@@ -5,7 +5,7 @@ This repository is an early community port of [WoWSims TBC](https://github.com/w
 > [!WARNING]
 > The simulator still contains TBC rules, level-70 data, talents, spells, and encounter defaults. Its current output is **not valid for Forever**.
 
-The port starts from the modern `tbc-new` architecture at commit [`17a8fb28c5ad14b649acecdaacd488594048f467`](https://github.com/wowsims/tbc-new/commit/17a8fb28c5ad14b649acecdaacd488594048f467). We will preserve that architecture while replacing the game model in small, tested steps:
+The port starts from the modern `tbc-new` architecture at commit [`17a8fb28c5ad14b649acecdaacd488594048f467`](https://github.com/wowsims/tbc-new/commit/17a8fb28c5ad14b649acecdaacd488594048f467) and is synchronized through [`9fa04e0675354c1fa2167b83171bbfce5df492ef`](https://github.com/wowsims/tbc-new/commit/9fa04e0675354c1fa2167b83171bbfce5df492ef). We will preserve that architecture while replacing the game model in small, tested steps:
 
 - establish level-60 and level-63 encounter foundations;
 - model Forever's shared hit and critical-strike item stats without merging the physical and spell outcome tables;

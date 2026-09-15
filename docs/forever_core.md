@@ -6,6 +6,8 @@ This document separates announced Forever behavior from assumptions inherited fr
 
 The modern architecture baseline is [`wowsims/tbc-new` v0.0.137](https://github.com/wowsims/tbc-new/tree/17a8fb28c5ad14b649acecdaacd488594048f467), commit `17a8fb28c5ad14b649acecdaacd488594048f467`. The first green Forever integration baseline is commit `6cff8086e8e2550856288d71cc9d72bee3e60e4a`.
 
+The fork is synchronized with upstream through commit [`9fa04e0675354c1fa2167b83171bbfce5df492ef`](https://github.com/wowsims/tbc-new/commit/9fa04e0675354c1fa2167b83171bbfce5df492ef), including the data-driven `DefenseType` and weapon-proc helpers from upstream PR [#520](https://github.com/wowsims/tbc-new/pull/520). The synchronization preserves upstream commit ancestry so later updates do not replay this change set.
+
 These references identify inherited behavior; they are not evidence that a rule is correct for Forever. Changes to provisional numbers should cite client measurements or an authoritative announcement and update the associated characterization test in the same pull request.
 
 ## Characterization coverage
@@ -34,6 +36,8 @@ All extracted values still reproduce the inherited TBC engine exactly. Armor, re
 ### Weapon attack context
 
 Spells can declare a currently inert weapon source: none, main hand, off hand or ranged. The zero value is a separate unspecified state, so a future activation audit can distinguish intentionally non-weapon spells from missing annotations. This source is separate from `ProcMask`, because proc routing and hit-table categories do not reliably identify the weapon used. Core auto attacks set it explicitly, and item-backed `Weapon` values retain the equipped weapon, hand and ranged classifications whenever they are built or rebuilt from equipment. Class abilities remain unspecified until they can be audited before weapon-skill mechanics are activated.
+
+Upstream's `DefenseType` is orthogonal to weapon source: it selects the physical, ranged or magical outcome table and base critical multiplier from client spell-category data, but it does not say which equipped weapon supplies skill context. Auto attacks therefore carry both fields independently. The inherited 1.5 magical and 2.0 melee/ranged critical multipliers live in the rules profile rather than outcome code, ready for evidence-backed Forever values.
 
 The engine continues to keep one mutable `AttackTable` per attacker/defender pair. It does not copy Classic's per-cast-type table maps, which would duplicate pair-wide aura state. Future weapon-skill rules will resolve a short-lived context from the spell, the current player equipment and any authoritative synthetic auto-attack weapon instead.
 
