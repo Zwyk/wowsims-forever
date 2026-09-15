@@ -6,8 +6,10 @@ import (
 	"github.com/wowsims/tbc/sim/core/proto"
 )
 
-const CharacterLevel = 70
-const DefaultBossLevel = CharacterLevel + 3
+// Compatibility constants for call sites which need compile-time values.
+// The active ruleset selector and these aliases must move together.
+const CharacterLevel = activeCharacterLevel
+const DefaultBossLevel = CharacterLevel + activeDefaultBossLevelDelta
 const MinIlvl = 60
 const MaxIlvl = 600
 

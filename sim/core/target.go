@@ -374,6 +374,10 @@ type AttackTable struct {
 }
 
 func NewAttackTable(attacker *Unit, defender *Unit) *AttackTable {
+	return newAttackTableWithRuleset(attacker, defender, currentRuleset())
+}
+
+func newAttackTableWithRuleset(attacker *Unit, defender *Unit, rules rulesetProfile) *AttackTable {
 	table := &AttackTable{
 		Attacker: attacker,
 		Defender: defender,
@@ -387,28 +391,7 @@ func NewAttackTable(attacker *Unit, defender *Unit) *AttackTable {
 		MobTypeBonusStats: make(map[proto.MobType]stats.Stats),
 	}
 
-	if defender.Type == EnemyUnit {
-		// Assumes attacker (the Player) is at CharacterLevel.
-		table.BaseSpellMissChance = UnitLevelFloat64(defender.Level, 0.02, 0.04, 0.05, 0.06, 0.17)
-		table.BaseMissChance = UnitLevelFloat64(defender.Level, 0.04, 0.05, 0.055, 0.06, 0.08)
-		table.BaseBlockChance = 0.05
-		table.BaseDodgeChance = UnitLevelFloat64(defender.Level, 0.04, 0.05, 0.055, 0.06, 0.065)
-		table.BaseParryChance = UnitLevelFloat64(defender.Level, 0.04, 0.05, 0.055, 0.06, 0.14)
-		table.BaseGlanceChance = UnitLevelFloat64(defender.Level, 0, 0.06, 0.12, 0.18, 0.24)
-
-		table.GlanceMultiplier = UnitLevelFloat64(defender.Level, 0.95, 0.95, 0.95, 0.85, 0.75)
-		table.HitSuppression = UnitLevelFloat64(defender.Level, 0, 0, 0, 0, 0.01)
-		table.MeleeCritSuppression = UnitLevelFloat64(defender.Level, 0, 0, 0.01, 0.02, 0.048)
-		table.SpellCritSuppression = UnitLevelFloat64(defender.Level, 0, 0, 0, 0.003, 0.021)
-	} else {
-		// Assumes defender (the Player) is at CharacterLevel.
-		table.BaseSpellMissChance = 0.05
-		table.BaseMissChance = UnitLevelFloat64(attacker.Level, 0.054, 0.05, 0.048, 0.046, 0.044)
-		table.BaseBlockChance = UnitLevelFloat64(attacker.Level, 0.054, 0.05, 0.048, 0.046, 0.044)
-		table.BaseDodgeChance = UnitLevelFloat64(attacker.Level, 0.004, 0, -0.002, -0.004, -0.006)
-		table.BaseParryChance = UnitLevelFloat64(attacker.Level, 0.054, 0.05, 0.048, 0.046, 0.044)
-		table.BaseCrushChance = UnitLevelFloat64(attacker.Level, 0.0, 0.0, 0.0, 0.0, 0.15)
-	}
+	rules.attackTableBase(attacker, defender).applyTo(table)
 
 	return table
 }

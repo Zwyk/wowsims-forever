@@ -23,6 +23,12 @@ These references identify inherited behavior; they are not evidence that a rule 
 
 The per-class golden results are the broad regression layer. Do not regenerate them merely to make CI green: a result update must accompany a reviewed mechanics change and explain why each affected class moved.
 
+## Core ruleset boundary
+
+The active core ruleset is selected at build time and remains internal to the Go engine. It contains value-only level and attack-table data; simulations cannot mutate it or choose a different ruleset through proto input. Existing public constants and constructors remain compatibility facades while call sites are migrated incrementally.
+
+The first extraction contains only the inherited TBC level bands and both attack-table directions. Rating conversions, outcome caps, armor, resistance, weapon skill, talents and UI values stay outside this profile until each surface can move in a focused, zero-behavior-change pull request. A later Forever profile will be added alongside the inherited profile, then activated only with the matching level-60 data and UI changes.
+
 ### Known inherited quirks
 
 - A level-69 target is not offered by the inherited encounter picker. Direct API input at that level falls through to the `+3` lookup values because the level table has no `-1` entry; this unsupported-input behavior is documented but deliberately not made a desired invariant.
