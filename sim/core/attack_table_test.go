@@ -8,11 +8,21 @@ import (
 )
 
 func TestInheritedTBCLevelBaseline(t *testing.T) {
+	rules := currentRuleset()
+	if rules.id != rulesetInheritedTBC {
+		t.Fatalf("active ruleset: got %d, want inherited TBC", rules.id)
+	}
 	if CharacterLevel != 70 {
 		t.Fatalf("character level: got %d, want 70", CharacterLevel)
 	}
 	if DefaultBossLevel != 73 {
 		t.Fatalf("default boss level: got %d, want 73", DefaultBossLevel)
+	}
+	if int32(CharacterLevel) != rules.levels.characterLevel {
+		t.Fatalf("character-level compatibility constant: got %d, ruleset has %d", CharacterLevel, rules.levels.characterLevel)
+	}
+	if int32(DefaultBossLevel) != rules.levels.defaultBossLevel() {
+		t.Fatalf("boss-level compatibility constant: got %d, ruleset has %d", DefaultBossLevel, rules.levels.defaultBossLevel())
 	}
 }
 
@@ -27,6 +37,7 @@ func TestInheritedPlayerVsEnemyAttackTables(t *testing.T) {
 		level                int32
 		spellMiss            float64
 		physicalMiss         float64
+		block                float64
 		dodge                float64
 		parry                float64
 		glance               float64
@@ -35,11 +46,11 @@ func TestInheritedPlayerVsEnemyAttackTables(t *testing.T) {
 		meleeCritSuppression float64
 		spellCritSuppression float64
 	}{
-		{"minus-two", CharacterLevel - 2, 0.02, 0.04, 0.04, 0.04, 0.00, 0.95, 0.00, 0.000, 0.000},
-		{"same-level", CharacterLevel, 0.04, 0.05, 0.05, 0.05, 0.06, 0.95, 0.00, 0.000, 0.000},
-		{"plus-one", CharacterLevel + 1, 0.05, 0.055, 0.055, 0.055, 0.12, 0.95, 0.00, 0.010, 0.000},
-		{"plus-two", CharacterLevel + 2, 0.06, 0.06, 0.06, 0.06, 0.18, 0.85, 0.00, 0.020, 0.003},
-		{"boss", DefaultBossLevel, 0.17, 0.08, 0.065, 0.14, 0.24, 0.75, 0.01, 0.048, 0.021},
+		{"minus-two", CharacterLevel - 2, 0.02, 0.04, 0.05, 0.04, 0.04, 0.00, 0.95, 0.00, 0.000, 0.000},
+		{"same-level", CharacterLevel, 0.04, 0.05, 0.05, 0.05, 0.05, 0.06, 0.95, 0.00, 0.000, 0.000},
+		{"plus-one", CharacterLevel + 1, 0.05, 0.055, 0.05, 0.055, 0.055, 0.12, 0.95, 0.00, 0.010, 0.000},
+		{"plus-two", CharacterLevel + 2, 0.06, 0.06, 0.05, 0.06, 0.06, 0.18, 0.85, 0.00, 0.020, 0.003},
+		{"boss", DefaultBossLevel, 0.17, 0.08, 0.05, 0.065, 0.14, 0.24, 0.75, 0.01, 0.048, 0.021},
 	}
 
 	for _, test := range tests {
@@ -49,6 +60,7 @@ func TestInheritedPlayerVsEnemyAttackTables(t *testing.T) {
 
 			assertFloat64(t, "spell miss", table.BaseSpellMissChance, test.spellMiss)
 			assertFloat64(t, "physical miss", table.BaseMissChance, test.physicalMiss)
+			assertFloat64(t, "block", table.BaseBlockChance, test.block)
 			assertFloat64(t, "dodge", table.BaseDodgeChance, test.dodge)
 			assertFloat64(t, "parry", table.BaseParryChance, test.parry)
 			assertFloat64(t, "glance", table.BaseGlanceChance, test.glance)
