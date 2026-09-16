@@ -65,7 +65,7 @@ func (character *Character) addManaStatDependenciesWithRuleset(rules rulesetProf
 // this separate from NewCharacter preserves class initialization order.
 // Dodge/block, talents, forms, flat AP corrections and pets remain class-owned.
 func (character *Character) AddBaseClassStatDependencies() {
-	character.addBaseClassStatDependenciesWithRuleset(currentRuleset())
+	character.addBaseClassStatDependenciesWithRuleset(character.resolvedRuleset())
 }
 
 func (character *Character) addBaseClassStatDependenciesWithRuleset(rules rulesetProfile) {

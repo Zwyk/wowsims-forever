@@ -773,10 +773,17 @@ func (spell *Spell) ExpectedTickDamageFromCurrentSnapshot(sim *Simulation, targe
 // SpellMod_CritMultiplier_Flat) scale only the bonus part above 100%.
 // https://web.archive.org/web/20081014064638/http://elitistjerks.com/f31/t12595-relentless_earthstorm_diamond_-_melee_only/p4/
 func (spell *Spell) CritDamageMultiplier(at *AttackTable) float64 {
-	outcomes := currentRuleset().combat.outcomes
+	var outcomes outcomeRules
+	if at != nil && (at.rulesInitialized || at.Attacker != nil) {
+		// Engine-created tables already cache their outcome subprofile. Do
+		// not resolve/copy a Unit profile that will immediately be discarded.
+		outcomes = at.resolvedOutcomeRules()
+	} else {
+		// Healing and contextless legacy tables retain the spell's owner.
+		outcomes = spell.Unit.resolvedOutcomeRules()
+	}
 	attackTableMultiplier := 1.0
 	if at != nil {
-		outcomes = at.resolvedOutcomeRules()
 		attackTableMultiplier = at.CritMultiplier
 	}
 

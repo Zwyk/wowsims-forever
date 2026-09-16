@@ -40,6 +40,12 @@ type GetAttackPowerValue func(spell *Spell, target *Unit) float64
 type Unit struct {
 	Type UnitType
 
+	// Engine-created units retain a value snapshot of the rules selected at
+	// construction. A zero-value Unit still uses the active build-time profile
+	// for compatibility with standalone helpers and externally constructed units.
+	rules            rulesetProfile
+	rulesInitialized bool
+
 	// Index of this unit with its group.
 	//  For Players, this is the 0-indexed raid index (0-24).
 	//  For Enemies, this is its enemy index.
@@ -676,7 +682,32 @@ func (unit *Unit) GetCurrentPowerBar() PowerBarType {
 // Stat dependencies that apply both to players/pets (represented as Character
 // structs) and to NPCs (represented as Target structs).
 func (unit *Unit) addUniversalStatDependencies() {
-	unit.addUniversalStatDependenciesWithRuleset(currentRuleset())
+	unit.addUniversalStatDependenciesWithRuleset(unit.resolvedRuleset())
+}
+
+func (unit *Unit) resolvedRuleset() rulesetProfile {
+	if unit != nil && unit.rulesInitialized {
+		return unit.rules
+	}
+	return currentRuleset()
+}
+
+// Read only the subprofile needed by hot-path helpers. Returning the complete
+// profile would copy the much larger level tables and class attribute rules,
+// even when the caller immediately discards them. Nil owners retain the same
+// active-profile fallback as contextless, zero-valued units.
+func (unit *Unit) resolvedRatingRules() ratingRules {
+	if unit != nil && unit.rulesInitialized {
+		return unit.rules.ratings
+	}
+	return currentRuleset().ratings
+}
+
+func (unit *Unit) resolvedOutcomeRules() outcomeRules {
+	if unit != nil && unit.rulesInitialized {
+		return unit.rules.combat.outcomes
+	}
+	return currentRuleset().combat.outcomes
 }
 
 func (unit *Unit) addUniversalStatDependenciesWithRuleset(rules rulesetProfile) {
@@ -889,19 +920,19 @@ func (unit *Unit) ExecuteCustomRotation(sim *Simulation) {
 }
 
 func (unit *Unit) GetDodgeFromRating() float64 {
-	return unit.getDodgeFromRating(currentRuleset().ratings)
+	return unit.getDodgeFromRating(unit.resolvedRatingRules())
 }
 func (unit *Unit) getDodgeFromRating(ratings ratingRules) float64 {
 	return unit.stats[stats.DodgeRating] / ratings.dodgeRatingPerDodgePercent / 100
 }
 func (unit *Unit) GetParryFromRating() float64 {
-	return unit.getParryFromRating(currentRuleset().ratings)
+	return unit.getParryFromRating(unit.resolvedRatingRules())
 }
 func (unit *Unit) getParryFromRating(ratings ratingRules) float64 {
 	return unit.stats[stats.ParryRating] / ratings.parryRatingPerParryPercent / 100
 }
 func (unit *Unit) GetBlockFromRating() float64 {
-	return unit.getBlockFromRating(currentRuleset().ratings)
+	return unit.getBlockFromRating(unit.resolvedRatingRules())
 }
 func (unit *Unit) getBlockFromRating(ratings ratingRules) float64 {
 	return unit.stats[stats.BlockPercent] + unit.stats[stats.BlockRating]/ratings.blockRatingPerBlockPercent/100
@@ -947,13 +978,13 @@ func (unit *Unit) GetTotalBlockChanceAsDefender(atkTable *AttackTable) float64 {
 }
 
 func (unit *Unit) GetDefenseReduction() float64 {
-	return unit.getDefenseReduction(currentRuleset().ratings)
+	return unit.getDefenseReduction(unit.resolvedRatingRules())
 }
 func (unit *Unit) getDefenseReduction(ratings ratingRules) float64 {
 	return math.Floor(unit.stats[stats.DefenseRating]/ratings.defenseRatingPerDefenseLevel) * ratings.defenseChancePerDefenseLevelPercent / 100
 }
 func (unit *Unit) GetResilienceReduction() float64 {
-	return unit.getResilienceReduction(currentRuleset().ratings)
+	return unit.getResilienceReduction(unit.resolvedRatingRules())
 }
 func (unit *Unit) getResilienceReduction(ratings ratingRules) float64 {
 	return unit.GetStat(stats.ResilienceRating) / ratings.resilienceRatingPerCritReductionPercent / 100

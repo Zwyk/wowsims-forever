@@ -88,17 +88,20 @@ type Pet struct {
 
 func NewPet(config PetConfig) Pet {
 	distanceFromTarget := TernaryFloat64(config.StartsAtOwnerDistance, config.Owner.StartDistanceFromTarget, MaxMeleeRange)
+	rules := config.Owner.resolvedRuleset()
 
 	pet := Pet{
 		Character: Character{
 			Unit: Unit{
-				Type:        PetUnit,
-				Index:       config.Owner.Party.Raid.getNextPetIndex(),
-				Label:       fmt.Sprintf("%s - %s", config.Owner.Label, config.Name),
-				Level:       CharacterLevel,
-				PseudoStats: stats.NewPseudoStats(),
-				auraTracker: newAuraTracker(),
-				Metrics:     NewUnitMetrics(),
+				Type:             PetUnit,
+				Index:            config.Owner.Party.Raid.getNextPetIndex(),
+				Label:            fmt.Sprintf("%s - %s", config.Owner.Label, config.Name),
+				Level:            rules.levels.characterLevel,
+				rules:            rules,
+				rulesInitialized: true,
+				PseudoStats:      stats.NewPseudoStats(),
+				auraTracker:      newAuraTracker(),
+				Metrics:          NewUnitMetrics(),
 
 				StatDependencyManager: stats.NewStatDependencyManager(),
 
