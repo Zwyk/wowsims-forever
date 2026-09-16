@@ -11,13 +11,13 @@ The port starts from the modern `tbc-new` architecture at commit [`17a8fb28c5ad1
 - model Forever's shared hit and critical-strike item stats without merging the physical and spell outcome tables;
 - restore weapon-skill mechanics from Classic where Forever matches them;
 - keep dodge/parry reduction and numeric conversions provisional until beta data confirms them;
-- port class, race, talent, spell, and item changes after the core rules are stable.
+- port class, race, talent and spell changes after the core rules are stable; gear imports are outside the current scope.
 
 The inherited deployment, release, database-update, labeling, and webhook workflows remain disabled. Test CI and a new, narrowly scoped [GitHub Pages preview workflow](docs/forever_pages.md) are active. Pages publishes a standalone Classic level-60 **stat diagnostic**, not the inherited TBC simulator and not a complete Classic or Forever combat simulator.
 
 The finished site will retain the original WoWSims landing page, class navigation, simulator controls and results layout, with Forever branding and supported data. The baseline lab is a temporary development tool, not the final interface. Engine integration now includes bounded level-60 single-weapon, dual-wield, melee-special and spell-combat fixtures; see the [melee scope](docs/forever_core.md#scheduled-classic-60-melee-integration) and [spell scope](docs/forever_core.md#scheduled-classic-60-spell-integration).
 
-Current priority: **Paladin first**, beginning with Retribution. The [Classic level-60 Paladin integration](docs/forever_core.md#classic-60-paladin-command-integration) combines two-handed attacks, Seal of Command, Judgement and mana recovery through the native WoWSims APL in internal tests. The earlier [Mage Fireball integration](docs/forever_core.md#classic-60-mage-mana-and-fireball-integration) remains a regression reference. Next comes a usable Paladin class with supported level-60 gear, talents and spells in the original WoWSims interface. Protection will additionally need front-facing and incoming combat. A complete playable level-60 simulator is not available yet.
+Current priority: **Paladin mechanics, talents and base abilities**, beginning with Retribution. The [Classic Paladin build](docs/forever_core.md#classic-60-paladin-talents-and-offensive-abilities) validates all 44 Classic talent entries and runs a supported 51-point build with two-handed attacks, Command/Judgement, offensive spells, self blessings, a selected aura and mana recovery through the native WoWSims APL. Only the documented subset of talent effects is executable; healing, defensive and remaining seal mechanics still need work. Gear data and presets are excluded from this milestone; tests use synthetic weapons. These remain private engine integrations, and a complete playable Paladin simulator is not available yet. The earlier [Mage Fireball integration](docs/forever_core.md#classic-60-mage-mana-and-fireball-integration) remains a regression reference.
 
 ## Development
 

@@ -4,6 +4,29 @@ import (
 	"time"
 )
 
+// Weapon attacks and rotation wakeups can run before the queued hardcast
+// completion at the same timestamp. Finish the private Classic Paladin cast
+// first so another action cannot spend the mana reserved for its completion.
+func (unit *Unit) completeClassic60PaladinCastAtBoundary(sim *Simulation) {
+	if unit.resolvedRuleset().id != rulesetClassic60PaladinReference {
+		return
+	}
+	hc := &unit.Hardcast
+	if hc.Expires == startingCDTime || hc.Expires > sim.CurrentTime {
+		return
+	}
+	// Detach the queued action before callbacks can start another cast. Reusing
+	// the cancelled pointer would also revive its old entry in the event queue.
+	if unit.hardcastAction != nil && !unit.hardcastAction.consumed {
+		unit.hardcastAction.Cancel(sim)
+	}
+	unit.hardcastAction = nil
+	hc.Expires = startingCDTime
+	if hc.OnComplete != nil {
+		hc.OnComplete(sim, hc.Target)
+	}
+}
+
 // Note that this is only used when the hardcast and GCD actions happen at different times.
 func (unit *Unit) newHardcastAction(sim *Simulation) {
 	if unit.Metrics.isTanking {

@@ -340,8 +340,9 @@ type ManaCostOptions struct {
 	PercentModifier float64 // Will default to 1. PercentModifier stored as a float i.e. 40% reduction is (0.6 multiplier) to the base cost
 }
 type ManaCost struct {
-	ResourceMetrics *ResourceMetrics
-	classicBaseCost float64
+	ResourceMetrics       *ResourceMetrics
+	classicBaseCost       float64
+	classicCostMultiplier float64
 }
 
 func newManaCost(spell *Spell, options ManaCostOptions) *SpellCost {
@@ -356,8 +357,9 @@ func newManaCost(spell *Spell, options ManaCostOptions) *SpellCost {
 		PercentModifier:         TernaryFloat64(options.PercentModifier == 0, 1, options.PercentModifier),
 		AdditivePercentModifier: 1,
 		ResourceCostImpl: &ManaCost{
-			ResourceMetrics: spell.Unit.NewManaMetrics(spell.ActionID),
-			classicBaseCost: exactCost,
+			ResourceMetrics:       spell.Unit.NewManaMetrics(spell.ActionID),
+			classicBaseCost:       exactCost,
+			classicCostMultiplier: TernaryFloat64(options.PercentModifier == 0, 1, options.PercentModifier),
 		},
 	}
 }
@@ -390,7 +392,7 @@ func (mc *ManaCost) CostFailureReason(sim *Simulation, spell *Spell) string {
 func (mc *ManaCost) SpendCost(sim *Simulation, spell *Spell) {
 	if spell.Unit.resolvedResourceRules().manaModel.isClassicReference() {
 		validateClassic60ManaCost(spell, spell.Cost)
-		if spell.CurCast.Cost != mc.classicBaseCost {
+		if spell.CurCast.Cost != mc.classicBaseCost*mc.classicCostMultiplier {
 			panic("Classic mana reference requires the registered cast cost")
 		}
 	}

@@ -40,7 +40,7 @@ func (agent *classic60PaladinTestAgent) Reset(sim *Simulation) {
 func (agent *classic60PaladinTestAgent) record(sim *Simulation, kind string, result *SpellResult) {
 	event := classic60PaladinTestEvent{kind: kind, seed: sim.currentSeed, at: sim.CurrentTime,
 		fsr: agent.PseudoStats.FiveSecondRuleRefreshTime, mana: agent.CurrentMana(),
-		seal: agent.spells.SealAura.IsActive(), oom: agent.IsOOM()}
+		seal: agent.spells.SealAura != nil && agent.spells.SealAura.IsActive(), oom: agent.IsOOM()}
 	if result != nil {
 		event.damage, event.resist, event.outcome = result.Damage, result.ArmorAndResistanceMultiplier, result.Outcome
 	}
@@ -59,6 +59,7 @@ type classic60PaladinTestConfig struct {
 	spellDamage, physicalCrit float64
 	mp5, armor, startingMana  float64
 	apl, pauseAutos           bool
+	talents                   *classic60PaladinTalents
 }
 
 // Assemble a pre-racial Human Paladin with a synthetic equipped 2H sword.
@@ -113,13 +114,23 @@ func newClassic60PaladinTestSim(t *testing.T, config classic60PaladinTestConfig,
 	agent.CurrentTarget = &target.Unit
 	target.initialize(targetConfig)
 	agent.initialize(agent)
-	agent.spells = registerClassic60ReferencePaladin(&agent.Character, true)
+	if config.talents == nil {
+		agent.spells = registerClassic60ReferencePaladin(&agent.Character, true)
+	} else {
+		var err error
+		agent.spells, err = registerClassic60PaladinBuild(&agent.Character, *config.talents)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
 	// Judgement intentionally suppresses OnCastComplete/OnApplyEffects.
 	// Observe its real effect entry without changing any casting decision.
-	judgeEffects := agent.spells.Judgement.ApplyEffects
-	agent.spells.Judgement.ApplyEffects = func(sim *Simulation, target *Unit, spell *Spell) {
-		agent.record(sim, "judge", nil)
-		judgeEffects(sim, target, spell)
+	if agent.spells.Judgement != nil {
+		judgeEffects := agent.spells.Judgement.ApplyEffects
+		agent.spells.Judgement.ApplyEffects = func(sim *Simulation, target *Unit, spell *Spell) {
+			agent.record(sim, "judge", nil)
+			judgeEffects(sim, target, spell)
+		}
 	}
 	agent.RegisterAura(Aura{Label: "Observe Classic Paladin", Duration: NeverExpires,
 		OnReset: func(aura *Aura, sim *Simulation) {
@@ -179,7 +190,7 @@ func newClassic60PaladinTestSim(t *testing.T, config classic60PaladinTestConfig,
 	}
 	env.postFinalizeEffects = nil
 	env.State = Finalized
-	if agent.BaseMana != 1512 || agent.MaxMana() != 2282 || agent.GetStat(stats.Spirit) != 75 || agent.GetStat(stats.AttackPower) != 370 {
+	if config.talents == nil && (agent.BaseMana != 1512 || agent.MaxMana() != 2282 || agent.GetStat(stats.Spirit) != 75 || agent.GetStat(stats.AttackPower) != 370) {
 		t.Fatalf("Paladin initialization changed the pre-racial Classic baseline: %+v", agent.GetStats())
 	}
 	return newSimWithEnv(env, &proto.SimOptions{Iterations: config.iterations, RandomSeed: config.seed, IsTest: true}, simsignals.CreateSignals()), agent

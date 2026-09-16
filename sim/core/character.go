@@ -112,7 +112,7 @@ func newCharacterWithRuleset(party *Party, partyIndex int, player *proto.Player,
 			PseudoStats:      stats.NewPseudoStats(),
 			Metrics:          NewUnitMetrics(),
 
-			StatDependencyManager: stats.NewStatDependencyManager(),
+			StatDependencyManager: rules.attributes.newStatDependencyManager(),
 
 			ReactionTime:            time.Duration(max(player.ReactionTimeMs, 10)) * time.Millisecond,
 			ChannelClipDelay:        max(0, time.Duration(player.ChannelClipDelayMs)*time.Millisecond),
@@ -285,7 +285,7 @@ func (character *Character) applyAllEffects(agent Agent, raidBuffs *proto.RaidBu
 
 	measureStats := func() *proto.UnitStats {
 		baseStats := character.GetStats()
-		character.stats = character.SortAndApplyStatDependencies(character.stats).FloorGameStats()
+		character.stats = character.roundDerivedStats(character.SortAndApplyStatDependencies(character.stats))
 		measuredStatsProto := &proto.UnitStats{
 			Stats:       character.GetStats().ToProtoArray(),
 			PseudoStats: character.GetPseudoStatsProto(),

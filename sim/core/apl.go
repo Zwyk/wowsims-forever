@@ -410,6 +410,7 @@ func (apl *APLRotation) DoNextAction(sim *Simulation) {
 	if apl.inLoop {
 		return
 	}
+	apl.unit.completeClassic60PaladinCastAtBoundary(sim)
 
 	if apl.unit.IsChanneling() {
 		dot := apl.unit.ChanneledDot
