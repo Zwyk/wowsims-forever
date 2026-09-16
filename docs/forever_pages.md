@@ -7,6 +7,12 @@ It is **not a combat/DPS simulator**, and does not enable Forever mechanics.
 The inherited TBC UI is deliberately not published: its engine remains level 70
 and many of its asset/runtime URLs are fixed to `/tbc/`.
 
+The final published product will preserve the original WoWSims landing page,
+class navigation and simulator interface, updated for Forever. This diagnostic
+is temporary. Bringing the normal interface online requires matching level-60
+engine/data support and a deliberate migration of asset and worker URLs to the
+project-site path; publishing the existing TBC pages would not complete that work.
+
 ## One-time GitHub setup
 
 In [repository Settings > Pages](https://github.com/Zwyk/wowsims-forever/settings/pages),

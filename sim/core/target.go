@@ -345,6 +345,7 @@ type AttackTable struct {
 	Defender         *Unit
 	ratings          ratingRules
 	outcomes         outcomeRules
+	mitigation       mitigationRules
 	rulesInitialized bool
 
 	BaseMissChance      float64
@@ -395,6 +396,7 @@ func newAttackTableWithRuleset(attacker *Unit, defender *Unit, rules rulesetProf
 		Defender:         defender,
 		ratings:          rules.ratings,
 		outcomes:         rules.combat.outcomes,
+		mitigation:       rules.mitigation,
 		rulesInitialized: true,
 
 		CritMultiplier:              1,
@@ -432,6 +434,16 @@ func (table *AttackTable) resolvedOutcomeRules() outcomeRules {
 		return table.Attacker.resolvedOutcomeRules()
 	}
 	return currentRuleset().combat.outcomes
+}
+
+func (table *AttackTable) resolvedMitigationRules() mitigationRules {
+	if table.rulesInitialized {
+		return table.mitigation
+	}
+	if table.Attacker != nil {
+		return table.Attacker.resolvedRuleset().mitigation
+	}
+	return currentRuleset().mitigation
 }
 
 func EnableDamageDoneByCaster(index int, maxIndex int, attackTable *AttackTable, handler DynamicDamageDoneByCaster) {

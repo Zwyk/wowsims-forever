@@ -919,26 +919,42 @@ func (unit *Unit) ExecuteCustomRotation(sim *Simulation) {
 	panic("Unimplemented ExecuteCustomRotation")
 }
 
+// Incomplete, explicitly scoped rulesets leave unaudited conversions absent.
+// An absent stat contributes zero without dividing by an absent coefficient;
+// attempting to use that conversion with an actual stat fails closed.
+func checkedRatingQuotient(value, divisor float64) float64 {
+	if value == 0 {
+		return 0
+	}
+	if math.IsNaN(value) || math.IsInf(value, 0) || divisor <= 0 || math.IsNaN(divisor) || math.IsInf(divisor, 0) {
+		panic("stat conversion requires a finite value and a supported positive divisor")
+	}
+	return value / divisor
+}
+
 func (unit *Unit) GetDodgeFromRating() float64 {
 	return unit.getDodgeFromRating(unit.resolvedRatingRules())
 }
 func (unit *Unit) getDodgeFromRating(ratings ratingRules) float64 {
-	return unit.stats[stats.DodgeRating] / ratings.dodgeRatingPerDodgePercent / 100
+	return checkedRatingQuotient(unit.stats[stats.DodgeRating], ratings.dodgeRatingPerDodgePercent) / 100
 }
 func (unit *Unit) GetParryFromRating() float64 {
 	return unit.getParryFromRating(unit.resolvedRatingRules())
 }
 func (unit *Unit) getParryFromRating(ratings ratingRules) float64 {
-	return unit.stats[stats.ParryRating] / ratings.parryRatingPerParryPercent / 100
+	return checkedRatingQuotient(unit.stats[stats.ParryRating], ratings.parryRatingPerParryPercent) / 100
 }
 func (unit *Unit) GetBlockFromRating() float64 {
 	return unit.getBlockFromRating(unit.resolvedRatingRules())
 }
 func (unit *Unit) getBlockFromRating(ratings ratingRules) float64 {
-	return unit.stats[stats.BlockPercent] + unit.stats[stats.BlockRating]/ratings.blockRatingPerBlockPercent/100
+	return unit.stats[stats.BlockPercent] + checkedRatingQuotient(unit.stats[stats.BlockRating], ratings.blockRatingPerBlockPercent)/100
 }
 
 func (unit *Unit) GetTotalDodgeChanceAsDefender(spell *Spell, atkTable *AttackTable) float64 {
+	if atkTable.resolvedOutcomeRules().weaponSkillModel != weaponSkillModelDisabled {
+		return max(0, livePhysicalAttackTableView(spell, atkTable).baseDodgeChance)
+	}
 	ratings := atkTable.resolvedRatingRules()
 	outcomes := atkTable.resolvedOutcomeRules()
 	chance := unit.PseudoStats.BaseDodgeChance +
@@ -951,6 +967,11 @@ func (unit *Unit) GetTotalDodgeChanceAsDefender(spell *Spell, atkTable *AttackTa
 }
 
 func (unit *Unit) GetTotalParryChanceAsDefender(spell *Spell, atkTable *AttackTable) float64 {
+	if atkTable.resolvedOutcomeRules().weaponSkillModel != weaponSkillModelDisabled {
+		livePhysicalAttackTableView(spell, atkTable)
+		// The only activated Classic context attacks from behind.
+		return 0
+	}
 	ratings := atkTable.resolvedRatingRules()
 	outcomes := atkTable.resolvedOutcomeRules()
 	chance := unit.PseudoStats.BaseParryChance +
@@ -962,6 +983,9 @@ func (unit *Unit) GetTotalParryChanceAsDefender(spell *Spell, atkTable *AttackTa
 }
 
 func (unit *Unit) GetTotalChanceToBeMissedAsDefender(atkTable *AttackTable) float64 {
+	if atkTable.resolvedOutcomeRules().weaponSkillModel != weaponSkillModelDisabled {
+		panic("Classic melee reference miss chance requires a weapon-specific spell context")
+	}
 	// ReducedPhysicalHitTakenChance is stored in percent points, BaseMissChance as a fraction.
 	chance := atkTable.BaseMissChance +
 		unit.PseudoStats.ReducedPhysicalHitTakenChance/100
@@ -969,6 +993,12 @@ func (unit *Unit) GetTotalChanceToBeMissedAsDefender(atkTable *AttackTable) floa
 }
 
 func (unit *Unit) GetTotalBlockChanceAsDefender(atkTable *AttackTable) float64 {
+	if atkTable.resolvedOutcomeRules().weaponSkillModel != weaponSkillModelDisabled {
+		if atkTable.Attacker == nil || atkTable.Attacker.Type != PlayerUnit || atkTable.Attacker.PseudoStats.InFrontOfTarget || unit != atkTable.Defender || unit.Type != EnemyUnit {
+			panic("unsupported block context in Classic melee reference")
+		}
+		return 0
+	}
 	ratings := atkTable.resolvedRatingRules()
 	chance := unit.PseudoStats.BaseBlockChance +
 		atkTable.BaseBlockChance +
@@ -981,13 +1011,13 @@ func (unit *Unit) GetDefenseReduction() float64 {
 	return unit.getDefenseReduction(unit.resolvedRatingRules())
 }
 func (unit *Unit) getDefenseReduction(ratings ratingRules) float64 {
-	return math.Floor(unit.stats[stats.DefenseRating]/ratings.defenseRatingPerDefenseLevel) * ratings.defenseChancePerDefenseLevelPercent / 100
+	return math.Floor(checkedRatingQuotient(unit.stats[stats.DefenseRating], ratings.defenseRatingPerDefenseLevel)) * ratings.defenseChancePerDefenseLevelPercent / 100
 }
 func (unit *Unit) GetResilienceReduction() float64 {
 	return unit.getResilienceReduction(unit.resolvedRatingRules())
 }
 func (unit *Unit) getResilienceReduction(ratings ratingRules) float64 {
-	return unit.GetStat(stats.ResilienceRating) / ratings.resilienceRatingPerCritReductionPercent / 100
+	return checkedRatingQuotient(unit.GetStat(stats.ResilienceRating), ratings.resilienceRatingPerCritReductionPercent) / 100
 }
 
 func (unit *Unit) updateReducedCritTakenPercent() {

@@ -6,6 +6,8 @@ type rulesetID uint8
 
 const (
 	rulesetInheritedTBC rulesetID = iota
+	// Internal, deliberately incomplete profile used by scheduled melee tests.
+	rulesetClassic60MeleeReference
 )
 
 // Keep the compile-time constants beside the active selector. Existing code
@@ -36,6 +38,7 @@ type rulesetProfile struct {
 	ratings    ratingRules
 	combat     combatRules
 	attributes attributeRules
+	mitigation mitigationRules
 }
 
 type levelRules struct {

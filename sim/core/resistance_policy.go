@@ -28,9 +28,10 @@ type classicReferenceBinaryResistView struct {
 
 // classicReferencePartialResistProjection reproduces the non-binary threshold
 // projection in wowsims/classic commit
-// 7779ebbf79dc7f1341e6ab939b28a3402c9a730a. It is a comparison fallback only
-// and has no production caller. Pure dots divide only the explicit-resistance
-// component by ten; the enemy level component is unchanged.
+// 7779ebbf79dc7f1341e6ab939b28a3402c9a730a. Explicit internal Classic attack
+// tables select this policy; the default live simulator remains inherited TBC.
+// Pure dots divide only the explicit-resistance component by ten; the enemy
+// level component is unchanged.
 func classicReferencePartialResistProjection(base rulesetProfile, input classicReferenceResistanceInput, pureDot bool) (classicReferencePartialResistView, bool) {
 	coefficient, ok := classicReferenceResistanceCoefficient(base, input, false, pureDot)
 	if !ok {
@@ -59,7 +60,7 @@ func classicReferencePartialResistProjection(base rulesetProfile, input classicR
 // classicReferenceBinaryResistProjection returns the resistance multiplier
 // applied to a binary spell's base hit chance. It is not a damage multiplier
 // or a final hit chance; base miss, spell Hit and the miss floor remain outside
-// this inactive numerical policy.
+// this numerical policy.
 func classicReferenceBinaryResistProjection(base rulesetProfile, input classicReferenceResistanceInput) (classicReferenceBinaryResistView, bool) {
 	coefficient, ok := classicReferenceResistanceCoefficient(base, input, true, false)
 	if !ok {
