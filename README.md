@@ -13,7 +13,7 @@ The port starts from the modern `tbc-new` architecture at commit [`17a8fb28c5ad1
 - keep dodge/parry reduction and numeric conversions provisional until beta data confirms them;
 - port class, race, talent, spell, and item changes after the core rules are stable.
 
-The inherited deployment, release, database-update, labeling, and webhook workflows are disabled in this branch. Test CI is the only active workflow.
+The inherited deployment, release, database-update, labeling, and webhook workflows remain disabled. Test CI and a new, narrowly scoped [GitHub Pages preview workflow](docs/forever_pages.md) are active. Pages publishes a standalone Classic level-60 **stat diagnostic**, not the inherited TBC simulator and not a complete Classic or Forever combat simulator.
 
 ## Development
 

@@ -107,6 +107,13 @@ jobs:
               run: |
                   make dist/tbc/.dirstamp
 
+            - name: Build and smoke-test Classic 60 preview
+              run: |
+                  node tools/classic60preview/build.mjs
+                  node tools/classic60preview/smoke.mjs dist/forever-preview
+                  node --test tools/ci/check_pages_artifact.test.mjs
+                  node tools/ci/check_pages_artifact.mjs dist/forever-preview
+
     test:
         needs: workflow-policy
         runs-on: ubuntu-latest
