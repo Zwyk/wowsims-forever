@@ -14,7 +14,8 @@ import "github.com/wowsims/tbc/sim/core/proto"
 // rules describe the default modifier of 1 for the seven mana-using classes;
 // Warrior/Rogue must not install them. The linear resource model assumes at
 // least 20 Stamina/Intellect. Race eligibility and fractional-stat rounding are
-// separate policies, not inferred here. There is no production caller.
+// separate policies, not inferred here. Only inactive baseline composition
+// consumes these rules; no live profile selects them.
 func classicReferenceLevel60AttributeRules(base rulesetProfile) (attributeRules, bool) {
 	if base.levels.characterLevel != classicReferenceCharacterLevel {
 		return attributeRules{}, false
