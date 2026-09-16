@@ -10,9 +10,9 @@ import (
 
 func TestClassic60MageManaRegenSourceVectors(t *testing.T) {
 	for _, test := range []struct {
-		name                                  string
+		name                                    string
 		spirit, intellect, mp5, spiritPerSecond float64
-		castingTick, fullTick                  float64
+		castingTick, fullTick                   float64
 	}{
 		{"zero Spirit", 0, 20, 0, 6.25, 0, 12.5},
 		{"Human baseline", 120, 125, 0, 21.25, 0, 42.5},
@@ -82,7 +82,9 @@ func TestClassic60MageManaRejectsUnsupportedRuntime(t *testing.T) {
 		{"NaN MP5", func(a *classic60ManaTestAgent) { a.stats[stats.MP5] = math.NaN() }, func(a *classic60ManaTestAgent) { a.UpdateManaRegenRates() }},
 		{"unvalidated mana bar", func(a *classic60ManaTestAgent) { a.classic60MageReference = false }, func(a *classic60ManaTestAgent) { a.SpiritManaRegenPerSecond() }},
 		{"foreign mana bar", func(a *classic60ManaTestAgent) { a.manaBar.unit = &Unit{} }, func(a *classic60ManaTestAgent) { a.SpiritManaRegenPerSecond() }},
-		{"foreign table resource policy", func(a *classic60ManaTestAgent) { a.AttackTables[0].resources = resourceRules{manaModel: manaModelUnavailable} }, func(a *classic60ManaTestAgent) { a.Spell.SpellChanceToMiss(a.AttackTables[0]) }},
+		{"foreign table resource policy", func(a *classic60ManaTestAgent) {
+			a.AttackTables[0].resources = resourceRules{manaModel: manaModelUnavailable}
+		}, func(a *classic60ManaTestAgent) { a.Spell.SpellChanceToMiss(a.AttackTables[0]) }},
 		{"foreign owner resource policy", func(a *classic60ManaTestAgent) { a.rules.resources = resourceRules{} }, func(a *classic60ManaTestAgent) { a.Spell.SpellChanceToMiss(a.AttackTables[0]) }},
 		{"flat cost modifier", func(a *classic60ManaTestAgent) { a.Spell.Cost.FlatModifier = -1 }, func(a *classic60ManaTestAgent) { a.Spell.Cost.GetCurrentCost() }},
 		{"percent cost modifier", func(a *classic60ManaTestAgent) { a.Spell.Cost.PercentModifier = .9 }, func(a *classic60ManaTestAgent) { a.Spell.Cost.GetCurrentCost() }},

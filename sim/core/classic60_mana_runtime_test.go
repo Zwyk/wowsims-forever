@@ -65,10 +65,10 @@ func (agent *classic60ManaTestAgent) OnManaTick(sim *Simulation) {
 }
 
 type classic60ManaTestConfig struct {
-	duration                         time.Duration
-	iterations                       int32
-	seed                             int64
-	continuous, manual, apl          bool
+	duration                          time.Duration
+	iterations                        int32
+	seed                              int64
+	continuous, manual, apl           bool
 	spellDamage, resistance, hit, mp5 float64
 }
 
