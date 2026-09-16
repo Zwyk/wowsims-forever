@@ -351,7 +351,14 @@ func (wa *WeaponAttack) trySwing(sim *Simulation) time.Duration {
 }
 
 func (wa *WeaponAttack) swing(sim *Simulation) time.Duration {
+	wa.unit.completeClassic60PaladinCastAtBoundary(sim)
 	attackSpell := wa.spell
+	// Pinned Classic attack.go defers a due swing while hardcasting instead
+	// of spending its swing timer on an attack that cannot complete.
+	if wa.unit.resolvedRuleset().id == rulesetClassic60PaladinReference && !attackSpell.CanCast(sim, wa.unit.CurrentTarget) {
+		wa.swingAt = max(wa.unit.Hardcast.Expires, sim.CurrentTime+100*time.Millisecond)
+		return wa.swingAt
+	}
 
 	if wa.replaceSwing != nil {
 		// Need to check APL here to allow last-moment HS queue casts.

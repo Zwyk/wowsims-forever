@@ -53,6 +53,7 @@ func classic60MageManaReferenceRules() rulesetProfile {
 func classic60PaladinReferenceRules() rulesetProfile {
 	rules := classic60MeleeReferenceRules()
 	rules.id = rulesetClassic60PaladinReference
+	rules.attributes.preserveFractionalStats = true
 	rules.combat.outcomes.spellChanceModel = spellChanceModelClassicReference60
 	rules.combat.outcomes.minimumSpellMissChance = 0.01
 	rules.combat.outcomes.magicCritDamageMultiplier = 1.5
@@ -124,7 +125,14 @@ func validateManaCostOptions(spell *Spell, options ManaCostOptions) {
 	percentage := model == manaModelClassic60PaladinReference && options.FlatCost == 0 &&
 		options.BaseCostPercent > 0 && options.BaseCostPercent <= 100 &&
 		!math.IsNaN(options.BaseCostPercent) && !math.IsInf(options.BaseCostPercent, 0)
-	if (!flat && !percentage) || (options.PercentModifier != 0 && options.PercentModifier != 1) {
+	modifierAllowed := options.PercentModifier == 0 || options.PercentModifier == 1
+	if model == manaModelClassic60PaladinReference && (spell.SpellID == 20920 || spell.SpellID == 20271) {
+		// The only currently supported reduction is Benediction on Command/Judgement.
+		for rank := 1; rank <= 5; rank++ {
+			modifierAllowed = modifierAllowed || options.PercentModifier == float64(100-3*rank)/100
+		}
+	}
+	if (!flat && !percentage) || !modifierAllowed {
 		panic("Classic mana reference requires an unmodified positive supported mana cost")
 	}
 }
@@ -135,14 +143,15 @@ func validateManaCostOptions(spell *Spell, options ManaCostOptions) {
 func validateClassic60ManaCost(spell *Spell, cost *SpellCost) {
 	spell.Unit.validateClassic60Mana()
 	if cost == nil || cost.spell != spell || cost.FlatModifier != 0 ||
-		cost.PercentModifier != 1 || cost.AdditivePercentModifier != 1 ||
+		cost.AdditivePercentModifier != 1 ||
 		spell.Unit.PseudoStats.SpellCostPercentModifier != 100 {
 		panic("Classic mana reference requires an unmodified registered mana cost")
 	}
 	mana, ok := cost.ResourceCostImpl.(*ManaCost)
 	if !ok || mana == nil || mana.ResourceMetrics == nil || mana.classicBaseCost <= 0 ||
 		math.IsNaN(mana.classicBaseCost) || math.IsInf(mana.classicBaseCost, 0) ||
-		cost.BaseCost != int32(mana.classicBaseCost) {
+		cost.BaseCost != int32(mana.classicBaseCost) || cost.PercentModifier != mana.classicCostMultiplier ||
+		(spell.Unit.resolvedResourceRules().manaModel == manaModelClassic60MageReference && mana.classicCostMultiplier != 1) {
 		panic("Classic mana reference requires a consistent mana cost with resource metrics")
 	}
 }

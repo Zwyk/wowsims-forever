@@ -9,12 +9,14 @@ import (
 // stats, talents, racials, forms or pet-specific scaling. Keep it value-only so
 // an injected profile cannot mutate another character's dependency inputs.
 type attributeRules struct {
-	healthPerStamina   float64
-	playerHealthOffset float64
-	armorPerAgility    float64
-	manaPerIntellect   float64
-	manaOffset         float64
-	classes            [proto.Class_ClassDruid + 1]classAttributeRules
+	// The pinned Classic evaluator preserves fractional attributes and sources.
+	preserveFractionalStats bool
+	healthPerStamina        float64
+	playerHealthOffset      float64
+	armorPerAgility         float64
+	manaPerIntellect        float64
+	manaOffset              float64
+	classes                 [proto.Class_ClassDruid + 1]classAttributeRules
 }
 
 type classAttributeRules struct {
@@ -85,4 +87,20 @@ func (character *Character) addBaseClassStatDependenciesWithRuleset(rules rulese
 	if class.physicalCritPercentPerAgility != 0 {
 		character.AddStatDependency(stats.Agility, stats.PhysicalCritPercent, class.physicalCritPercentPerAgility)
 	}
+}
+
+func (rules attributeRules) newStatDependencyManager() stats.StatDependencyManager {
+	if rules.preserveFractionalStats {
+		return stats.NewStatDependencyManagerWithSourceRounding(stats.PreserveFractionalSources)
+	}
+	return stats.NewStatDependencyManager()
+}
+
+// Apply the owning profile at both finalization and dynamic aura changes, so
+// removing and reapplying an attribute multiplier cannot introduce rounding drift.
+func (unit *Unit) roundDerivedStats(values stats.Stats) stats.Stats {
+	if unit.resolvedRuleset().attributes.preserveFractionalStats {
+		return values
+	}
+	return values.FloorGameStats()
 }

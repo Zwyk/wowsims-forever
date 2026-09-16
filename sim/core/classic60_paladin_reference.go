@@ -13,10 +13,15 @@ type classic60PaladinSpells struct {
 	CommandJudgement *Spell
 	SealAura         *Aura
 
+	Consecration, Exorcism, HolyWrath, HolyShock                                    *Spell
+	BlessingOfMight, BlessingOfWisdom, BlessingOfKings                              *Spell
+	MightAura, WisdomAura, KingsAura, SanctityEffect, DevotionEffect, VengeanceAura *Aura
+
 	judgementHitCheck *Spell
 	commandICD        Cooldown
 	commandPPM        *DynamicProcManager
 	commandPending    map[*SpellResult]struct{}
+	selectedAura      *Aura
 }
 
 func (spells *classic60PaladinSpells) disposePendingCommandResults() {
@@ -33,14 +38,24 @@ func (spells *classic60PaladinSpells) disposePendingCommandResults() {
 //
 // This private bundle is not a public Paladin agent or a complete talent build.
 // Learning Command is explicit because the pinned registration omits that
-// talent check. Other talents, cost/damage modifiers, stunned-target damage,
-// alternate seals, weapon swaps and twisting are outside this reference.
+// talent check. The validated build entrypoint adds supported talents and other
+// abilities; stunned-target damage, alternate seals, weapon swaps and twisting
+// remain outside this reference.
 // Auto-attacks must already be configured, as in the source's class constructor.
 func registerClassic60ReferencePaladin(character *Character, sealOfCommandLearned bool) *classic60PaladinSpells {
+	if !sealOfCommandLearned {
+		panic("Classic Command reference requires the learned talent")
+	}
+	talents := classic60PaladinTalents{}
+	talents[classic60PaladinSealOfCommand] = 1
+	return registerClassic60PaladinCommand(character, talents)
+}
+
+func registerClassic60PaladinCommand(character *Character, talents classic60PaladinTalents) *classic60PaladinSpells {
 	if character == nil || character.Type != PlayerUnit || character.Level != 60 ||
 		character.Race != proto.Race_RaceHuman || character.Class != proto.Class_ClassPaladin ||
 		!character.HasManaBar() || character.resolvedRuleset().id != rulesetClassic60PaladinReference ||
-		!sealOfCommandLearned || !character.AutoAttacks.AutoSwingMelee {
+		!character.AutoAttacks.AutoSwingMelee {
 		panic("Classic rank-5 Command requires the internal level-60 Human Paladin mana/melee reference and a learned seal")
 	}
 
@@ -51,6 +66,12 @@ func registerClassic60ReferencePaladin(character *Character, sealOfCommandLearne
 		commandPPM:     character.NewStaticLegacyPPMManager(7, ProcMaskMelee),
 		commandPending: make(map[*SpellResult]struct{}),
 	}
+
+	if talents[classic60PaladinSealOfCommand] == 0 {
+		return spells
+	}
+	weaponMultiplier := 1 + .02*float64(talents[classic60PaladinTwoHandedWeaponSpecialization])
+	benediction := float64(100-3*talents[classic60PaladinBenediction]) / 100
 
 	// The source asks its Judgement wrapper for a magical hit-only result.
 	// Use a separately classified, non-damaging helper in the modern engine;
@@ -69,7 +90,7 @@ func registerClassic60ReferencePaladin(character *Character, sealOfCommandLearne
 		ProcMask: ProcMaskMeleeMHSpecial, WeaponAttackSource: WeaponAttackSourceMainHand,
 		Flags:            SpellFlagMeleeMetrics | SpellFlagNoOnCastComplete,
 		Cast:             CastConfig{IgnoreHaste: true},
-		DamageMultiplier: 1, ThreatMultiplier: 1, BonusCoefficient: 0.429,
+		DamageMultiplier: weaponMultiplier, ThreatMultiplier: 1, BonusCoefficient: 0.429,
 		ApplyEffects: func(sim *Simulation, target *Unit, spell *Spell) {
 			// Only the base roll is halved for an unstunned target. The source
 			// does this unconditionally and does not implement the stun bonus.
@@ -98,7 +119,7 @@ func registerClassic60ReferencePaladin(character *Character, sealOfCommandLearne
 		// CalcDamage adds the coefficient before applying DamageMultiplier:
 		// executable source scaling is 0.7 * (weapon damage + 0.29 * SP),
 		// i.e. an effective 0.203 SP coefficient, not an additive 0.29 SP.
-		DamageMultiplier: 0.7, ThreatMultiplier: 1, BonusCoefficient: 0.29,
+		DamageMultiplier: 0.7 * weaponMultiplier, ThreatMultiplier: 1, BonusCoefficient: 0.29,
 		ApplyEffects: func(sim *Simulation, target *Unit, spell *Spell) {
 			baseDamage := character.MHWeaponDamage(sim, spell.MeleeAttackPower(target))
 			result := spell.CalcDamage(sim, target, baseDamage, spell.OutcomeMeleeSpecialHitAndCrit)
@@ -147,7 +168,7 @@ func registerClassic60ReferencePaladin(character *Character, sealOfCommandLearne
 		SpellSchool: SpellSchoolHoly, DefenseType: DefenseTypeMagic,
 		ProcMask: ProcMaskEmpty, WeaponAttackSource: WeaponAttackSourceNone,
 		Flags:    SpellFlagAPL,
-		ManaCost: ManaCostOptions{FlatCost: 210},
+		ManaCost: ManaCostOptions{FlatCost: 210, PercentModifier: benediction},
 		Cast: CastConfig{
 			IgnoreHaste: true,
 			DefaultCast: Cast{GCD: GCDDefault},
@@ -161,11 +182,11 @@ func registerClassic60ReferencePaladin(character *Character, sealOfCommandLearne
 		ProcMask: ProcMaskEmpty, WeaponAttackSource: WeaponAttackSourceNone,
 		Flags: SpellFlagMeleeMetrics | SpellFlagAPL | SpellFlagNoOnCastComplete | SpellFlagPassiveSpell,
 		// The pinned base mana is 1512: preserve the fractional 90.72 cost.
-		ManaCost: ManaCostOptions{BaseCostPercent: 6},
+		ManaCost: ManaCostOptions{BaseCostPercent: 6, PercentModifier: benediction},
 		Cast: CastConfig{
 			IgnoreHaste: true,
 			DefaultCast: Cast{NonEmpty: true},
-			CD:          Cooldown{Timer: character.NewTimer(), Duration: 10 * time.Second},
+			CD:          Cooldown{Timer: character.NewTimer(), Duration: time.Duration(10-talents[classic60PaladinImprovedJudgement]) * time.Second},
 		},
 		ExtraCastCondition: func(_ *Simulation, _ *Unit) bool { return spells.SealAura.IsActive() },
 		ApplyEffects: func(sim *Simulation, target *Unit, _ *Spell) {

@@ -877,7 +877,8 @@ func (sc *SpellCost) ApplyCostModifiers(cost int32) float64 {
 			panic("Classic mana reference requires the registered base cost")
 		}
 		// Classic keeps fractional base-mana costs such as Judgement's 90.72.
-		return sc.ResourceCostImpl.(*ManaCost).classicBaseCost
+		mana := sc.ResourceCostImpl.(*ManaCost)
+		return mana.classicBaseCost * mana.classicCostMultiplier
 	}
 	cost = max(0, cost+sc.FlatModifier)
 	cost = max(0, cost*spell.Unit.PseudoStats.SpellCostPercentModifier/100)
