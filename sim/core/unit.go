@@ -38,6 +38,7 @@ type GetAttackPowerValue func(spell *Spell, target *Unit) float64
 // Unit is an abstraction of a Character/Boss/Pet/etc, containing functionality
 // shared by all of them.
 type Unit struct {
+	foreverRet                 *foreverRetAgent
 	Type                       UnitType
 	classic60HolyDamageTaken   float64
 	classic60PaladinDefense    *classic60PaladinDefenseState

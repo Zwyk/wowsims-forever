@@ -7,24 +7,24 @@
     "url": "https://talentsforever.com/data.json",
     "license": "CC-BY-4.0",
     "attribution": "Data from talentsforever.com (https://talentsforever.com)",
-    "generated": "2026-09-15",
-    "retrievedAt": "2026-09-15T17:24:21Z",
-    "lastModified": "Tue, 15 Sep 2026 17:24:21 GMT"
+    "generated": "2026-09-16",
+    "retrievedAt": "2026-09-16T21:01:45Z",
+    "lastModified": "Wed, 16 Sep 2026 20:58:32 GMT"
   },
   "snapshot": {
     "path": "third_party/talentsforever/data.json",
-    "bytes": 585544,
-    "rawSha256": "11cab87a32e6cd44e66f7674cd017e2339d0852dbcb1d25f8a79c447f5f307b6",
-    "documentBytes": 411527,
-    "documentSha256": "6b5a34a53951444f697cc63feadb51ddda59d9bfb75b691ce0884afc689fdf33",
-    "evidenceSha256": "a558af53afbdbff93db713df7d0325a6db835e9e8c4315e7ded78ef2e2de57fc",
-    "sourceMetadataSha256": "284bb13ceb3b0ae86014ef79f4ef16a02da27f7ea1678fa56f595937e482d208"
+    "bytes": 608361,
+    "rawSha256": "20780eafb7235ede6ee19355bc7cbc4e5d3ea0d1584079a91c80c67b84961a27",
+    "documentBytes": 431731,
+    "documentSha256": "ff3710060dc37dbaeb3b5d9f5b27b5a24415e4e403a7f218cb81bebc45756a58",
+    "evidenceSha256": "d16719ac1ed8188123d6365f05ffb035e0cc4db4444969352c33387a3a87aea9",
+    "sourceMetadataSha256": "8eb07df617b9d6d48d0f8ab0efb4f0aee52368530922c88fc032100785785c39"
   },
   "sections": {
     "changelog": {
       "type": "array",
-      "entries": 37,
-      "sha256": "698ea15071d33b20c1c3ced9be7850969dca3312deae828c796c19558487a934"
+      "entries": 50,
+      "sha256": "5b6512f47437c150bdc64d65fc99e8fd10af85600ef1f77f82bfb8daab88406e"
     },
     "class_abilities": {
       "type": "object",
@@ -39,7 +39,7 @@
     "legacy": {
       "type": "object",
       "entries": 2,
-      "sha256": "8b8f3996042b9ca011f4540989bbf92c6521cd72ee4bc72289d4c6c8988143cf"
+      "sha256": "4f51a03c223dcd80a9ed247eae5c28c9b97444ee8fd0d3ef583e02f70991a91f"
     },
     "racials": {
       "type": "object",
@@ -48,8 +48,8 @@
     },
     "spell_desc": {
       "type": "object",
-      "entries": 366,
-      "sha256": "fe3a70d49606374993f02d324b332442707601f3916a1b1cee448d201278d9b1"
+      "entries": 367,
+      "sha256": "d04fa7df67cea806183833890c26d60c6f6d6f25801e89249e7240ab864cab48"
     },
     "spellbooks": {
       "type": "object",
@@ -59,23 +59,23 @@
     "talents": {
       "type": "object",
       "entries": 9,
-      "sha256": "2b42f098a4c4f113564e3535c8c178be899eda1cae8ab32496cdabb1efdbb440"
+      "sha256": "a3efb8f318dadb94fc9696d0fa668762677f0abda585b608e72ba5a703a9d89a"
     }
   },
   "metrics": {
     "classes": 9,
     "talentTrees": 27,
     "talents": 470,
-    "completeTalents": 187,
-    "talentsWithConfirmedRank": 33,
+    "completeTalents": 211,
+    "talentsWithConfirmedRank": 76,
     "spellbookEntries": 401,
-    "spellDescriptions": 366,
-    "demoSpellDescriptions": 229,
-    "classicSpellDescriptions": 137,
+    "spellDescriptions": 367,
+    "demoSpellDescriptions": 245,
+    "classicSpellDescriptions": 122,
     "racialAbilities": 40,
     "classRacialAbilities": 12,
     "classAbilities": 37,
     "legacyPerks": 20,
-    "changelogEntries": 37
+    "changelogEntries": 50
   }
 }

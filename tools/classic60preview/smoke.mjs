@@ -7,7 +7,7 @@ import vm from 'node:vm';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const artifact = resolve(root, process.argv[2] || 'dist/forever-preview');
-assert.deepEqual((await readdir(artifact)).sort(), ['app.js', 'build-info.json', 'classic60.wasm', 'index.html', 'style.css', 'wasm_exec.js']);
+assert.deepEqual((await readdir(artifact)).sort(), ['app.js', 'build-info.json', 'classic60.wasm', 'index.html', 'style.css', 'wasm_exec.js', 'baseline.html', 'forever.js', 'forever.css', 'forever-worker.js', 'logo.png', 'paladin.jpg'].sort());
 const build = JSON.parse(await readFile(resolve(artifact, 'build-info.json'), 'utf8'));
 assert.match(build.commit, /^[a-f\d]{40}$/i);
 assert.equal(typeof build.dirty, 'boolean');
@@ -17,6 +17,15 @@ const go = new globalThis.Go();
 const { instance } = await WebAssembly.instantiate(await readFile(resolve(artifact, 'classic60.wasm')), go.importObject);
 void go.run(instance).then(() => { throw new Error('Preview engine unexpectedly exited.'); });
 assert.equal(typeof globalThis.classic60Preview, 'function');
+
+assert.equal(typeof globalThis.foreverRet, 'function');
+const ret = JSON.parse(globalThis.foreverRet(JSON.stringify({ iterations: 3, duration: 60 })));
+assert.equal(ret.error, undefined, ret.error);
+assert.ok(ret.dps > 0);
+assert.ok(ret.actions.some(action => action.name === 'Holy Strike' && action.dps > 0));
+assert.ok(ret.actions.some(action => action.name === 'Hammer of Wrath' && action.dps > 0));
+assert.equal(globalThis.foreverRet(JSON.stringify({ iterations: 3, duration: 60 })), JSON.stringify(ret));
+console.log(`Forever Ret WASM: ${ret.dps.toFixed(2)} DPS, deterministic results.`);
 
 function call(request) {
 	const envelope = JSON.parse(globalThis.classic60Preview(JSON.stringify(request)));

@@ -143,6 +143,11 @@ func livePhysicalAttackTableView(spell *Spell, table *AttackTable) physicalAttac
 	if paladin && table.Defender.PseudoStats.Stunned {
 		view.baseDodgeChance, view.baseParryChance, view.baseBlockChance = 0, 0, 0
 	}
+	if spell.Unit.foreverRet != nil {
+		reduction := spell.Unit.foreverRet.config.AvoidanceReduction / 100
+		view.baseDodgeChance = max(0, view.baseDodgeChance-reduction)
+		view.baseParryChance = max(0, view.baseParryChance-reduction)
+	}
 	return view
 }
 
@@ -183,6 +188,10 @@ func (spell *Spell) validateClassic60PaladinMelee(table *AttackTable, character 
 	case classic60PaladinAttackNone:
 		if spell.SpellSchool != SpellSchoolPhysical || spell.ProcMask != ProcMaskMeleeMHAuto {
 			panic("Classic Paladin physical reference supports white main-hand attacks")
+		}
+	case foreverPaladinHolyStrike:
+		if spell.Unit.foreverRet == nil || spell.SpellID != 17143 || spell.SpellSchool != SpellSchoolHoly || spell.ProcMask != ProcMaskMeleeMHSpecial || !spell.IgnoreHaste {
+			panic("Forever Holy Strike requires its owned Ret simulation")
 		}
 	case classic60PaladinCommandProc, classic60PaladinCommandJudgement:
 		expectedID := int32(20947)

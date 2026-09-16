@@ -541,6 +541,10 @@ func TestEvidenceReferencesAreQuarantined(t *testing.T) {
 		"tools/foreverdata/",
 		"third_party/talentsforever/",
 		"docs/forever_core.md",
+		// Explicit Ret derivative generation and its evidence ledger. Runtime
+		// code still cannot import the raw, unreviewed multi-class snapshot.
+		"docs/forever_ret.md",
+		"tools/classic60preview/generate-ret-catalog.mjs",
 		".github/workflows/run_tests.yml",
 		".gitattributes",
 		"makefile",

@@ -52,6 +52,11 @@ func registerClassic60PaladinBuild(character *Character, talents classic60Paladi
 	if err := talents.validateOffensiveSupport(); err != nil {
 		return nil, err
 	}
+	return registerClassic60PaladinAbilities(character, talents)
+}
+
+// Shared spell assembly; callers own validation of their talent schema.
+func registerClassic60PaladinAbilities(character *Character, talents classic60PaladinTalents) (*classic60PaladinSpells, error) {
 	if character == nil || character.resolvedRuleset().id != rulesetClassic60PaladinReference ||
 		character.Type != PlayerUnit || character.Level != 60 || character.Race != proto.Race_RaceHuman ||
 		character.Class != proto.Class_ClassPaladin || !character.HasManaBar() || !character.AutoAttacks.AutoSwingMelee {

@@ -80,6 +80,7 @@ const (
 	classic60PaladinCommandJudgement
 	classic60PaladinHammerOfWrath
 	classic60PaladinRighteousnessProc
+	foreverPaladinHolyStrike
 )
 
 type Spell struct {

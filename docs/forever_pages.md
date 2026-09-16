@@ -1,17 +1,15 @@
 # Classic 60 preview on GitHub Pages
 
-The published preview is a small browser diagnostic that runs the Go Classic
-level-60 character-baseline code through WebAssembly. Its purpose is to make
-the foundation inspectable while a complete Classic-like engine is being built.
-It is **not a combat/DPS simulator**, and does not enable Forever mechanics.
-The inherited TBC UI is deliberately not published: its engine remains level 70
-and many of its asset/runtime URLs are fixed to `/tbc/`.
+The published root runs the [Forever Ret DPS simulator](forever_ret.md). It uses
+the Go combat engine through WebAssembly in a cancellable Web Worker. The
+Classic level-60 base-stat diagnostic remains available at `baseline.html`.
+Both use relative asset paths under the repository's Pages subpath. The
+inherited level-70 TBC UI is not published.
 
-The final published product will preserve the original WoWSims landing page,
-class navigation and simulator interface, updated for Forever. This diagnostic
-is temporary. Bringing the normal interface online requires matching level-60
-engine/data support and a deliberate migration of asset and worker URLs to the
-project-site path; publishing the existing TBC pages would not complete that work.
+The Ret interface follows the original WoWSims sidebar, tabs, class colors and
+results layout. Additional class navigation can be added as each DPS model
+becomes usable. Its provisional data and bounded encounter scope are visible
+in the interface; it is not a verified model of every unreleased Forever rule.
 
 ## One-time GitHub setup
 
@@ -68,10 +66,13 @@ version from `.nvmrc` (see [installation](installation.md)). From the repo root:
 
 ```sh
 make sim/core/proto/api.pb.go
+node tools/classic60preview/generate-ret-catalog.mjs --check
 node tools/classic60preview/build.mjs
 node tools/classic60preview/smoke.mjs dist/forever-preview
 node --test tools/ci/check_pages_artifact.test.mjs
 node tools/ci/check_pages_artifact.mjs dist/forever-preview
+# Requires Chrome (included on the CI Ubuntu runner):
+node tools/classic60preview/browser-smoke.mjs dist/forever-preview
 ```
 
 The publishable directory is `dist/forever-preview`. Serve that directory through
