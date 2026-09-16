@@ -2,11 +2,8 @@ package core
 
 import (
 	"math"
-	"reflect"
 	"testing"
 	"time"
-
-	googleProto "google.golang.org/protobuf/proto"
 )
 
 func TestClassic60DualWieldRuntimeSchedulerResetAndReproducibility(t *testing.T) {
@@ -52,9 +49,8 @@ func TestClassic60DualWieldRuntimeSchedulerResetAndReproducibility(t *testing.T)
 	assertFloat64(t, "collected off-hand damage", oh.Damage, damage[WeaponAttackSourceOffHand])
 	assertFloat64(t, "raid DPS from both hands", result.RaidMetrics.Dps.Avg, (mh.Damage+oh.Damage)/180)
 	repeat, _, repeatSwings := newClassic60MeleeTestSim(t, config)
-	if !googleProto.Equal(result, repeat.run()) || !reflect.DeepEqual(*swings, *repeatSwings) {
-		t.Fatal("identical seeds did not reproduce both hands' scheduled results")
-	}
+	classic60MeleeTestAssertResultEqual(t, result, repeat.run())
+	classic60MeleeTestAssertSwingsEqual(t, *swings, *repeatSwings)
 }
 
 func TestClassic60DualWieldRuntimeMissPenaltyAndHitSuppression(t *testing.T) {

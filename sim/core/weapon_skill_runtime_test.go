@@ -127,7 +127,9 @@ func TestClassicRuntimeRejectsUnauditedMeleeContexts(t *testing.T) {
 		{"dual wield", func(c *Character, _ *Spell, _ *AttackTable) { c.AutoAttacks.IsDualWielding = true }},
 		{"queued attack override", func(c *Character, _ *Spell, _ *AttackTable) { c.PseudoStats.DisableDWMissPenalty = true }},
 		{"unarmed", func(c *Character, _ *Spell, _ *AttackTable) { c.Equipment[proto.ItemSlot_ItemSlotMainHand] = Item{} }},
-		{"mixed auto and special", func(_ *Character, s *Spell, _ *AttackTable) { s.ProcMask = ProcMaskMeleeMHAuto | ProcMaskMeleeMHSpecial }},
+		{"mixed auto and special", func(_ *Character, s *Spell, _ *AttackTable) {
+			s.ProcMask = ProcMaskMeleeMHAuto | ProcMaskMeleeMHSpecial
+		}},
 		{"offhand", func(_ *Character, s *Spell, _ *AttackTable) { s.weaponAttackSource = WeaponAttackSourceOffHand }},
 		{"school", func(_ *Character, s *Spell, _ *AttackTable) { s.SpellSchool = SpellSchoolFire }},
 		{"cannot dodge", func(_ *Character, s *Spell, _ *AttackTable) { s.Flags |= SpellFlagCannotBeDodged }},

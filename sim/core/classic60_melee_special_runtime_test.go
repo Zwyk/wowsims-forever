@@ -8,7 +8,6 @@ import (
 
 	"github.com/wowsims/tbc/sim/core/proto"
 	"github.com/wowsims/tbc/sim/core/stats"
-	googleProto "google.golang.org/protobuf/proto"
 )
 
 func classic60SpecialOutcomeFixture(source WeaponAttackSource) (*Character, *Spell, *AttackTable) {
@@ -46,6 +45,11 @@ func TestClassic60SpecialOutcomeBoundariesAndRandomDraws(t *testing.T) {
 		{"main hand", WeaponAttackSourceMainHand, 0.06, 0.12},
 		{"off hand", WeaponAttackSourceOffHand, 0.08, 0.145},
 	} {
+		_, boundarySpell, boundaryTable := classic60SpecialOutcomeFixture(hand.source)
+		missBoundary := boundarySpell.GetPhysicalMissChance(boundaryTable)
+		assertFloat64(t, "literal special miss chance", missBoundary, hand.miss)
+		// Use the validated runtime threshold for equality: .05 + .01 and
+		// the literal .06 can differ by one floating-point representable value.
 		for _, test := range []struct {
 			name        string
 			hit, crit   float64
@@ -54,7 +58,7 @@ func TestClassic60SpecialOutcomeBoundariesAndRandomDraws(t *testing.T) {
 			randomDraws int
 		}{
 			{"miss", hand.miss - 0.0001, 0, OutcomeMiss, 0, 1},
-			{"dodge at miss boundary", hand.miss, 0, OutcomeDodge, 0, 1},
+			{"dodge at miss boundary", missBoundary, 0, OutcomeDodge, 0, 1},
 			{"dodge before landed boundary", hand.landed - 0.0001, 0, OutcomeDodge, 0, 1},
 			{"crit", hand.landed + 0.0001, 0.1919, OutcomeCrit, 200, 2},
 			{"hit", hand.landed + 0.0001, 0.1921, OutcomeHit, 100, 2},
@@ -78,8 +82,8 @@ func TestClassic60SpecialOutcomeBoundariesAndRandomDraws(t *testing.T) {
 
 func TestClassic60ExpectedSpecialUsesConditionalCritAndWeaponSkill(t *testing.T) {
 	for _, test := range []struct {
-		name                 string
-		source               WeaponAttackSource
+		name                  string
+		source                WeaponAttackSource
 		hit, crit, base, want float64
 	}{
 		{"305 main hand", WeaponAttackSourceMainHand, 0, 24, 100, 104.896},
@@ -275,7 +279,8 @@ func TestClassic60SpecialRuntimeCastsCooldownsMetricsAndReset(t *testing.T) {
 		}
 	}
 	repeat, repeatCasts := newClassic60SpecialTestSim(t, config)
-	if !googleProto.Equal(result, repeat.run()) || !reflect.DeepEqual(*casts, *repeatCasts) {
-		t.Fatal("scheduled specials were not reproducible with identical seeds")
+	classic60MeleeTestAssertResultEqual(t, result, repeat.run())
+	if !reflect.DeepEqual(*casts, *repeatCasts) {
+		t.Fatal("scheduled special cast trace was not reproducible with identical seeds")
 	}
 }

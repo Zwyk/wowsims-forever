@@ -3,6 +3,7 @@ package core
 import (
 	"math"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -164,6 +165,64 @@ func classic60MeleeTestMetricsForHand(t *testing.T, result *proto.RaidSimResult,
 	return nil
 }
 
+func classic60MeleeTestAssertResultEqual(t *testing.T, want, got *proto.RaidSimResult) {
+	t.Helper()
+	// UnitMetrics.ToProto appends Actions while ranging over a map. Preserve
+	// exact protobuf equality after ordering only that unordered report field;
+	// ordered schedules and every numeric metric remain subject to exact checks.
+	canonical := func(result *proto.RaidSimResult) *proto.RaidSimResult {
+		cloned := googleProto.Clone(result).(*proto.RaidSimResult)
+		var sortActions func(*proto.UnitMetrics)
+		sortActions = func(unit *proto.UnitMetrics) {
+			keys := make(map[*proto.ActionMetrics]string, len(unit.Actions))
+			seen := make(map[string]bool, len(unit.Actions))
+			for _, action := range unit.Actions {
+				encoded, err := (googleProto.MarshalOptions{Deterministic: true}).Marshal(action.Id)
+				if err != nil {
+					t.Fatalf("cannot encode reported action ID: %v", err)
+				}
+				key := string(encoded)
+				if seen[key] {
+					t.Fatalf("report contains duplicate action ID %v", action.Id)
+				}
+				seen[key] = true
+				keys[action] = key
+			}
+			sort.Slice(unit.Actions, func(i, j int) bool { return keys[unit.Actions[i]] < keys[unit.Actions[j]] })
+			for _, pet := range unit.Pets {
+				sortActions(pet)
+			}
+		}
+		for _, party := range cloned.GetRaidMetrics().GetParties() {
+			for _, player := range party.Players {
+				sortActions(player)
+			}
+		}
+		for _, target := range cloned.GetEncounterMetrics().GetTargets() {
+			sortActions(target)
+		}
+		return cloned
+	}
+	if !googleProto.Equal(canonical(want), canonical(got)) {
+		t.Error("identical seeds produced different report metrics after canonicalizing action order")
+	}
+}
+
+func classic60MeleeTestAssertSwingsEqual(t *testing.T, want, got []classic60MeleeTestSwing) {
+	t.Helper()
+	if !reflect.DeepEqual(want, got) {
+		if len(want) != len(got) {
+			t.Fatalf("identical seeds changed scheduled swing count: %d != %d", len(want), len(got))
+		}
+		for i := range want {
+			if want[i] != got[i] {
+				t.Fatalf("identical seeds changed scheduled swing %d: %+v != %+v", i, want[i], got[i])
+			}
+		}
+		t.Fatal("identical seeds changed the scheduled swing trace")
+	}
+}
+
 func TestClassic60MeleeRuntimeSchedulerResetAndReproducibility(t *testing.T) {
 	active := currentRuleset()
 	config := classic60MeleeTestConfig{targetLevel: 63, duration: 60 * time.Second, iterations: 3, seed: 724}
@@ -193,9 +252,8 @@ func TestClassic60MeleeRuntimeSchedulerResetAndReproducibility(t *testing.T) {
 		t.Fatal("Classic fixture changed its initial stats or the active TBC profile")
 	}
 	repeat, _, repeatSwings := newClassic60MeleeTestSim(t, config)
-	if !googleProto.Equal(result, repeat.run()) || !reflect.DeepEqual(*swings, *repeatSwings) {
-		t.Fatal("identical seeds did not reproduce full scheduled results")
-	}
+	classic60MeleeTestAssertResultEqual(t, result, repeat.run())
+	classic60MeleeTestAssertSwingsEqual(t, *swings, *repeatSwings)
 }
 
 func TestClassic60MeleeRuntimeSourceDistributions(t *testing.T) {
