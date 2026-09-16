@@ -7,11 +7,32 @@ import (
 )
 
 type classic60PaladinSpells struct {
-	SealOfCommand    *Spell
-	Judgement        *Spell
-	CommandProc      *Spell
-	CommandJudgement *Spell
-	SealAura         *Aura
+	classic60PaladinHealing
+	classic60PaladinSupport
+	classic60PaladinMagicDefense
+	classic60PaladinCooldowns
+	classic60PaladinMiscTalents
+	classic60PaladinMobility
+	*classic60PaladinDefenseState
+	HammerOfWrath                                                  *Spell
+	HammerOfJustice, Repentance                                    *Spell
+	HammerOfJusticeAuras, RepentanceAuras                          AuraArray
+	SealOfTheCrusader, CrusaderJudgement                           *Spell
+	SealOfRighteousness, RighteousnessProc, RighteousnessJudgement *Spell
+	RighteousnessAura                                              *Aura
+	SealOfLight, SealOfWisdom, SealOfJustice                       *Spell
+	LightProc, WisdomProc, JusticeProc                             *Spell
+	LightJudgement, WisdomJudgement, JusticeJudgement              *Spell
+	SealOfLightAura, SealOfWisdomAura, SealOfJusticeAura           *Aura
+	CrusaderAura                                                   *Aura
+	currentSeal                                                    *Aura
+	currentJudgement                                               *Spell
+	activeJudgement                                                *Aura
+	SealOfCommand                                                  *Spell
+	Judgement                                                      *Spell
+	CommandProc                                                    *Spell
+	CommandJudgement                                               *Spell
+	SealAura                                                       *Aura
 
 	Consecration, Exorcism, HolyWrath, HolyShock                                    *Spell
 	BlessingOfMight, BlessingOfWisdom, BlessingOfKings                              *Spell
@@ -39,8 +60,8 @@ func (spells *classic60PaladinSpells) disposePendingCommandResults() {
 // This private bundle is not a public Paladin agent or a complete talent build.
 // Learning Command is explicit because the pinned registration omits that
 // talent check. The validated build entrypoint adds supported talents and other
-// abilities; stunned-target damage, alternate seals, weapon swaps and twisting
-// remain outside this reference.
+// abilities, alternate seals and stunned-target damage. Weapon swaps and
+// twisting remain outside this reference.
 // Auto-attacks must already be configured, as in the source's class constructor.
 func registerClassic60ReferencePaladin(character *Character, sealOfCommandLearned bool) *classic60PaladinSpells {
 	if !sealOfCommandLearned {
@@ -68,9 +89,10 @@ func registerClassic60PaladinCommand(character *Character, talents classic60Pala
 	}
 
 	if talents[classic60PaladinSealOfCommand] == 0 {
+		spells.registerJudgement(character, talents)
 		return spells
 	}
-	weaponMultiplier := 1 + .02*float64(talents[classic60PaladinTwoHandedWeaponSpecialization])
+	weaponMultiplier := classic60PaladinWeaponMultiplier(character, talents)
 	benediction := float64(100-3*talents[classic60PaladinBenediction]) / 100
 
 	// The source asks its Judgement wrapper for a magical hit-only result.
@@ -94,7 +116,10 @@ func registerClassic60PaladinCommand(character *Character, talents classic60Pala
 		ApplyEffects: func(sim *Simulation, target *Unit, spell *Spell) {
 			// Only the base roll is halved for an unstunned target. The source
 			// does this unconditionally and does not implement the stun bonus.
-			baseDamage := sim.Roll(339, 373) * 0.5
+			baseDamage := sim.Roll(339, 373)
+			if !target.PseudoStats.Stunned {
+				baseDamage *= .5
+			}
 			hit := spells.judgementHitCheck.CalcOutcome(sim, target, spells.judgementHitCheck.OutcomeMagicHit)
 			landed := hit.Landed()
 			spells.judgementHitCheck.DisposeResult(hit)
@@ -116,10 +141,9 @@ func registerClassic60PaladinCommand(character *Character, talents classic60Pala
 		ProcMask: ProcMaskMeleeMHSpecial, WeaponAttackSource: WeaponAttackSourceMainHand,
 		Flags: SpellFlagMeleeMetrics | SpellFlagPassiveSpell,
 		Cast:  CastConfig{IgnoreHaste: true},
-		// CalcDamage adds the coefficient before applying DamageMultiplier:
-		// executable source scaling is 0.7 * (weapon damage + 0.29 * SP),
-		// i.e. an effective 0.203 SP coefficient, not an additive 0.29 SP.
-		DamageMultiplier: 0.7 * weaponMultiplier, ThreatMultiplier: 1, BonusCoefficient: 0.29,
+		// VMaNGOS Classic applies .7 to the weapon roll before .20 spell
+		// power; its separate target-side coefficient (e.g. Crusader) is .29.
+		DamageMultiplier: 0.7 * weaponMultiplier, ThreatMultiplier: 1, BonusCoefficient: .20 / .7,
 		ApplyEffects: func(sim *Simulation, target *Unit, spell *Spell) {
 			baseDamage := character.MHWeaponDamage(sim, spell.MeleeAttackPower(target))
 			result := spell.CalcDamage(sim, target, baseDamage, spell.OutcomeMeleeSpecialHitAndCrit)
@@ -143,10 +167,12 @@ func registerClassic60PaladinCommand(character *Character, talents classic60Pala
 		},
 	})
 	spells.CommandProc.classic60PaladinAttack = classic60PaladinCommandProc
+	spells.CommandProc.classic60TargetBonusCoefficient = .29
 
 	spells.SealAura = character.RegisterAura(Aura{
 		Label: "Seal of Command (Rank 5)", ActionID: ActionID{SpellID: 20920},
 		Duration: 30 * time.Second,
+		OnExpire: func(aura *Aura, _ *Simulation) { spells.sealExpired(aura) },
 		// Step can discard the first action past the encounter boundary
 		// before generic pending-action cleanup sees it. Keep ownership of
 		// calculated results until delivery or the iteration/reset boundary.
@@ -173,9 +199,39 @@ func registerClassic60PaladinCommand(character *Character, talents classic60Pala
 			IgnoreHaste: true,
 			DefaultCast: Cast{GCD: GCDDefault},
 		},
-		ApplyEffects: func(sim *Simulation, _ *Unit, _ *Spell) { spells.SealAura.Activate(sim) },
+		ApplyEffects: func(sim *Simulation, _ *Unit, _ *Spell) {
+			spells.activateSeal(sim, spells.SealAura, spells.CommandJudgement)
+		},
 	})
 
+	spells.registerJudgement(character, talents)
+	return spells
+}
+
+func (spells *classic60PaladinSpells) activateSeal(sim *Simulation, aura *Aura, judgement *Spell) {
+	if spells.currentSeal != nil && spells.currentSeal != aura {
+		spells.currentSeal.Deactivate(sim)
+	}
+	spells.currentSeal, spells.currentJudgement = aura, judgement
+	aura.Activate(sim)
+}
+
+func (spells *classic60PaladinSpells) sealExpired(aura *Aura) {
+	if spells.currentSeal == aura {
+		spells.currentSeal, spells.currentJudgement = nil, nil
+	}
+}
+
+func (spells *classic60PaladinSpells) activateJudgement(sim *Simulation, aura *Aura) {
+	if spells.activeJudgement != nil && spells.activeJudgement != aura {
+		spells.activeJudgement.Deactivate(sim)
+	}
+	spells.activeJudgement = aura
+	aura.Activate(sim)
+}
+
+func (spells *classic60PaladinSpells) registerJudgement(character *Character, talents classic60PaladinTalents) {
+	benediction := float64(100-3*talents[classic60PaladinBenediction]) / 100
 	spells.Judgement = character.RegisterSpell(SpellConfig{
 		ActionID:    ActionID{SpellID: 20271},
 		SpellSchool: SpellSchoolHoly, DefenseType: DefenseTypeMagic,
@@ -188,13 +244,14 @@ func registerClassic60PaladinCommand(character *Character, talents classic60Pala
 			DefaultCast: Cast{NonEmpty: true},
 			CD:          Cooldown{Timer: character.NewTimer(), Duration: time.Duration(10-talents[classic60PaladinImprovedJudgement]) * time.Second},
 		},
-		ExtraCastCondition: func(_ *Simulation, _ *Unit) bool { return spells.SealAura.IsActive() },
+		ExtraCastCondition: func(_ *Simulation, _ *Unit) bool {
+			return spells.currentSeal != nil && spells.currentSeal.IsActive() && spells.currentJudgement != nil
+		},
 		ApplyEffects: func(sim *Simulation, target *Unit, _ *Spell) {
-			spells.CommandJudgement.Cast(sim, target)
+			seal, judgement := spells.currentSeal, spells.currentJudgement
+			judgement.Cast(sim, target)
 			// The seal is consumed whether the judgement hits or misses.
-			spells.SealAura.Deactivate(sim)
+			seal.Deactivate(sim)
 		},
 	})
-
-	return spells
 }

@@ -57,6 +57,7 @@ func classic60PaladinReferenceRules() rulesetProfile {
 	rules.combat.outcomes.spellChanceModel = spellChanceModelClassicReference60
 	rules.combat.outcomes.minimumSpellMissChance = 0.01
 	rules.combat.outcomes.magicCritDamageMultiplier = 1.5
+	rules.combat.outcomes.rangedCritDamageMultiplier = 2
 	rules.resources.manaModel = manaModelClassic60PaladinReference
 	return rules
 }
@@ -126,7 +127,7 @@ func validateManaCostOptions(spell *Spell, options ManaCostOptions) {
 		options.BaseCostPercent > 0 && options.BaseCostPercent <= 100 &&
 		!math.IsNaN(options.BaseCostPercent) && !math.IsInf(options.BaseCostPercent, 0)
 	modifierAllowed := options.PercentModifier == 0 || options.PercentModifier == 1
-	if model == manaModelClassic60PaladinReference && (spell.SpellID == 20920 || spell.SpellID == 20271) {
+	if model == manaModelClassic60PaladinReference && (spell.SpellID == 20920 || spell.SpellID == 20271 || spell.SpellID == 20308 || spell.SpellID == 20293 || spell.SpellID == 20349 || spell.SpellID == 20357 || spell.SpellID == 20164) {
 		// The only currently supported reduction is Benediction on Command/Judgement.
 		for rank := 1; rank <= 5; rank++ {
 			modifierAllowed = modifierAllowed || options.PercentModifier == float64(100-3*rank)/100

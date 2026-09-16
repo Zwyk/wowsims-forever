@@ -26,9 +26,16 @@ type classic60PaladinTestAgent struct {
 	spells       *classic60PaladinSpells
 	events       []classic60PaladinTestEvent
 	startingMana float64
+	pauseAutos   bool
 }
 
 func (agent *classic60PaladinTestAgent) Reset(sim *Simulation) {
+	if agent.pauseAutos {
+		// startPull runs before the pending time-zero cancellation and can
+		// schedule a white swing immediately. Hold that first swing past the
+		// encounter so isolated spell tests cannot proc talents at pull.
+		agent.AutoAttacks.DelayMeleeBy(sim, sim.Duration+time.Second)
+	}
 	if agent.startingMana > 0 {
 		// Agent.Reset runs after the resource bar reset and before the native
 		// APL can cast at pull. This changes only the test's initial state.
@@ -59,6 +66,7 @@ type classic60PaladinTestConfig struct {
 	spellDamage, physicalCrit float64
 	mp5, armor, startingMana  float64
 	apl, pauseAutos           bool
+	oneHandShield, front      bool
 	talents                   *classic60PaladinTalents
 }
 
@@ -82,7 +90,7 @@ func newClassic60PaladinTestSim(t *testing.T, config classic60PaladinTestConfig,
 	raid := NewRaid(&proto.Raid{})
 	party := NewParty(raid, 0, &proto.Party{}, &proto.Raid{})
 	raid.Parties = []*Party{party}
-	agent := &classic60PaladinTestAgent{startingMana: config.startingMana}
+	agent := &classic60PaladinTestAgent{startingMana: config.startingMana, pauseAutos: config.pauseAutos}
 	agent.Character = newCharacterWithRuleset(party, 0, &proto.Player{
 		Name: "Classic Paladin fixture", Race: proto.Race_RaceHuman, Class: proto.Class_ClassPaladin,
 		Spec: &proto.Player_RetributionPaladin{}, Equipment: &proto.EquipmentSpec{},
@@ -96,6 +104,11 @@ func newClassic60PaladinTestSim(t *testing.T, config classic60PaladinTestConfig,
 		WeaponType: proto.WeaponType_WeaponTypeSword, HandType: proto.HandType_HandTypeTwoHand,
 		WeaponDamageMin: 100, WeaponDamageMax: 100, SwingSpeed: 3,
 	}
+	if config.oneHandShield {
+		agent.Equipment[proto.ItemSlot_ItemSlotMainHand].HandType = proto.HandType_HandTypeOneHand
+		agent.Equipment[proto.ItemSlot_ItemSlotOffHand] = Item{ID: -2, Type: proto.ItemType_ItemTypeWeapon, WeaponType: proto.WeaponType_WeaponTypeShield, HandType: proto.HandType_HandTypeOffHand}
+	}
+	agent.PseudoStats.InFrontOfTarget = config.front
 	agent.EnableAutoAttacks(agent, AutoAttackOptions{MainHand: agent.WeaponFromMainHand(), AutoSwingMelee: true})
 	agent.AutoAttacks.RandomMeleeOffset = false
 	party.Players = []Agent{agent}
@@ -348,7 +361,7 @@ func TestClassic60PaladinCommandDamageClassificationAndScaling(t *testing.T) {
 			})
 			classic60PaladinResult(t, sim.run())
 			const weaponDamage = 100 + 3.0*370/14 // Fresh, non-normalized weapon/AP roll.
-			procDamage := .7*weaponDamage + .203*spellDamage
+			procDamage := .7*weaponDamage + .20*spellDamage
 			judgeDamage := 178 + .429*spellDamage
 			count := 0
 			for _, event := range agent.events {

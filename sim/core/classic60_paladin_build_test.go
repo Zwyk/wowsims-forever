@@ -2,7 +2,6 @@ package core
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
@@ -76,16 +75,20 @@ func TestClassic60PaladinSupportedBuildAndVengeance(t *testing.T) {
 	classic60PaladinResult(t, sim.run())
 }
 
-func TestClassic60PaladinUnsupportedTalentsRejectBeforeMutation(t *testing.T) {
+func TestClassic60PaladinInvalidTalentsRejectBeforeMutation(t *testing.T) {
 	_, agent := newClassic60PaladinTestSim(t, classic60PaladinTestConfig{})
-	// Legal source Ret preset, but contains unsupported Crusader/Vindication.
+	// The legal source Ret preset is now supported, including Vindication.
 	talents, err := parseClassic60PaladinTalents("500501-503-52230351200315")
 	if err != nil {
 		t.Fatal(err)
 	}
 	before, spells := agent.GetStats(), len(agent.Spellbook)
-	if result, err := registerClassic60PaladinBuild(&agent.Character, talents); err == nil || result != nil || !strings.Contains(err.Error(), "not implemented") {
-		t.Fatal("an unsupported talent build was silently accepted")
+	if err := talents.validateOffensiveSupport(); err != nil {
+		t.Fatalf("legal source Ret preset is not supported: %v", err)
+	}
+	talents[classic60PaladinVindication] = 4 // maximum is three
+	if result, err := registerClassic60PaladinBuild(&agent.Character, talents); err == nil || result != nil {
+		t.Fatal("an invalid talent build was silently accepted")
 	}
 	if agent.GetStats() != before || len(agent.Spellbook) != spells {
 		t.Fatal("rejected talent selection mutated the character")
@@ -104,7 +107,7 @@ func TestClassic60PaladinBaseAbilitiesWithoutCommand(t *testing.T) {
 			}
 		})
 	})
-	if agent.spells.SealOfCommand != nil || agent.spells.Judgement != nil || agent.spells.Consecration != nil || agent.spells.HolyShock != nil {
+	if agent.spells.SealOfCommand != nil || agent.spells.Consecration != nil || agent.spells.HolyShock != nil {
 		t.Fatal("untalented build gained a talent-gated ability")
 	}
 	classic60PaladinResult(t, sim.run())

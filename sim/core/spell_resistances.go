@@ -7,6 +7,9 @@ import (
 )
 
 func (result *SpellResult) applyResistances(sim *Simulation, spell *Spell, isPeriodic bool, attackTable *AttackTable) {
+	if spell.Unit.Type == EnemyUnit && spell.Unit.resolvedRuleset().id == rulesetClassic60PaladinReference && spell.DefenseType == DefenseTypeMagic {
+		result.classic60PreMitigationDamage = result.Damage
+	}
 	resistanceMultiplier, outcome := spell.ResistanceMultiplier(sim, isPeriodic, attackTable)
 
 	result.Damage *= resistanceMultiplier
@@ -21,7 +24,13 @@ func (spell *Spell) ResistanceMultiplier(sim *Simulation, isPeriodic bool, attac
 	if attackTable.resolvedOutcomeRules().spellChanceModel == spellChanceModelClassicReference60 {
 		// Also validate always-hit periodic damage and ignore-resist paths, which
 		// need not call a spell hit/crit getter during their outcome step.
-		if attackTable.resolvedResourceRules().manaModel == manaModelClassic60PaladinReference && spell.DefenseType == DefenseTypeMelee {
+		if attackTable.resolvedResourceRules().manaModel == manaModelClassic60PaladinReference && spell.Unit.Type == EnemyUnit {
+			if spell.DefenseType == DefenseTypeMagic {
+				liveClassic60PaladinIncomingSpellView(spell, attackTable)
+			} else {
+				validateClassic60PaladinIncoming(spell, attackTable)
+			}
+		} else if attackTable.resolvedResourceRules().manaModel == manaModelClassic60PaladinReference && (spell.DefenseType == DefenseTypeMelee || spell.classic60PaladinAttack == classic60PaladinHammerOfWrath) {
 			livePhysicalAttackTableView(spell, attackTable)
 		} else {
 			liveClassicSpellChanceView(spell, attackTable)

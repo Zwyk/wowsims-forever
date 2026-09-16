@@ -47,11 +47,17 @@ func (unit *Unit) initMovement() {
 }
 
 func (unit *Unit) MoveTo(moveRange float64, sim *Simulation) {
-	if moveRange == unit.DistanceFromTarget {
+	if unit.classic60PaladinMobility == nil && moveRange == unit.DistanceFromTarget {
 		return
 	}
 
 	unit.UpdatePosition(sim, false)
+	if unit.classic60PaladinMobility != nil && unit.classic60PaladinMobility.holdRootedMove(moveRange, sim) {
+		return
+	}
+	if unit.classic60PaladinMobility != nil && moveRange == unit.DistanceFromTarget {
+		return
+	}
 	moveDistance := moveRange - unit.DistanceFromTarget
 	timeToMove := time.Duration(math.Abs(moveDistance)/unit.GetMovementSpeed()*1000) * time.Millisecond
 	registerMovementAction(unit, sim, unit.GetMovementSpeed()*TernaryFloat64(moveDistance < 0, -1., 1.), sim.CurrentTime+timeToMove, moveDistance)
@@ -181,7 +187,11 @@ func (unit *Unit) MultiplyMovementSpeed(sim *Simulation, amount float64) {
 // Returns the units current movement speed in yards / second
 func (unit *Unit) GetMovementSpeed() float64 {
 	if unit.Type == PlayerUnit {
-		return 7. * unit.PseudoStats.MovementSpeedMultiplier
+		speed := 7. * unit.PseudoStats.MovementSpeedMultiplier
+		if unit.classic60PaladinMobility != nil {
+			speed *= unit.classic60PaladinMobility.movementMultiplier()
+		}
+		return speed
 	}
 
 	return 8. * unit.PseudoStats.MovementSpeedMultiplier

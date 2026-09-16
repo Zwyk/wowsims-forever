@@ -120,6 +120,7 @@ const (
 	OutcomePartial1_4 // 1/4 of the spell was resisted.
 	OutcomePartial2_4 // 2/4 of the spell was resisted.
 	OutcomePartial3_4 // 3/4 of the spell was resisted.
+	OutcomeImmune
 )
 
 const (
@@ -128,7 +129,9 @@ const (
 )
 
 func (ho HitOutcome) String() string {
-	if ho.Matches(OutcomeMiss) {
+	if ho.Matches(OutcomeImmune) {
+		return "Immune"
+	} else if ho.Matches(OutcomeMiss) {
 		return "Miss"
 	} else if ho.Matches(OutcomeDodge) {
 		return "Dodge"

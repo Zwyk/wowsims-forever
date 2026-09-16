@@ -55,6 +55,9 @@ func (spell *Spell) classicSpellChanceAttackTable(target *Unit) *AttackTable {
 // remain unsupported. Restrict crit to [0,1], where the source's unclamped
 // getter and its expected-outcome helpers describe the same probabilities.
 func liveClassicSpellChanceView(spell *Spell, table *AttackTable) classicSpellChanceView {
+	if table != nil && table.Attacker != nil && table.Attacker.Type == EnemyUnit && table.resolvedResourceRules().manaModel == manaModelClassic60PaladinReference {
+		return liveClassic60PaladinIncomingSpellView(spell, table)
+	}
 	if spell == nil || spell.Unit == nil || table == nil || !table.rulesInitialized ||
 		table.Attacker != spell.Unit || table.Defender == nil ||
 		table.Attacker.Type != PlayerUnit || table.Attacker.Level != 60 ||
@@ -69,8 +72,12 @@ func liveClassicSpellChanceView(spell *Spell, table *AttackTable) classicSpellCh
 		table.resolvedMitigationRules().resistanceModel != resistanceMitigationClassicReference60 {
 		panic("Classic spell reference requires consistent cached chance and resistance rules")
 	}
-	if spell.DefenseType != DefenseTypeMagic || spell.weaponAttackSource != WeaponAttackSourceNone ||
-		(spell.ProcMask != ProcMaskSpellDamage && spell.ProcMask != ProcMaskEmpty) {
+	sealProc := spell.Unit.resolvedRuleset().id == rulesetClassic60PaladinReference &&
+		spell.classic60PaladinAttack == classic60PaladinRighteousnessProc && spell.SpellID == 25713 &&
+		spell.weaponAttackSource == WeaponAttackSourceMainHand && spell.ProcMask == ProcMaskMeleeMHSpecial &&
+		spell.SpellSchool == SpellSchoolHoly && spell.Flags.Matches(SpellFlagIgnoreResists)
+	if spell.DefenseType != DefenseTypeMagic || (!sealProc && (spell.weaponAttackSource != WeaponAttackSourceNone ||
+		(spell.ProcMask != ProcMaskSpellDamage && spell.ProcMask != ProcMaskEmpty))) {
 		panic("Classic spell reference requires an explicitly non-weapon magical damage spell")
 	}
 	switch spell.SpellSchool {

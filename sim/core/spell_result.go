@@ -20,6 +20,7 @@ type SpellResult struct {
 	ArmorAndResistanceMultiplier     float64 // Armor multiplier
 	PostArmorAndResistanceMultiplier float64 // Damage done by this cast after Armor is applied
 	PostOutcomeDamage                float64 // Damage done by this cast after Outcome is applied
+	classic60PreMitigationDamage     float64
 
 	inUse bool
 }
@@ -75,6 +76,7 @@ func (spell *Spell) NewResult(target *Unit) *SpellResult {
 	result.inUse = true
 	result.PostArmorAndResistanceMultiplier = 0
 	result.PostOutcomeDamage = 0
+	result.classic60PreMitigationDamage = 0
 
 	return result
 }
@@ -91,6 +93,7 @@ func (spell *Spell) CloneResult(result *SpellResult) *SpellResult {
 	newResult.Outcome = result.Outcome
 	newResult.PostArmorAndResistanceMultiplier = result.PostArmorAndResistanceMultiplier
 	newResult.PostOutcomeDamage = result.PostOutcomeDamage
+	newResult.classic60PreMitigationDamage = result.classic60PreMitigationDamage
 
 	return newResult
 }
@@ -323,6 +326,9 @@ func getCritChancesWithRatingRules(rawChance float64, target *Unit, ratings rati
 }
 
 func (spell *Spell) HealingPower(target *Unit) float64 {
+	if spell.Unit.resolvedRuleset().id == rulesetClassic60PaladinReference {
+		return spell.Unit.GetStat(stats.HealingPower) + target.PseudoStats.BonusHealingTaken
+	}
 	return spell.SpellDamage(target) + target.PseudoStats.BonusHealingTaken
 }
 func (spell *Spell) HealingCritChance() float64 {
@@ -336,6 +342,19 @@ func (spell *Spell) HealingCritCheck(sim *Simulation) bool {
 
 func (spell *Spell) ApplyPostOutcomeDamageModifiers(sim *Simulation, result *SpellResult, isPeriodic bool) {
 	result.PostOutcomeDamage = result.Damage
+	if spell.Unit.Type == EnemyUnit && spell.Unit.resolvedRuleset().id == rulesetClassic60PaladinReference && spell.DefenseType == DefenseTypeMagic {
+		if result.Landed() {
+			table := spell.Unit.AttackTables[result.Target.UnitIndex]
+			original := SpellResult{Target: result.Target, Damage: result.classic60PreMitigationDamage}
+			original.applyTargetModifiers(sim, spell, table, isPeriodic)
+			if result.DidCrit() {
+				original.Damage *= spell.CritDamageMultiplier(table)
+			}
+			result.classic60PreMitigationDamage = max(0, original.Damage)
+		} else {
+			result.classic60PreMitigationDamage = 0
+		}
+	}
 
 	// TBC ANNI: Look into this
 	// if spell.Flags.Matches(SpellFlagAoE) {
@@ -368,6 +387,18 @@ func (spell *Spell) CalcOutcome(sim *Simulation, target *Unit, outcomeApplier Ou
 func (spell *Spell) calcDamageInternal(sim *Simulation, target *Unit, baseDamage float64, attackerMultiplier float64, isPeriodic bool, outcomeApplier OutcomeApplier) *SpellResult {
 	attackTable := spell.Unit.AttackTables[target.UnitIndex]
 	result := spell.NewResult(target)
+	if target.resolvedRuleset().id == rulesetClassic60PaladinReference && target.classic60ImmuneSchools.Matches(spell.SpellSchool) && spell.Unit.IsOpponent(target) {
+		if spell.DefenseType == DefenseTypeMagic {
+			liveClassic60PaladinIncomingSpellView(spell, attackTable)
+		} else {
+			validateClassic60PaladinIncoming(spell, attackTable)
+		}
+		result.Outcome, result.ArmorAndResistanceMultiplier = OutcomeImmune, 1
+		// Existing report transport groups unsuccessful attacks in Misses;
+		// runtime callbacks and logs retain the distinct immune outcome.
+		spell.SpellMetrics[target.UnitIndex].Misses++
+		return result
+	}
 	result.Damage = baseDamage
 
 	if sim.Log == nil {
@@ -820,6 +851,23 @@ func (spell *Spell) attackerDamageMultiplierInternal(attackTable *AttackTable) f
 func (result *SpellResult) applyTargetModifiers(sim *Simulation, spell *Spell, attackTable *AttackTable, isPeriodic bool) {
 	if spell.Flags.Matches(SpellFlagIgnoreTargetModifiers) {
 		return
+	}
+	result.Damage += attackTable.Defender.PseudoStats.BonusDamageTakenBeforeModifiers
+	if spell.Unit.resolvedRuleset().id == rulesetClassic60PaladinReference && spell.SpellSchool == SpellSchoolHoly {
+		coefficient := spell.BonusCoefficient
+		if spell.classic60TargetBonusCoefficient != 0 {
+			coefficient = spell.classic60TargetBonusCoefficient
+		}
+		if isPeriodic {
+			dot := spell.AOEDot()
+			if dot == nil {
+				dot = spell.Dot(attackTable.Defender)
+			}
+			if dot != nil {
+				coefficient = dot.BonusCoefficient
+			}
+		}
+		result.Damage += attackTable.Defender.classic60HolyDamageTaken * coefficient
 	}
 
 	if spell.SpellSchool.Matches(SpellSchoolPhysical) {

@@ -78,11 +78,14 @@ const (
 	classic60PaladinAttackNone classic60PaladinAttackKind = iota
 	classic60PaladinCommandProc
 	classic60PaladinCommandJudgement
+	classic60PaladinHammerOfWrath
+	classic60PaladinRighteousnessProc
 )
 
 type Spell struct {
 	// Private capability tag for the audited Holy melee outcomes.
-	classic60PaladinAttack classic60PaladinAttackKind
+	classic60PaladinAttack          classic60PaladinAttackKind
+	classic60TargetBonusCoefficient float64
 
 	// ID for this spell.
 	ActionID
@@ -654,6 +657,18 @@ func (spell *Spell) CanCast(sim *Simulation, target *Unit) bool {
 // Example: Metamorphosis drains 4 Demonic Fury every second.
 // This means at the end of the cast you could end up not meeting the casting requirements.
 func (spell *Spell) CanCompleteCast(sim *Simulation, target *Unit, logCastFailure bool) bool {
+	if spell.Unit.classic60PaladinMisc.blocksCast(spell) {
+		if logCastFailure {
+			return spell.castFailureHelper(sim, "spell school is silenced or interrupted")
+		}
+		return false
+	}
+	if spell.Unit.classic60PaladinPacified && spell.SpellSchool == SpellSchoolPhysical {
+		if logCastFailure {
+			return spell.castFailureHelper(sim, "physical actions are prevented")
+		}
+		return false
+	}
 	if !spell.Unit.IsEnabled() {
 		if logCastFailure {
 			return spell.castFailureHelper(sim, "unit is disabled")
