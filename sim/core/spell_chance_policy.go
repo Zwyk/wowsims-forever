@@ -82,10 +82,10 @@ func liveClassicSpellChanceView(spell *Spell, table *AttackTable) classicSpellCh
 		panic("Classic spell reference requires consistent school classification")
 	}
 	unit := spell.Unit
-	if unit.HasManaBar() || unit.HasRageBar() || unit.HasEnergyBar() || unit.HasFocusBar() || spell.Cost != nil ||
-		unit.stats[stats.SpellHasteRating] != 0 || unit.stats[stats.MeleeHasteRating] != 0 ||
+	validateClassicSpellResources(spell, table)
+	if unit.stats[stats.SpellHasteRating] != 0 || unit.stats[stats.MeleeHasteRating] != 0 ||
 		unit.PseudoStats.CastSpeedMultiplier != 1 || !spell.IgnoreHaste {
-		panic("Classic spell reference does not support resources or haste")
+		panic("Classic spell reference does not support haste")
 	}
 	if table.BonusSpellCritPercent != 0 || table.Defender.PseudoStats.BonusSpellCritPercentTaken != 0 ||
 		table.Defender.PseudoStats.ReducedCritTakenPercent != 0 || table.Defender.stats[stats.ResilienceRating] != 0 ||

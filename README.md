@@ -17,7 +17,7 @@ The inherited deployment, release, database-update, labeling, and webhook workfl
 
 The finished site will retain the original WoWSims landing page, class navigation, simulator controls and results layout, with Forever branding and supported data. The baseline lab is a temporary development tool, not the final interface. Engine integration now includes bounded level-60 single-weapon, dual-wield, melee-special and spell-combat fixtures; see the [melee scope](docs/forever_core.md#scheduled-classic-60-melee-integration) and [spell scope](docs/forever_core.md#scheduled-classic-60-spell-integration).
 
-Current milestone: starting stats and diagnostic combat work under tested Classic reference rules. The next integration work is resource costs/regeneration and a real Classic class rotation, followed by matching gear/talents/encounters and the normal WoWSims interface. Front-facing/incoming combat, live racials/rounding, forms and pets remain additional gates for the classes that need them. A complete playable level-60 simulator is not available yet.
+Current milestone: starting stats, diagnostic combat and a [real Classic rank-11 Fireball rotation](docs/forever_core.md#classic-60-mage-mana-and-fireball-integration) now work in internal tests, including mana costs, regeneration, interruption and OOM recovery through the native WoWSims APL. The next integration work is a coherent minimal Mage class with more supported spell ranks/cost modifiers and matching level-60 gear/talents, followed by the normal WoWSims interface. Front-facing/incoming combat, live racials/rounding, forms and pets remain additional gates for the classes that need them. A complete playable level-60 simulator is not available yet.
 
 ## Development
 

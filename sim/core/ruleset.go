@@ -10,6 +10,8 @@ const (
 	rulesetClassic60MeleeReference
 	// Separate, resource-free caster diagnostic; never publicly selected.
 	rulesetClassic60SpellReference
+	// Bounded Human Mage mana diagnostic; never publicly selected.
+	rulesetClassic60MageManaReference
 )
 
 // Keep the compile-time constants beside the active selector. Existing code
@@ -41,6 +43,7 @@ type rulesetProfile struct {
 	combat     combatRules
 	attributes attributeRules
 	mitigation mitigationRules
+	resources  resourceRules
 }
 
 type levelRules struct {

@@ -18,6 +18,7 @@ func classic60SpellReferenceRules() rulesetProfile {
 			magicCritDamageMultiplier: 1.5,
 		}},
 		mitigation: mitigationRules{resistanceModel: resistanceMitigationClassicReference60},
+		resources:  resourceRules{manaModel: manaModelUnavailable},
 	}
 	var ok bool
 	rules.attributes, ok = classicReferenceLevel60AttributeRules(rules)

@@ -860,6 +860,15 @@ type SpellCost struct {
 
 func (sc *SpellCost) ApplyCostModifiers(cost int32) float64 {
 	spell := sc.spell
+	if spell.Unit.resolvedResourceRules().manaModel == manaModelClassic60MageReference {
+		validateClassic60MageManaCost(spell, sc)
+		if cost != sc.BaseCost {
+			panic("Classic Mage mana reference requires the registered flat cost")
+		}
+		// Classic uses floating-point cost arithmetic. Only unmodified integer
+		// flat costs are supported here; do not enter TBC's integer pct bucket.
+		return float64(cost)
+	}
 	cost = max(0, cost+sc.FlatModifier)
 	cost = max(0, cost*spell.Unit.PseudoStats.SpellCostPercentModifier/100)
 	return max(0, float64(cost)*sc.PercentModifier*sc.AdditivePercentModifier)
