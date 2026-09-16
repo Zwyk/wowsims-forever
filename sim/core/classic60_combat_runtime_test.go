@@ -179,9 +179,9 @@ func TestClassic60MeleeRuntimeSourceDistributions(t *testing.T) {
 	// At +3, baseline 4% crit is entirely removed by 4.8% suppression. The first
 	// point of hit is ineffective only while the skill deficit exceeds ten.
 	tests := []struct {
-		name                     string
-		level                    int32
-		skill, hit               float64
+		name                      string
+		level                     int32
+		skill, hit                float64
 		miss, dodge, glance, crit float64
 		glanceMin, glanceMax      float64
 	}{

@@ -139,7 +139,9 @@ func TestClassicRuntimeRejectsUnauditedMeleeContexts(t *testing.T) {
 		{"defense", func(_ *Character, _ *Spell, at *AttackTable) { at.Defender.stats[stats.DefenseRating] = 1 }},
 		{"dodge modifier", func(_ *Character, _ *Spell, at *AttackTable) { at.Defender.PseudoStats.DodgeReduction = 0.01 }},
 		{"level", func(_ *Character, _ *Spell, at *AttackTable) { at.Defender.Level = 64 }},
-		{"skill", func(c *Character, _ *Spell, _ *AttackTable) { c.addWeaponSkillBonus(proto.WeaponSkillCategory_WeaponSkillCategoryTwoHandedSwords, 16) }},
+		{"skill", func(c *Character, _ *Spell, _ *AttackTable) {
+			c.addWeaponSkillBonus(proto.WeaponSkillCategory_WeaponSkillCategoryTwoHandedSwords, 16)
+		}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			character, spell, table := classicMeleeOutcomeFixture()
