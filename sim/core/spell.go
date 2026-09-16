@@ -72,7 +72,18 @@ type SpellConfig struct {
 	RelatedSelfBuff   *Aura
 }
 
+type classic60PaladinAttackKind uint8
+
+const (
+	classic60PaladinAttackNone classic60PaladinAttackKind = iota
+	classic60PaladinCommandProc
+	classic60PaladinCommandJudgement
+)
+
 type Spell struct {
+	// Private capability tag for the audited Holy melee outcomes.
+	classic60PaladinAttack classic60PaladinAttackKind
+
 	// ID for this spell.
 	ActionID
 	//Rank of the spell.
@@ -860,14 +871,13 @@ type SpellCost struct {
 
 func (sc *SpellCost) ApplyCostModifiers(cost int32) float64 {
 	spell := sc.spell
-	if spell.Unit.resolvedResourceRules().manaModel == manaModelClassic60MageReference {
-		validateClassic60MageManaCost(spell, sc)
+	if spell.Unit.resolvedResourceRules().manaModel.isClassicReference() {
+		validateClassic60ManaCost(spell, sc)
 		if cost != sc.BaseCost {
-			panic("Classic Mage mana reference requires the registered flat cost")
+			panic("Classic mana reference requires the registered base cost")
 		}
-		// Classic uses floating-point cost arithmetic. Only unmodified integer
-		// flat costs are supported here; do not enter TBC's integer pct bucket.
-		return float64(cost)
+		// Classic keeps fractional base-mana costs such as Judgement's 90.72.
+		return sc.ResourceCostImpl.(*ManaCost).classicBaseCost
 	}
 	cost = max(0, cost+sc.FlatModifier)
 	cost = max(0, cost*spell.Unit.PseudoStats.SpellCostPercentModifier/100)

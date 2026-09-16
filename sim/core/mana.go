@@ -18,8 +18,8 @@ type manaBar struct {
 	currentMana float64
 
 	manaRegenMultiplier float64
-	// Set only after the character-level Human Mage boundary is validated.
-	classic60MageReference bool
+	// Set only after the character-level Human/class boundary is validated.
+	classic60ManaClass proto.Class
 
 	manaCastingMetrics    *ResourceMetrics
 	manaNotCastingMetrics *ResourceMetrics
@@ -150,11 +150,14 @@ func (unit *Unit) SpiritManaRegenPerSecond() float64 {
 	switch unit.resolvedResourceRules().manaModel {
 	case manaModelInheritedTBC:
 		return 0.001 + unit.stats[stats.Spirit]*math.Sqrt(unit.stats[stats.Intellect])*0.009327
-	case manaModelClassic60MageReference:
+	case manaModelClassic60MageReference, manaModelClassic60PaladinReference:
 		if !unit.HasManaBar() {
 			return 0
 		}
-		unit.validateClassic60MageMana()
+		unit.validateClassic60Mana()
+		if unit.resolvedResourceRules().manaModel == manaModelClassic60PaladinReference {
+			return 7.5 + unit.stats[stats.Spirit]/10
+		}
 		return 6.25 + unit.stats[stats.Spirit]/8
 	default:
 		if !unit.HasManaBar() {
@@ -167,8 +170,8 @@ func (unit *Unit) SpiritManaRegenPerSecond() float64 {
 // Returns the rate of mana regen per second, assuming this unit is
 // considered to be casting.
 func (unit *Unit) ManaRegenPerSecondWhileCasting() float64 {
-	if unit.HasManaBar() && unit.resolvedResourceRules().manaModel == manaModelClassic60MageReference {
-		unit.validateClassic60MageMana()
+	if unit.HasManaBar() && unit.resolvedResourceRules().manaModel.isClassicReference() {
+		unit.validateClassic60Mana()
 	}
 	regenRate := unit.MP5ManaRegenPerSecond()
 
@@ -338,10 +341,15 @@ type ManaCostOptions struct {
 }
 type ManaCost struct {
 	ResourceMetrics *ResourceMetrics
+	classicBaseCost float64
 }
 
 func newManaCost(spell *Spell, options ManaCostOptions) *SpellCost {
 	validateManaCostOptions(spell, options)
+	exactCost := 0.0
+	if spell.Unit.resolvedResourceRules().manaModel.isClassicReference() {
+		exactCost = TernaryFloat64(options.FlatCost > 0, float64(options.FlatCost), spell.Unit.BaseMana*options.BaseCostPercent/100)
+	}
 	return &SpellCost{
 		spell:                   spell,
 		BaseCost:                TernaryInt32(options.FlatCost > 0, options.FlatCost, int32(options.BaseCostPercent*spell.Unit.BaseMana)/100),
@@ -349,6 +357,7 @@ func newManaCost(spell *Spell, options ManaCostOptions) *SpellCost {
 		AdditivePercentModifier: 1,
 		ResourceCostImpl: &ManaCost{
 			ResourceMetrics: spell.Unit.NewManaMetrics(spell.ActionID),
+			classicBaseCost: exactCost,
 		},
 	}
 }
@@ -379,10 +388,10 @@ func (mc *ManaCost) CostFailureReason(sim *Simulation, spell *Spell) string {
 	return fmt.Sprintf("not enough mana (Current Mana = %0.03f, Mana Cost = %0.03f)", spell.Unit.CurrentMana(), spell.CurCast.Cost)
 }
 func (mc *ManaCost) SpendCost(sim *Simulation, spell *Spell) {
-	if spell.Unit.resolvedResourceRules().manaModel == manaModelClassic60MageReference {
-		validateClassic60MageManaCost(spell, spell.Cost)
-		if spell.CurCast.Cost != float64(spell.Cost.BaseCost) {
-			panic("Classic Mage mana reference requires an unmodified flat cast cost")
+	if spell.Unit.resolvedResourceRules().manaModel.isClassicReference() {
+		validateClassic60ManaCost(spell, spell.Cost)
+		if spell.CurCast.Cost != mc.classicBaseCost {
+			panic("Classic mana reference requires the registered cast cost")
 		}
 	}
 	if spell.CurCast.Cost > 0 {

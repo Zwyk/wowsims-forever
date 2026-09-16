@@ -13,6 +13,7 @@ const (
 	manaModelInheritedTBC manaModel = iota
 	manaModelUnavailable
 	manaModelClassic60MageReference
+	manaModelClassic60PaladinReference
 )
 
 type resourceRules struct {
@@ -47,68 +48,102 @@ func classic60MageManaReferenceRules() rulesetProfile {
 	return rules
 }
 
-func (character *Character) validateManaRules() {
-	switch character.resolvedResourceRules().manaModel {
-	case manaModelInheritedTBC:
-		return
+// Paladin joins the audited melee, spell and mana policies without importing
+// a TBC class constructor. The first runtime slice is rear two-handed Command.
+func classic60PaladinReferenceRules() rulesetProfile {
+	rules := classic60MeleeReferenceRules()
+	rules.id = rulesetClassic60PaladinReference
+	rules.combat.outcomes.spellChanceModel = spellChanceModelClassicReference60
+	rules.combat.outcomes.minimumSpellMissChance = 0.01
+	rules.combat.outcomes.magicCritDamageMultiplier = 1.5
+	rules.resources.manaModel = manaModelClassic60PaladinReference
+	return rules
+}
+
+func (model manaModel) classicReferenceClass() proto.Class {
+	switch model {
 	case manaModelClassic60MageReference:
-		if !character.rulesInitialized || character.Type != PlayerUnit || character.Level != 60 ||
-			character.Race != proto.Race_RaceHuman || character.Class != proto.Class_ClassMage ||
-			character.HasRageBar() || character.HasEnergyBar() || character.HasFocusBar() {
-			panic("Classic Mage mana reference requires a level-60 Human Mage player")
-		}
-		character.classic60MageReference = true
-		character.manaRegenMultiplier = 1
+		return proto.Class_ClassMage
+	case manaModelClassic60PaladinReference:
+		return proto.Class_ClassPaladin
 	default:
-		panic("mana is unavailable for this ruleset")
+		return proto.Class_ClassUnknown
 	}
 }
 
-func (unit *Unit) validateClassic60MageMana() {
-	if !unit.rulesInitialized || unit.resolvedResourceRules().manaModel != manaModelClassic60MageReference ||
-		unit.Type != PlayerUnit || unit.Level != 60 || unit.manaBar.unit != unit || !unit.classic60MageReference ||
+func (model manaModel) isClassicReference() bool {
+	return model.classicReferenceClass() != proto.Class_ClassUnknown
+}
+
+func (character *Character) validateManaRules() {
+	model := character.resolvedResourceRules().manaModel
+	if model == manaModelInheritedTBC {
+		return
+	}
+	expectedClass := model.classicReferenceClass()
+	if expectedClass == proto.Class_ClassUnknown {
+		panic("mana is unavailable for this ruleset")
+	}
+	if !character.rulesInitialized || character.Type != PlayerUnit || character.Level != 60 ||
+		character.Race != proto.Race_RaceHuman || character.Class != expectedClass ||
+		character.HasRageBar() || character.HasEnergyBar() || character.HasFocusBar() {
+		panic("Classic mana reference requires a level-60 Human of the selected class")
+	}
+	character.classic60ManaClass = expectedClass
+	character.manaRegenMultiplier = 1
+}
+
+func (unit *Unit) validateClassic60Mana() {
+	expectedClass := unit.resolvedResourceRules().manaModel.classicReferenceClass()
+	if !unit.rulesInitialized || expectedClass == proto.Class_ClassUnknown ||
+		unit.Type != PlayerUnit || unit.Level != 60 || unit.manaBar.unit != unit || unit.classic60ManaClass != expectedClass ||
 		unit.HasRageBar() || unit.HasEnergyBar() || unit.HasFocusBar() {
-		panic("Classic Mage mana reference requires a validated player mana bar")
+		panic("Classic mana reference requires a validated player mana bar")
 	}
 	if unit.PseudoStats.SpiritRegenMultiplier != 1 || unit.PseudoStats.SpiritRegenRateCasting != 0 ||
 		unit.PseudoStats.ForceFullSpiritRegen || unit.manaRegenMultiplier != 1 {
-		panic("Classic Mage mana reference does not support regeneration modifiers")
+		panic("Classic mana reference does not support regeneration modifiers")
 	}
 	for _, stat := range []stats.Stat{stats.Spirit, stats.MP5} {
 		if value := unit.stats[stat]; math.IsNaN(value) || math.IsInf(value, 0) || value < 0 {
-			panic("Classic Mage mana reference requires finite nonnegative Spirit and MP5")
+			panic("Classic mana reference requires finite nonnegative Spirit and MP5")
 		}
 	}
 }
 
 func validateManaCostOptions(spell *Spell, options ManaCostOptions) {
-	switch spell.Unit.resolvedResourceRules().manaModel {
-	case manaModelInheritedTBC:
+	model := spell.Unit.resolvedResourceRules().manaModel
+	if model == manaModelInheritedTBC {
 		return
-	case manaModelClassic60MageReference:
-		spell.Unit.validateClassic60MageMana()
-		if options.FlatCost <= 0 || options.BaseCostPercent != 0 ||
-			(options.PercentModifier != 0 && options.PercentModifier != 1) {
-			panic("Classic Mage mana reference supports only unmodified positive integer flat costs")
-		}
-	default:
+	}
+	if !model.isClassicReference() {
 		panic("mana costs are unavailable for this ruleset")
+	}
+	spell.Unit.validateClassic60Mana()
+	flat := options.FlatCost > 0 && options.BaseCostPercent == 0
+	percentage := model == manaModelClassic60PaladinReference && options.FlatCost == 0 &&
+		options.BaseCostPercent > 0 && options.BaseCostPercent <= 100 &&
+		!math.IsNaN(options.BaseCostPercent) && !math.IsInf(options.BaseCostPercent, 0)
+	if (!flat && !percentage) || (options.PercentModifier != 0 && options.PercentModifier != 1) {
+		panic("Classic mana reference requires an unmodified positive supported mana cost")
 	}
 }
 
-// Classic's cost calculation is floating-point, whereas inherited TBC uses an
-// integer percentage bucket. Accept only their proven common unmodified flat
-// cost subset; neither percentage costs nor cost reductions are characterized.
+// Preserve Classic's floating-point base cost in the mana implementation while
+// retaining the inherited engine's integer cost field and arithmetic for TBC.
 // https://github.com/wowsims/classic/blob/7779ebbf79dc7f1341e6ab939b28a3402c9a730a/sim/core/spell.go#L667-L684
-func validateClassic60MageManaCost(spell *Spell, cost *SpellCost) {
-	spell.Unit.validateClassic60MageMana()
-	if cost == nil || cost.spell != spell || cost.BaseCost <= 0 || cost.FlatModifier != 0 ||
+func validateClassic60ManaCost(spell *Spell, cost *SpellCost) {
+	spell.Unit.validateClassic60Mana()
+	if cost == nil || cost.spell != spell || cost.FlatModifier != 0 ||
 		cost.PercentModifier != 1 || cost.AdditivePercentModifier != 1 ||
 		spell.Unit.PseudoStats.SpellCostPercentModifier != 100 {
-		panic("Classic Mage mana reference requires an unmodified registered flat mana cost")
+		panic("Classic mana reference requires an unmodified registered mana cost")
 	}
-	if mana, ok := cost.ResourceCostImpl.(*ManaCost); !ok || mana == nil || mana.ResourceMetrics == nil {
-		panic("Classic Mage mana reference requires a mana cost with resource metrics")
+	mana, ok := cost.ResourceCostImpl.(*ManaCost)
+	if !ok || mana == nil || mana.ResourceMetrics == nil || mana.classicBaseCost <= 0 ||
+		math.IsNaN(mana.classicBaseCost) || math.IsInf(mana.classicBaseCost, 0) ||
+		cost.BaseCost != int32(mana.classicBaseCost) {
+		panic("Classic mana reference requires a consistent mana cost with resource metrics")
 	}
 }
 
@@ -117,10 +152,14 @@ func validateClassicSpellResources(spell *Spell, table *AttackTable) {
 	if unit.HasRageBar() || unit.HasEnergyBar() || unit.HasFocusBar() {
 		panic("Classic spell reference does not support rage, energy or focus")
 	}
-	if table.resolvedResourceRules().manaModel == manaModelClassic60MageReference {
-		unit.validateClassic60MageMana()
+	model := table.resolvedResourceRules().manaModel
+	if model.isClassicReference() {
+		if model != unit.resolvedResourceRules().manaModel {
+			panic("Classic spell reference requires the owner's resource policy")
+		}
+		unit.validateClassic60Mana()
 		if spell.Cost != nil {
-			validateClassic60MageManaCost(spell, spell.Cost)
+			validateClassic60ManaCost(spell, spell.Cost)
 		}
 	} else if unit.HasManaBar() || spell.Cost != nil {
 		panic("Classic spell reference does not support resources")

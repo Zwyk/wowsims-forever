@@ -21,7 +21,11 @@ func (spell *Spell) ResistanceMultiplier(sim *Simulation, isPeriodic bool, attac
 	if attackTable.resolvedOutcomeRules().spellChanceModel == spellChanceModelClassicReference60 {
 		// Also validate always-hit periodic damage and ignore-resist paths, which
 		// need not call a spell hit/crit getter during their outcome step.
-		liveClassicSpellChanceView(spell, attackTable)
+		if attackTable.resolvedResourceRules().manaModel == manaModelClassic60PaladinReference && spell.DefenseType == DefenseTypeMelee {
+			livePhysicalAttackTableView(spell, attackTable)
+		} else {
+			liveClassicSpellChanceView(spell, attackTable)
+		}
 	}
 	if spell.Flags.Matches(SpellFlagIgnoreResists) {
 		return 1, OutcomeEmpty
