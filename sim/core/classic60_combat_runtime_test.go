@@ -3,6 +3,7 @@ package core
 import (
 	"math"
 	"reflect"
+	"sort"
 	"testing"
 	"time"
 
@@ -13,13 +14,15 @@ import (
 )
 
 type classic60MeleeTestConfig struct {
-	targetLevel int32
-	armor       float64
-	skillBonus  float64
-	hitPercent  float64
-	duration    time.Duration
-	iterations  int32
-	seed        int64
+	targetLevel       int32
+	armor             float64
+	skillBonus        float64
+	offHandSkillBonus float64
+	dualWield         bool
+	hitPercent        float64
+	duration          time.Duration
+	iterations        int32
+	seed              int64
 }
 
 type classic60MeleeTestSwing struct {
@@ -27,16 +30,18 @@ type classic60MeleeTestSwing struct {
 	at      time.Duration
 	outcome HitOutcome
 	damage  float64
+	source  WeaponAttackSource
 }
 
 // This fixture deliberately bypasses agent factories and applyCharacterEffects.
 // It runs real auto-attacks through the modern environment, reset, event loop,
 // spell outcomes and metrics, without importing a TBC class, racial, talent,
-// resource bar, item effect or encounter AI. The in-memory sword supplies only
-// a classified weapon and fixed damage; it is not fetched from either database.
+// resource bar, item effect or encounter AI. The in-memory sword and optional
+// off-hand axe supply only classified weapons and fixed damage; neither is
+// fetched from a database.
 // Pre-racial Human Warrior primary stats are integral, so finalization's modern
 // primary-stat floor does not alter this narrowly supported Classic baseline.
-func newClassic60MeleeTestSim(t *testing.T, config classic60MeleeTestConfig) (*Simulation, *FakeAgent, *[]classic60MeleeTestSwing) {
+func newClassic60MeleeTestSim(t *testing.T, config classic60MeleeTestConfig, configure ...func(*FakeAgent)) (*Simulation, *FakeAgent, *[]classic60MeleeTestSwing) {
 	t.Helper()
 	rules := classic60MeleeReferenceRules()
 	baseline, ok := classicReferenceInitializeCharacter(60, proto.Race_RaceHuman, proto.Class_ClassWarrior)
@@ -58,7 +63,17 @@ func newClassic60MeleeTestSim(t *testing.T, config classic60MeleeTestConfig) (*S
 		WeaponDamageMin: 100, WeaponDamageMax: 100, SwingSpeed: 2,
 	}
 	agent.addWeaponSkillBonus(proto.WeaponSkillCategory_WeaponSkillCategorySwords, config.skillBonus)
-	agent.EnableAutoAttacks(agent, AutoAttackOptions{MainHand: agent.WeaponFromMainHand(), AutoSwingMelee: true})
+	autoAttacks := AutoAttackOptions{MainHand: agent.WeaponFromMainHand(), AutoSwingMelee: true}
+	if config.dualWield {
+		agent.Equipment[proto.ItemSlot_ItemSlotOffHand] = Item{
+			ID: -2, Type: proto.ItemType_ItemTypeWeapon,
+			WeaponType: proto.WeaponType_WeaponTypeAxe, HandType: proto.HandType_HandTypeOneHand,
+			WeaponDamageMin: 80, WeaponDamageMax: 80, SwingSpeed: 3,
+		}
+		agent.addWeaponSkillBonus(proto.WeaponSkillCategory_WeaponSkillCategoryAxes, config.offHandSkillBonus)
+		autoAttacks.OffHand = agent.WeaponFromOffHand()
+	}
+	agent.EnableAutoAttacks(agent, autoAttacks)
 	agent.AutoAttacks.RandomMeleeOffset = false
 	party.Players = []Agent{agent}
 	raid.updatePlayersAndPets()
@@ -85,14 +100,20 @@ func newClassic60MeleeTestSim(t *testing.T, config classic60MeleeTestConfig) (*S
 	agent.CurrentTarget = &target.Unit
 	target.initialize(targetConfig)
 	agent.initialize(agent)
+	for _, configureAgent := range configure {
+		configureAgent(agent)
+	}
 
 	swings := []classic60MeleeTestSwing{}
 	agent.RegisterAura(Aura{
 		Label: "Record Classic fixture swings", Duration: NeverExpires,
 		OnReset: func(aura *Aura, sim *Simulation) { aura.Activate(sim) },
 		OnSpellHitDealt: func(_ *Aura, sim *Simulation, spell *Spell, result *SpellResult) {
-			if spell == agent.AutoAttacks.MHAuto() {
-				swings = append(swings, classic60MeleeTestSwing{sim.currentSeed, sim.CurrentTime, result.Outcome, result.Damage})
+			if spell == agent.AutoAttacks.MHAuto() || spell == agent.AutoAttacks.OHAuto() {
+				swings = append(swings, classic60MeleeTestSwing{
+					seed: sim.currentSeed, at: sim.CurrentTime, outcome: result.Outcome,
+					damage: result.Damage, source: spell.weaponAttackSource,
+				})
 			}
 		},
 	})
@@ -123,11 +144,16 @@ func newClassic60MeleeTestSim(t *testing.T, config classic60MeleeTestConfig) (*S
 
 func classic60MeleeTestMetrics(t *testing.T, result *proto.RaidSimResult) *proto.TargetedActionMetrics {
 	t.Helper()
+	return classic60MeleeTestMetricsForHand(t, result, 1)
+}
+
+func classic60MeleeTestMetricsForHand(t *testing.T, result *proto.RaidSimResult, tag int32) *proto.TargetedActionMetrics {
+	t.Helper()
 	if result.Error != nil {
 		t.Fatalf("simulation failed: %v", result.Error)
 	}
 	for _, action := range result.RaidMetrics.Parties[0].Players[0].Actions {
-		if action.Id.GetOtherId() == proto.OtherAction_OtherActionAttack && action.Id.Tag == 1 {
+		if action.Id.GetOtherId() == proto.OtherAction_OtherActionAttack && action.Id.Tag == tag {
 			for _, target := range action.Targets {
 				if target.UnitIndex == 0 {
 					return target
@@ -135,8 +161,66 @@ func classic60MeleeTestMetrics(t *testing.T, result *proto.RaidSimResult) *proto
 			}
 		}
 	}
-	t.Fatal("scheduled main-hand attacks produced no target metrics")
+	t.Fatalf("scheduled hand %d attacks produced no target metrics", tag)
 	return nil
+}
+
+func classic60MeleeTestAssertResultEqual(t *testing.T, want, got *proto.RaidSimResult) {
+	t.Helper()
+	// UnitMetrics.ToProto appends Actions while ranging over a map. Preserve
+	// exact protobuf equality after ordering only that unordered report field;
+	// ordered schedules and every numeric metric remain subject to exact checks.
+	canonical := func(result *proto.RaidSimResult) *proto.RaidSimResult {
+		cloned := googleProto.Clone(result).(*proto.RaidSimResult)
+		var sortActions func(*proto.UnitMetrics)
+		sortActions = func(unit *proto.UnitMetrics) {
+			keys := make(map[*proto.ActionMetrics]string, len(unit.Actions))
+			seen := make(map[string]bool, len(unit.Actions))
+			for _, action := range unit.Actions {
+				encoded, err := (googleProto.MarshalOptions{Deterministic: true}).Marshal(action.Id)
+				if err != nil {
+					t.Fatalf("cannot encode reported action ID: %v", err)
+				}
+				key := string(encoded)
+				if seen[key] {
+					t.Fatalf("report contains duplicate action ID %v", action.Id)
+				}
+				seen[key] = true
+				keys[action] = key
+			}
+			sort.Slice(unit.Actions, func(i, j int) bool { return keys[unit.Actions[i]] < keys[unit.Actions[j]] })
+			for _, pet := range unit.Pets {
+				sortActions(pet)
+			}
+		}
+		for _, party := range cloned.GetRaidMetrics().GetParties() {
+			for _, player := range party.Players {
+				sortActions(player)
+			}
+		}
+		for _, target := range cloned.GetEncounterMetrics().GetTargets() {
+			sortActions(target)
+		}
+		return cloned
+	}
+	if !googleProto.Equal(canonical(want), canonical(got)) {
+		t.Error("identical seeds produced different report metrics after canonicalizing action order")
+	}
+}
+
+func classic60MeleeTestAssertSwingsEqual(t *testing.T, want, got []classic60MeleeTestSwing) {
+	t.Helper()
+	if !reflect.DeepEqual(want, got) {
+		if len(want) != len(got) {
+			t.Fatalf("identical seeds changed scheduled swing count: %d != %d", len(want), len(got))
+		}
+		for i := range want {
+			if want[i] != got[i] {
+				t.Fatalf("identical seeds changed scheduled swing %d: %+v != %+v", i, want[i], got[i])
+			}
+		}
+		t.Fatal("identical seeds changed the scheduled swing trace")
+	}
 }
 
 func TestClassic60MeleeRuntimeSchedulerResetAndReproducibility(t *testing.T) {
@@ -168,9 +252,8 @@ func TestClassic60MeleeRuntimeSchedulerResetAndReproducibility(t *testing.T) {
 		t.Fatal("Classic fixture changed its initial stats or the active TBC profile")
 	}
 	repeat, _, repeatSwings := newClassic60MeleeTestSim(t, config)
-	if !googleProto.Equal(result, repeat.run()) || !reflect.DeepEqual(*swings, *repeatSwings) {
-		t.Fatal("identical seeds did not reproduce full scheduled results")
-	}
+	classic60MeleeTestAssertResultEqual(t, result, repeat.run())
+	classic60MeleeTestAssertSwingsEqual(t, *swings, *repeatSwings)
 }
 
 func TestClassic60MeleeRuntimeSourceDistributions(t *testing.T) {
