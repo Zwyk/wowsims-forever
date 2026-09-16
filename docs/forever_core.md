@@ -1,5 +1,12 @@
 # Forever core rules ledger
 
+The separate [public Ret DPS facade](forever_ret.md) now selects an explicit,
+provisional Forever overlay on the private Classic Paladin fallback. References
+below to private-only fixtures describe those original APIs; the inherited TBC
+entrypoint remains unchanged. Runtime promotion is limited to the new Ret
+facade and does not activate the general reference-data catalog.
+
+
 This document separates announced Forever behavior from assumptions inherited from TBC or Classic. Numeric rules stay provisional until they can be measured against a Forever client build.
 
 ## Baseline provenance

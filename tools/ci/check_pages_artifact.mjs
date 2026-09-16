@@ -2,7 +2,7 @@ import { lstat, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-export const requiredFiles = ['index.html', 'app.js', 'style.css', 'wasm_exec.js', 'classic60.wasm', 'build-info.json'];
+export const requiredFiles = ['index.html', 'app.js', 'style.css', 'wasm_exec.js', 'classic60.wasm', 'build-info.json', 'baseline.html', 'forever.js', 'forever.css', 'forever-worker.js', 'logo.png', 'paladin.jpg'];
 
 // Stay below Pages' supported 1 GB site limit, including packaging overhead.
 const maxArtifactBytes = 900 * 1024 * 1024;

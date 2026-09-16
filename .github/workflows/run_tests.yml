@@ -109,8 +109,10 @@ jobs:
 
             - name: Build and smoke-test Classic 60 preview
               run: |
+                  node tools/classic60preview/generate-ret-catalog.mjs --check
                   node tools/classic60preview/build.mjs
                   node tools/classic60preview/smoke.mjs dist/forever-preview
+                  node tools/classic60preview/browser-smoke.mjs dist/forever-preview
                   node --test tools/ci/check_pages_artifact.test.mjs
                   node tools/ci/check_pages_artifact.mjs dist/forever-preview
 

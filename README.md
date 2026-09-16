@@ -3,7 +3,7 @@
 This repository is an early community port of [WoWSims TBC](https://github.com/wowsims/tbc-new) for World of Warcraft: Forever. It is a staging area while the WoWSims community decides where the long-term project should live.
 
 > [!WARNING]
-> The simulator still contains TBC rules, level-70 data, talents, spells, and encounter defaults. Its current output is **not valid for Forever**.
+> The inherited TBC simulator is not valid for Forever. The separate [Forever Ret DPS simulator](https://zwyk.github.io/wowsims-forever/) uses explicit demo changes and documented Classic level-60 fallbacks; unresolved values remain provisional.
 
 The port starts from the modern `tbc-new` architecture at commit [`17a8fb28c5ad14b649acecdaacd488594048f467`](https://github.com/wowsims/tbc-new/commit/17a8fb28c5ad14b649acecdaacd488594048f467) and is synchronized through [`9fa04e0675354c1fa2167b83171bbfce5df492ef`](https://github.com/wowsims/tbc-new/commit/9fa04e0675354c1fa2167b83171bbfce5df492ef). We will preserve that architecture while replacing the game model in small, tested steps:
 
@@ -13,11 +13,11 @@ The port starts from the modern `tbc-new` architecture at commit [`17a8fb28c5ad1
 - keep dodge/parry reduction and numeric conversions provisional until beta data confirms them;
 - port class, race, talent and spell changes after the core rules are stable; gear imports are outside the current scope.
 
-The inherited deployment, release, database-update, labeling, and webhook workflows remain disabled. Test CI and a new, narrowly scoped [GitHub Pages preview workflow](docs/forever_pages.md) are active. Pages publishes a standalone Classic level-60 **stat diagnostic**, not the inherited TBC simulator and not a complete Classic or Forever combat simulator.
+The inherited deployment, release, database-update, labeling, and webhook workflows remain disabled. Test CI and a new, narrowly scoped [GitHub Pages preview workflow](docs/forever_pages.md) are active. Pages publishes the single-player Forever Ret DPS simulator, with the Classic base-stat diagnostic retained at `baseline.html`. The inherited TBC simulator is not published.
 
 The finished site will retain the original WoWSims landing page, class navigation, simulator controls and results layout, with Forever branding and supported data. The baseline lab is a temporary development tool, not the final interface. Engine integration now includes bounded level-60 single-weapon, dual-wield, melee-special and spell-combat fixtures; see the [melee scope](docs/forever_core.md#scheduled-classic-60-melee-integration) and [spell scope](docs/forever_core.md#scheduled-classic-60-spell-integration).
 
-Current priority: **Paladin mechanics, talents and base abilities, with gear excluded**. The [private Classic Paladin integration](docs/forever_core.md#classic-60-paladin-talents-and-offensive-abilities) now includes damage and healing spells, seals, self blessings, selected auras, incoming melee/magic, shield mechanics, threat, crowd control and defensive cooldowns. All 44 Classic talents are validated and have implementations within documented combat boundaries; the ledger identifies remaining ability and integration gaps. Tests use synthetic weapons and native WoWSims APL rotations. This remains a pre-racial Human engine fixture: the public simulator is still TBC-70, the Pages preview is still a stat diagnostic, and a complete playable Paladin simulator is not available yet. The earlier [Mage Fireball integration](docs/forever_core.md#classic-60-mage-mana-and-fireball-integration) remains a regression reference.
+Current priority: **ready-to-use single-player DPS simulations, with gear catalogs and raid-wide simulation deferred**. The [Ret simulator](docs/forever_ret.md) provides editable stats and weapon values, the Forever talent tree, seal/ability priorities, encounter inputs, DPS breakdowns, saved/shareable builds and cancellable browser simulation. Its scope is a pre-racial Human level 60 with a two-handed sword attacking one passive target; unsupported Holy/Protection builds are rejected. Holy Strike rank values, inferred talent ranks and proc semantics are explicitly documented assumptions. The [private Classic Paladin integration](docs/forever_core.md#classic-60-paladin-talents-and-offensive-abilities) remains the tested fallback, including all 44 Classic talents. Other classes are not yet public Forever DPS simulators.
 
 ## Development
 

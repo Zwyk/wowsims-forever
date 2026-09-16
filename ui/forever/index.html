@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Retribution Paladin · WoWSims Forever</title>
+		<meta
+			name="description"
+			content="A single-player Forever Retribution DPS simulator with editable stats, talents, rotation and explicit provisional mechanics." />
+		<link rel="stylesheet" href="./forever.css" />
+		<script src="./forever.js" defer></script>
+	</head>
+	<body>
+		<header class="site-header">
+			<a class="brand" href="./"><img src="./logo.png" alt="" />WoW<span>Sims</span><small>FOREVER</small></a>
+			<nav aria-label="Project">
+				<a href="./baseline.html">Base stats</a><a href="https://github.com/Zwyk/wowsims-forever" target="_blank" rel="noopener">GitHub ↗</a>
+			</nav>
+		</header>
+		<form id="sim-form">
+			<div class="sim-layout">
+				<aside class="sim-sidebar">
+					<div class="portrait">
+						<span class="class-label">PALADIN</span>
+						<h1>Retribution</h1>
+						<p>Level 60 · Single-target DPS</p>
+					</div>
+					<div class="sidebar-body">
+						<div class="model-badge">Provisional Forever model</div>
+						<p class="muted">Demo changes + Classic 60 fallbacks.<br />Review assumptions before comparing builds.</p>
+						<div id="run-settings" class="fields"></div>
+						<button id="run" class="primary" type="submit" disabled>Loading engine…</button
+						><button id="cancel" type="button" hidden>Cancel simulation</button>
+						<p id="status" role="status" aria-live="polite">Starting the combat engine.</p>
+						<div class="build-actions">
+							<button id="share" type="button" disabled>Copy build link</button><button id="reset" type="button" disabled>Reset build</button>
+						</div>
+						<p class="small muted">Your build is saved in this browser. Gear catalogs and raid simulation are deferred.</p>
+					</div>
+				</aside>
+				<main>
+					<section class="result-summary" aria-label="Simulation result">
+						<div>
+							<span class="eyebrow">DAMAGE PER SECOND</span>
+							<div id="dps">— <small>DPS</small></div>
+							<p id="uncertainty" class="muted">Run a simulation to compare your build.</p>
+						</div>
+						<div id="result-context" class="muted"></div>
+					</section>
+					<div class="sim-header">
+						<div role="tablist" aria-label="Simulator settings">
+							<button role="tab" type="button" aria-selected="true" aria-controls="character" id="tab-character">Character</button
+							><button role="tab" type="button" aria-selected="false" aria-controls="talents" id="tab-talents">Talents</button
+							><button role="tab" type="button" aria-selected="false" aria-controls="rotation" id="tab-rotation">Rotation</button
+							><button role="tab" type="button" aria-selected="false" aria-controls="results" id="tab-results">Results</button
+							><button role="tab" type="button" aria-selected="false" aria-controls="model" id="tab-model">Assumptions</button>
+						</div>
+					</div>
+					<div class="workspace">
+						<section role="tabpanel" id="character" aria-labelledby="tab-character">
+							<div class="section-heading">
+								<h2>Build your character</h2>
+								<span>Pre-racial Human baseline</span>
+							</div>
+							<p class="muted">
+								Enter bonus stats from your intended gear and external buffs. Base stats, talents and your selected self blessing are added by
+								the simulator.
+							</p>
+							<div class="panel-grid">
+								<section class="panel">
+									<h3>Bonus stats</h3>
+									<div id="stats-fields" class="fields two-column"></div>
+								</section>
+								<section class="panel">
+									<h3>Two-handed sword</h3>
+									<div id="weapon-fields" class="fields"></div>
+									<hr />
+									<h3>Self blessing</h3>
+									<div id="buff-fields" class="fields"></div>
+									<p class="small muted">Active before the pull, starting at full mana. Weapon skill includes any assumed racial bonus.</p>
+								</section>
+								<section class="panel">
+									<h3>Encounter</h3>
+									<div id="encounter-fields" class="fields"></div>
+									<p class="small muted">
+										Stationary rear attacks against one passive enemy. Armor is the effective value after any assumed debuffs.
+									</p>
+								</section>
+							</div>
+						</section>
+						<section role="tabpanel" id="talents" aria-labelledby="tab-talents" hidden>
+							<div class="section-heading">
+								<h2>Paladin talents</h2>
+								<span id="talent-total"></span>
+							</div>
+							<p class="muted">
+								51 points available. Each tier requires 5 points per earlier tier. Off-tree builds are limited to 20 points; healing and
+								defensive talents have no DPS effect in this encounter.
+							</p>
+							<div id="talent-trees"></div>
+							<p class="small muted">
+								Tree and tooltip data adapted from <a href="https://talentsforever.com" target="_blank" rel="noopener">TalentsForever</a>, CC BY
+								4.0. Partial descriptions show observed ranks; other ranks may be extrapolated by the model.
+							</p>
+						</section>
+						<section role="tabpanel" id="rotation" aria-labelledby="tab-rotation" hidden>
+							<h2>Rotation</h2>
+							<div class="panel-grid">
+								<section class="panel">
+									<h3>Seal management</h3>
+									<div id="rotation-fields" class="fields"></div>
+									<p class="small muted">
+										Maintain the selected seal. With twisting enabled, alternate Command and Righteousness after a landed white swing once
+										the previous Echo has been consumed.
+									</p>
+								</section>
+								<section class="panel">
+									<h3>Ability priority</h3>
+									<p class="muted">Enable abilities and move them up or down. The first usable ability wins. Auto-attacks always run.</p>
+									<ol id="priority-list"></ol>
+								</section>
+							</div>
+						</section>
+						<section role="tabpanel" id="results" aria-labelledby="tab-results" hidden>
+							<div class="section-heading">
+								<h2>Damage breakdown</h2>
+								<button id="download" type="button" disabled>Download result</button>
+							</div>
+							<p id="result-description" class="muted">No simulation results yet.</p>
+							<div class="table-scroll">
+								<table>
+									<thead>
+										<tr>
+											<th>Ability</th>
+											<th>DPS</th>
+											<th>Share</th>
+											<th>Casts</th>
+											<th>Hits / ticks</th>
+											<th>Crits</th>
+											<th>Misses</th>
+											<th>Dodges</th>
+										</tr>
+									</thead>
+									<tbody id="damage-rows"></tbody>
+								</table>
+							</div>
+							<div id="damage-bars"></div>
+						</section>
+						<section role="tabpanel" id="model" aria-labelledby="tab-model" hidden>
+							<h2>Evidence & assumptions</h2>
+							<p class="muted">
+								This is usable for comparing builds under the listed assumptions. It is not a claim that unreleased level-60 spell values have
+								been verified.
+							</p>
+							<section class="panel">
+								<h3>Unresolved spell values</h3>
+								<p class="muted">
+									Holy Strike defaults use the observed level-38 tooltip. Change these inputs to test a possible level-60 value.
+								</p>
+								<div id="assumption-fields" class="fields two-column"></div>
+							</section>
+							<ul id="model-notes"></ul>
+							<p class="small">
+								Sources:
+								<a href="https://talentsforever.com" target="_blank" rel="noopener">TalentsForever · 16 September 2026 · CC BY 4.0</a> ·
+								<a
+									href="https://news.blizzard.com/en-us/article/24303313/world-of-warcraft-forever-deep-dive-panel-recap"
+									target="_blank"
+									rel="noopener"
+									>Blizzard Deep Dive</a
+								>
+								·
+								<a href="https://github.com/wowsims/classic/tree/7779ebbf79dc7f1341e6ab939b28a3402c9a730a" target="_blank" rel="noopener"
+									>Pinned Classic reference</a
+								>
+							</p>
+							<p id="build-version" class="small muted"></p>
+						</section>
+					</div>
+				</main>
+			</div>
+		</form>
+		<noscript>This simulator requires JavaScript and WebAssembly.</noscript>
+	</body>
+</html>

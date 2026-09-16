@@ -102,7 +102,11 @@ func (unit *Unit) validateClassic60Mana() {
 		unit.HasRageBar() || unit.HasEnergyBar() || unit.HasFocusBar() {
 		panic("Classic mana reference requires a validated player mana bar")
 	}
-	if unit.PseudoStats.SpiritRegenMultiplier != 1 || unit.PseudoStats.SpiritRegenRateCasting != 0 ||
+	castingRegen := 0.0
+	if unit.foreverRet != nil {
+		castingRegen = .1 * float64(unit.foreverRet.config.Talents["Reverence"])
+	}
+	if unit.PseudoStats.SpiritRegenMultiplier != 1 || unit.PseudoStats.SpiritRegenRateCasting != castingRegen ||
 		unit.PseudoStats.ForceFullSpiritRegen || unit.manaRegenMultiplier != 1 {
 		panic("Classic mana reference does not support regeneration modifiers")
 	}

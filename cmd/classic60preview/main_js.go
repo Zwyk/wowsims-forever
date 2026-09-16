@@ -18,6 +18,13 @@ func main() {
 		return core.Classic60PreviewJSON(args[0].String())
 	})
 	js.Global().Set("classic60Preview", callback)
+	retCallback := js.FuncOf(func(_ js.Value, args []js.Value) any {
+		if len(args) != 1 || args[0].Type() != js.TypeString {
+			return `{"error":"expected one JSON string"}`
+		}
+		return core.ForeverRetJSON(args[0].String())
+	})
+	js.Global().Set("foreverRet", retCallback)
 	// Keep the callback registered for the life of this diagnostic module.
 	select {}
 }

@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const output = join(root, 'dist', 'forever-preview');
 const go = process.env.GO || 'go';
-const expectedFiles = new Set(['index.html', 'app.js', 'style.css', 'wasm_exec.js', 'classic60.wasm', 'build-info.json']);
+const expectedFiles = new Set(['index.html', 'app.js', 'style.css', 'wasm_exec.js', 'classic60.wasm', 'build-info.json', 'baseline.html', 'forever.js', 'forever.css', 'forever-worker.js', 'logo.png', 'paladin.jpg']);
 const run = (command, args, options = {}) => (execFileSync(command, args, { cwd: root, encoding: 'utf8', ...options }) || '').trim();
 
 await mkdir(output, { recursive: true });
@@ -24,8 +24,12 @@ run(go, ['build', '-ldflags', '-w -s', '-o', join(output, 'classic60.wasm'), './
 	stdio: ['ignore', 'inherit', 'inherit'],
 });
 await Promise.all([
-	...['index.html', 'app.js', 'style.css'].map(file => copyFile(join(root, 'ui', 'classic60preview', file), join(output, file))),
+	...['app.js', 'style.css'].map(file => copyFile(join(root, 'ui', 'classic60preview', file), join(output, file))),
+	copyFile(join(root, 'ui', 'classic60preview', 'index.html'), join(output, 'baseline.html')),
+	...['index.html', 'forever.js', 'forever.css', 'forever-worker.js'].map(file => copyFile(join(root, 'ui', 'forever', file), join(output, file))),
+	copyFile(join(root, 'assets', 'img', 'WoW-Simulator-Icon.png'), join(output, 'logo.png')),
+	copyFile(join(root, 'assets', 'img', 'retribution_paladin.jpg'), join(output, 'paladin.jpg')),
 	copyFile(join(goroot, 'lib', 'wasm', 'wasm_exec.js'), join(output, 'wasm_exec.js')),
 ]);
 await writeFile(join(output, 'build-info.json'), `${JSON.stringify({ commit, dirty, builtAt: new Date().toISOString() }, null, 2)}\n`);
-console.log(`Built Classic 60 baseline preview in ${output}`);
+console.log(`Built Forever Ret simulator and Classic 60 baseline preview in ${output}`);
