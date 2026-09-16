@@ -15,7 +15,9 @@ The port starts from the modern `tbc-new` architecture at commit [`17a8fb28c5ad1
 
 The inherited deployment, release, database-update, labeling, and webhook workflows remain disabled. Test CI and a new, narrowly scoped [GitHub Pages preview workflow](docs/forever_pages.md) are active. Pages publishes a standalone Classic level-60 **stat diagnostic**, not the inherited TBC simulator and not a complete Classic or Forever combat simulator.
 
-The finished site will retain the original WoWSims landing page, class navigation, simulator controls and results layout, with Forever branding and supported data. The baseline lab is a temporary development tool, not the final interface. Engine integration now includes bounded level-60 single-weapon, dual-wield and melee-special fixtures; see the [current scope](docs/forever_core.md#scheduled-classic-60-melee-integration).
+The finished site will retain the original WoWSims landing page, class navigation, simulator controls and results layout, with Forever branding and supported data. The baseline lab is a temporary development tool, not the final interface. Engine integration now includes bounded level-60 single-weapon, dual-wield, melee-special and spell-combat fixtures; see the [melee scope](docs/forever_core.md#scheduled-classic-60-melee-integration) and [spell scope](docs/forever_core.md#scheduled-classic-60-spell-integration).
+
+Current milestone: starting stats and diagnostic combat work under tested Classic reference rules. The next integration work is resource costs/regeneration and a real Classic class rotation, followed by matching gear/talents/encounters and the normal WoWSims interface. Front-facing/incoming combat, live racials/rounding, forms and pets remain additional gates for the classes that need them. A complete playable level-60 simulator is not available yet.
 
 ## Development
 
