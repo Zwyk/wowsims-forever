@@ -7,7 +7,8 @@ import (
 
 // weaponSkillBonus returns the accumulated bonus for one category. These
 // values are deliberately outside the indexed Stats and serialized PseudoStat
-// vectors and are not consumed by combat outcomes yet.
+// vectors. Explicit Classic combat reads the selected weapon's category;
+// the default inherited TBC profile leaves the vector inactive.
 func (character *Character) weaponSkillBonus(category proto.WeaponSkillCategory) float64 {
 	return character.PseudoStats.WeaponSkillBonuses.Get(category)
 }

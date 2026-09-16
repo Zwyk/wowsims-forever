@@ -65,11 +65,35 @@ func livePhysicalAttackTableView(spell *Spell, table *AttackTable) physicalAttac
 	}
 	character := spell.weaponAttackCharacter()
 	if character == nil || &character.Unit != spell.Unit || character.Class != proto.Class_ClassWarrior || character.Race != proto.Race_RaceHuman ||
-		spell.Unit.PseudoStats.InFrontOfTarget || spell.Unit.AutoAttacks.IsDualWielding ||
+		spell.Unit.PseudoStats.InFrontOfTarget ||
 		spell.DefenseType != DefenseTypeMelee || spell.SpellSchool != SpellSchoolPhysical ||
-		spell.ProcMask != ProcMaskMeleeMHAuto || spell.weaponAttackSource != WeaponAttackSourceMainHand ||
 		spell.Flags.Matches(SpellFlagCannotBeDodged) {
-		panic("Classic melee reference supports only Human Warrior rear main-hand physical auto-attacks")
+		panic("Classic melee reference supports only Human Warrior rear physical melee attacks")
+	}
+	// Hand selection is explicit and must agree with the proc category. Do not
+	// infer skill from a broad/mixed mask or permit an unequipped off-hand.
+	switch spell.weaponAttackSource {
+	case WeaponAttackSourceMainHand:
+		if spell.ProcMask != ProcMaskMeleeMHAuto && spell.ProcMask != ProcMaskMeleeMHSpecial {
+			panic("Classic main-hand attack requires a matching auto or special proc mask")
+		}
+	case WeaponAttackSourceOffHand:
+		if !spell.Unit.AutoAttacks.IsDualWielding || (spell.ProcMask != ProcMaskMeleeOHAuto && spell.ProcMask != ProcMaskMeleeOHSpecial) {
+			panic("Classic off-hand attack requires dual wield and a matching proc mask")
+		}
+	default:
+		panic("Classic melee reference requires an explicit melee weapon source")
+	}
+	if spell.Unit.AutoAttacks.IsDualWielding {
+		mainHand := character.MainHand()
+		if mainHand.HandType == proto.HandType_HandTypeTwoHand ||
+			weaponSkillCategoryFromEquippedItem(mainHand, WeaponAttackSourceMainHand) == proto.WeaponSkillCategory_WeaponSkillCategoryUnspecified ||
+			weaponSkillCategoryFromEquippedItem(character.OffHand(), WeaponAttackSourceOffHand) == proto.WeaponSkillCategory_WeaponSkillCategoryUnspecified {
+			panic("Classic dual wield requires two compatible equipped melee weapons")
+		}
+	}
+	if spell.Unit.PseudoStats.DisableDWMissPenalty {
+		panic("Classic melee reference does not support queued-attack miss-penalty overrides")
 	}
 	context := spell.weaponAttackContext()
 	if context.classification.kind != weaponClassificationEquippedItem ||
@@ -103,6 +127,16 @@ func livePhysicalAttackTableView(spell *Spell, table *AttackTable) physicalAttac
 		panic("unsupported weapon or level in Classic melee reference")
 	}
 	return view
+}
+
+// The same weapon view supplies white and special chances, but their outcome
+// tables differ. Reject a caller that sends a special through the glancing
+// white table or a white swing through the no-dual-wield-penalty special table.
+func (spell *Spell) requireClassicMeleeOutcome(table *AttackTable, white bool) {
+	livePhysicalAttackTableView(spell, table)
+	if spell.ProcMask.Matches(ProcMaskMeleeWhiteHit) != white {
+		panic("Classic melee outcome does not match the attack's auto/special category")
+	}
 }
 
 // resolvePhysicalAttackTableView derives per-weapon values without mutating the

@@ -2,9 +2,10 @@ package core
 
 // classic60MeleeReferenceRules joins verified components for a bounded engine
 // integration test. It is NOT a complete Classic ruleset or an active build
-// target: only pre-racial humanoid Warrior main-hand white attacks against a
-// passive level 60–63 enemy are exercised. There are no class spells, resources,
-// haste, incoming attacks, talents, item effects or public selection path.
+// target: only pre-racial Human Warrior rear melee attacks against a passive
+// level 60–63 enemy are exercised, including both hands and weapon specials.
+// There are no class spells, resources, haste, incoming attacks, talents, item
+// effects or public selection path.
 //
 // Start empty rather than inheriting unverified TBC behavior. Weapon-dependent
 // physical chances are resolved at attack time, not from the empty table seeds.
@@ -17,6 +18,7 @@ func classic60MeleeReferenceRules() rulesetProfile {
 		levels: levelRules{characterLevel: 60, defaultBossLevelDelta: 3},
 		combat: combatRules{outcomes: outcomeRules{
 			weaponSkillModel:          weaponSkillModelClassicReference,
+			dualWieldMissPenalty:      0.19,
 			meleeCritDamageMultiplier: 2,
 		}},
 		mitigation: mitigationRules{

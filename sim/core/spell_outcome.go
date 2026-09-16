@@ -215,7 +215,7 @@ func (spell *Spell) outcomeMeleeWhite(sim *Simulation, result *SpellResult, atta
 	roll := sim.RandomFloat("White Hit Table")
 	glanceRoll := 0.0
 	if attackTable.resolvedOutcomeRules().weaponSkillModel != weaponSkillModelDisabled {
-		livePhysicalAttackTableView(spell, attackTable)
+		spell.requireClassicMeleeOutcome(attackTable, true)
 		// The pinned Classic engine draws this independently on every white
 		// attack, including misses. Preserve the inherited TBC RNG sequence.
 		glanceRoll = sim.RandomFloat("White Hit Glancing Penalty")
@@ -569,7 +569,10 @@ func (spell *Spell) outcomeEnemyMeleeWhite(sim *Simulation, result *SpellResult,
 func (spell *Spell) GetPhysicalMissChance(attackTable *AttackTable) float64 {
 	missChance := livePhysicalAttackTableView(spell, attackTable).baseMissChance - spell.PhysicalHitChance(attackTable)
 
-	if spell.Unit.AutoAttacks.IsDualWielding && !spell.Unit.PseudoStats.DisableDWMissPenalty {
+	// Keep the inherited helper's historical behavior. In the explicit
+	// Classic profile, only white attacks receive the dual-wield penalty.
+	whiteAttack := attackTable.resolvedOutcomeRules().weaponSkillModel == weaponSkillModelDisabled || spell.ProcMask.Matches(ProcMaskMeleeWhiteHit)
+	if whiteAttack && spell.Unit.AutoAttacks.IsDualWielding && !spell.Unit.PseudoStats.DisableDWMissPenalty {
 		missChance += attackTable.resolvedOutcomeRules().dualWieldMissPenalty
 	}
 
@@ -589,7 +592,7 @@ func (result *SpellResult) applyAttackTableMiss(spell *Spell, attackTable *Attac
 
 func (result *SpellResult) applyAttackTableMissNoDWPenalty(spell *Spell, attackTable *AttackTable, roll float64, chance *float64) bool {
 	if attackTable.resolvedOutcomeRules().weaponSkillModel != weaponSkillModelDisabled {
-		panic("Classic melee reference does not support special attacks")
+		spell.requireClassicMeleeOutcome(attackTable, false)
 	}
 	missChance := livePhysicalAttackTableView(spell, attackTable).baseMissChance - spell.PhysicalHitChance(attackTable)
 	*chance = max(0, missChance)
@@ -690,7 +693,7 @@ func (result *SpellResult) applyAttackTableCrit(spell *Spell, attackTable *Attac
 
 func (result *SpellResult) applyAttackTableCritSeparateRoll(sim *Simulation, spell *Spell, attackTable *AttackTable, countHits bool) bool {
 	if attackTable.resolvedOutcomeRules().weaponSkillModel != weaponSkillModelDisabled {
-		panic("Classic melee reference does not support separate-roll special attacks")
+		spell.requireClassicMeleeOutcome(attackTable, false)
 	}
 	if spell.PhysicalCritCheck(sim, attackTable) {
 		isPartialResist := result.DidResist()
@@ -883,6 +886,7 @@ func (spell *Spell) OutcomeExpectedPhysicalCrit(_ *Simulation, result *SpellResu
 
 func (spell *Spell) OutcomeExpectedMeleeWhite(_ *Simulation, result *SpellResult, attackTable *AttackTable) {
 	if attackTable.resolvedOutcomeRules().weaponSkillModel != weaponSkillModelDisabled {
+		spell.requireClassicMeleeOutcome(attackTable, true)
 		view := livePhysicalAttackTableView(spell, attackTable)
 		// Resolve the one-roll table in priority order, including truncation
 		// when a prior outcome consumes the remaining probability mass.
@@ -914,7 +918,15 @@ func (spell *Spell) OutcomeExpectedMeleeWhite(_ *Simulation, result *SpellResult
 
 func (spell *Spell) OutcomeExpectedMeleeWeaponSpecialHitAndCrit(_ *Simulation, result *SpellResult, attackTable *AttackTable) {
 	if attackTable.resolvedOutcomeRules().weaponSkillModel != weaponSkillModelDisabled {
-		panic("Classic melee reference does not support expected special attacks")
+		spell.requireClassicMeleeOutcome(attackTable, false)
+		view := livePhysicalAttackTableView(spell, attackTable)
+		missChance := max(0, view.baseMissChance-spell.PhysicalHitChance(attackTable))
+		landChance := max(0, 1-missChance-max(0, view.baseDodgeChance))
+		// Rear specials roll crit independently after landing. Match the
+		// real probability even when a diagnostic supplies more than 100% crit.
+		critChance := min(1, spell.PhysicalCritChance(attackTable))
+		result.Damage *= landChance * (1 + (spell.CritDamageMultiplier(attackTable)-1)*critChance)
+		return
 	}
 	missChance := max(0, attackTable.BaseMissChance-spell.PhysicalHitChance(attackTable))
 	ratings := attackTable.resolvedRatingRules()
