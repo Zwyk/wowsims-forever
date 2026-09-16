@@ -23,6 +23,9 @@ These references identify inherited behavior; they are not evidence that a rule 
 | Binary and non-binary resistance | `resistance_test.go` |
 | Baseline health, armor, mana, AP and attribute-derived crit; player/pet boundaries | `attribute_rules_test.go` |
 | Integrated pre-racial level-60 initialization for all 40 original combinations | `character_classic_reference_test.go`, `character_classic_reference_integration_test.go` |
+| Passive Classic racials and explicit fractional dependency sources | `character_racials_classic_reference_test.go`, `stats/deps_rounding_test.go` |
+| Per-unit ownership of extracted runtime rules, including pets and attack tables | `ruleset_ownership_test.go` |
+| Standalone Classic-60 diagnostic JSON and browser WASM | `classic60_preview_test.go`, `tools/classic60preview/smoke.mjs` |
 | End-to-end class behavior | Existing seeded per-class `.results` files |
 
 The per-class golden results are the broad regression layer. Do not regenerate them merely to make CI green: a result update must accompany a reviewed mechanics change and explain why each affected class moved.
@@ -34,6 +37,12 @@ The active core ruleset is selected at build time and remains internal to the Go
 The first extraction contains the inherited TBC level bands and both attack-table directions. The second adds combat-rating conversions, level-based NPC critical strike chance, and fixed outcome values such as expertise steps, the dual-wield miss penalty, the spell miss floor, and enemy critical/crushing damage multipliers. Engine-created attack tables cache value copies of the selected rating and outcome rules, providing a profile-local calculation seam without mutable global state.
 
 All extracted values still reproduce the inherited TBC engine exactly. Armor, resistance, weapon skill, class base stats, talents and UI values stay outside this profile until each surface can move in a focused pull request. A later Forever profile will be added alongside the inherited profile, then activated only with matching level-60 base-stat data and UI changes.
+
+### Runtime rule ownership
+
+Engine-created characters and targets now retain their selected profile by value. Pets inherit their owner's snapshot; ordinary attack tables use the attacker's snapshot and retain their existing copied rating/outcome policy. Attribute installation, mana dependencies, avoidance/defense/resilience conversions, expertise suppression and contextless spell crit/healing calculations consume the owning unit's rules. Legacy zero-value units still fall back to the build-time selector, and explicitly injected attack-table tests remain supported.
+
+The private character construction seam requires **both** a profile and its raw base-stat seed: choosing a level must not silently reuse the active level-70 `BaseStats` table. This is ownership of already-extracted rules, not permission to simulate a mixed-profile encounter. No public/proto selector is added. Racial/class/form code, level-dependent constants, live output-stat flooring, regeneration, equipment and spell data still require coordinated migration before activating level 60.
 
 ### Baseline attribute-conversion boundary
 
@@ -125,7 +134,23 @@ Hunter, Priest and Mage omit their populated dodge conversion rows in the execut
 
 Independent literal tests check full raw/resolved stat arrays for all 40 combinations, resource/capability gates, invalid enums and levels, value-copy isolation and unchanged active globals/level-70 construction. For example, the pre-racial Human Paladin baseline has 2,201 health, 2,282 mana (1,512 spell-cost base mana), 370 AP, 3.989% physical crit, 4.669% spell crit and 3.989% dodge. These are source-code regression anchors, not a complete naked character sheet or accepted Forever data. Integration tests feed assembled Druid baselines into reversible Cat AP dependencies and assembled armor/resistance values into the separate Classic mitigation projections; they still do not create a live fight.
 
-The boundary is deliberately **before racials** as well as gear, bonus stats, talents, forms, pets and regeneration. Original race attribute offsets are included, but Human Spirit, Gnome Intellect, Tauren Health, Night Elf Dodge and racial resistances are not. [Classic applies those effects later](https://github.com/wowsims/classic/blob/7779ebbf79dc7f1341e6ab939b28a3402c9a730a/sim/core/racials.go); calling our live TBC racial code would also introduce different rules. In particular, fractional Gnome Intellect exposes the unresolved source-rounding difference. Completing a runnable level-60 path requires explicit racial/rounding policy, profile-consistent constructor/class/resource/avoidance ownership, and matching combat/form/pet data—not only changing the level constant.
+This original entrypoint remains deliberately **before racials** as well as gear, bonus stats, talents, forms, pets and regeneration. The separate post-racial entrypoint below adds only unconditional own-character racial stat effects; it does not call the live TBC racial code.
+
+### Passive racials and explicit source rounding
+
+`classicReferenceInitializeCharacterWithRacials` composes [Classic's passive racial effects](https://github.com/wowsims/classic/blob/7779ebbf79dc7f1341e6ab939b28a3402c9a730a/sim/core/racials.go) through the same dependency graph: Human Spirit ×1.05, Gnome Intellect ×1.05, Tauren **derived total Health** ×1.05, Night Elf +1 percentage point Dodge, and the source's +10 racial resistances. Orc/Troll have no unconditional own-character stat additions in this bounded path. Raw base stats and spell-cost base mana remain unchanged. Weapon specializations, equipment, pet/target effects and activated racial abilities are excluded.
+
+The modern dependency manager now has an immutable, per-instance source-rounding choice. Its default and zero-value behavior still floor primary stat sources, preserving live TBC results. The Classic reference explicitly preserves fractional sources and does not call final stat flooring, matching the pinned [Classic dependency evaluator](https://github.com/wowsims/classic/blob/7779ebbf79dc7f1341e6ab939b28a3402c9a730a/sim/core/stats/deps.go). This is **source-code characterization**, not confirmed client or Forever rounding. For example, a Gnome Mage produces 134.4 Intellect, 2,949 Mana, 2.45792% spell crit and unchanged 1,213 base mana; a Tauren Warrior produces 2,760.45 Health. Tests cover all 40 supported pairs with and without passives. Live final flooring is a separate migration boundary, not solved by this constructor option.
+
+### Browser baseline lab and the working-Classic gate
+
+The standalone [baseline lab](forever_pages.md) runs these Go calculations as WASM, not reimplemented JavaScript formulas. It supports the original 40 race/class pairs, passive-racial comparison, visible stat/avoidance/armor outputs and JSON export with build identity. It cannot instantiate a live Character, import gear/talents, run a rotation or produce DPS. Unknown parameters, unsupported pairs and non-60 levels fail closed. The main simulator remains TBC-70 and is not published as a Classic simulator. The lab deliberately shows source omissions such as Hunter's missing Agility-to-Dodge dependency; these must be verified/corrected against game evidence before calling the engine Classic-accurate.
+
+Our next acceptance target is a working **Classic baseline before Forever-specific mechanics**:
+
+1. Complete a coherent level-60 runtime profile: combat/defense/weapon-skill and mitigation paths, regeneration, final rounding, forms and pets; remove incompatible level-70 fallbacks.
+2. Supply matching Classic gear, talents, spells and encounters for an end-to-end class slice, then expand class coverage. Resolve recorded source omissions and the Bear-form disagreement explicitly rather than inheriting them silently.
+3. Validate actual simulated fights with source-grounded numerical fixtures, deterministic regression results and browser smoke tests. Only then describe the deployment as a level-60 combat simulator or begin integrating Forever deltas into that baseline.
 
 ### Classic level-60 offensive chance-input reference
 

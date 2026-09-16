@@ -14,7 +14,8 @@ type classicReferenceArmorInput struct {
 
 // classicReferenceArmorDamageModifier reproduces wowsims/classic commit
 // 7779ebbf79dc7f1341e6ab939b28a3402c9a730a for the pinned level-60 world.
-// It is a comparison fallback only and has no production caller.
+// It is a comparison fallback used by tests and the standalone baseline lab;
+// the live combat path does not select it.
 //
 // The actual attacker may be anywhere from level 1 through the default +3
 // boss because the source formula uses attacker level for outgoing and

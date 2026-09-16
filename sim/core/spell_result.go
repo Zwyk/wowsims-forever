@@ -172,8 +172,7 @@ func (spell *Spell) RangedAttackPower(target *Unit) float64 {
 }
 
 func (spell *Spell) DodgeParrySuppression() float64 {
-	rules := currentRuleset()
-	return spell.dodgeParrySuppression(rules.ratings, rules.combat.outcomes)
+	return spell.dodgeParrySuppression(spell.Unit.resolvedRatingRules(), spell.Unit.resolvedOutcomeRules())
 }
 
 func (spell *Spell) dodgeParrySuppression(ratings ratingRules, outcomes outcomeRules) float64 {
@@ -288,7 +287,7 @@ type critChances struct {
 }
 
 func getCritChances(rawChance float64, target *Unit) critChances {
-	return getCritChancesWithRatingRules(rawChance, target, currentRuleset().ratings)
+	return getCritChancesWithRatingRules(rawChance, target, target.resolvedRatingRules())
 }
 
 func getCritChancesWithRatingRules(rawChance float64, target *Unit, ratings ratingRules) critChances {

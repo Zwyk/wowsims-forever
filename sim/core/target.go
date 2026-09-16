@@ -173,15 +173,17 @@ func newTargetWithRuleset(options *proto.Target, targetIndex int32, rules rulese
 
 	target := &Target{
 		Unit: Unit{
-			Type:        EnemyUnit,
-			Index:       targetIndex,
-			Label:       "Target " + strconv.Itoa(int(targetIndex)+1),
-			Level:       options.Level,
-			MobType:     options.MobType,
-			auraTracker: newAuraTracker(),
-			stats:       unitStats,
-			PseudoStats: stats.NewPseudoStats(),
-			Metrics:     NewUnitMetrics(),
+			Type:             EnemyUnit,
+			rules:            rules,
+			rulesInitialized: true,
+			Index:            targetIndex,
+			Label:            "Target " + strconv.Itoa(int(targetIndex)+1),
+			Level:            options.Level,
+			MobType:          options.MobType,
+			auraTracker:      newAuraTracker(),
+			stats:            unitStats,
+			PseudoStats:      stats.NewPseudoStats(),
+			Metrics:          NewUnitMetrics(),
 
 			StatDependencyManager: stats.NewStatDependencyManager(),
 			ReactionTime:          BossGCD,
@@ -381,7 +383,10 @@ type AttackTable struct {
 }
 
 func NewAttackTable(attacker *Unit, defender *Unit) *AttackTable {
-	return newAttackTableWithRuleset(attacker, defender, currentRuleset())
+	// The attacker owns this offensive context. Explicit internal profile
+	// injection remains available for component tests; constructing tables does
+	// not rewrite either unit's rules or validate an entire encounter profile.
+	return newAttackTableWithRuleset(attacker, defender, attacker.resolvedRuleset())
 }
 
 func newAttackTableWithRuleset(attacker *Unit, defender *Unit, rules rulesetProfile) *AttackTable {
@@ -406,11 +411,15 @@ func newAttackTableWithRuleset(attacker *Unit, defender *Unit, rules rulesetProf
 	return table
 }
 
-// These fallbacks preserve the historical behavior of externally constructed
-// AttackTable values. Engine-created tables always cache the selected profile.
+// Externally constructed tables inherit an available attacker owner, or the
+// active profile when contextless. Engine-created tables always cache their
+// selected profile, including explicit component-test overrides.
 func (table *AttackTable) resolvedRatingRules() ratingRules {
 	if table.rulesInitialized {
 		return table.ratings
+	}
+	if table.Attacker != nil {
+		return table.Attacker.resolvedRatingRules()
 	}
 	return currentRuleset().ratings
 }
@@ -418,6 +427,9 @@ func (table *AttackTable) resolvedRatingRules() ratingRules {
 func (table *AttackTable) resolvedOutcomeRules() outcomeRules {
 	if table.rulesInitialized {
 		return table.outcomes
+	}
+	if table.Attacker != nil {
+		return table.Attacker.resolvedOutcomeRules()
 	}
 	return currentRuleset().combat.outcomes
 }

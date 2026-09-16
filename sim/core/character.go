@@ -89,18 +89,28 @@ type Character struct {
 }
 
 func NewCharacter(party *Party, partyIndex int, player *proto.Player) Character {
+	return newCharacterWithRuleset(party, partyIndex, player, currentRuleset(), BaseStats[BaseStatsKey{Race: player.Race, Class: player.Class}])
+}
+
+// newCharacterWithRuleset requires an explicit raw base-stat seed alongside
+// the rules. It must never infer that the active BaseStats table supports a
+// different level. This internal construction seam does not activate another
+// ruleset: class/racial/gear/spell construction still needs separate migration.
+func newCharacterWithRuleset(party *Party, partyIndex int, player *proto.Player, rules rulesetProfile, baseStats stats.Stats) Character {
 	if player.Database != nil {
 		addToDatabase(player.Database)
 	}
 
 	character := Character{
 		Unit: Unit{
-			Type:        PlayerUnit,
-			Index:       int32(party.Index*5 + partyIndex),
-			Level:       CharacterLevel,
-			auraTracker: newAuraTracker(),
-			PseudoStats: stats.NewPseudoStats(),
-			Metrics:     NewUnitMetrics(),
+			Type:             PlayerUnit,
+			Index:            int32(party.Index*5 + partyIndex),
+			Level:            rules.levels.characterLevel,
+			rules:            rules,
+			rulesInitialized: true,
+			auraTracker:      newAuraTracker(),
+			PseudoStats:      stats.NewPseudoStats(),
+			Metrics:          NewUnitMetrics(),
 
 			StatDependencyManager: stats.NewStatDependencyManager(),
 
@@ -137,7 +147,7 @@ func NewCharacter(party *Party, partyIndex int, player *proto.Player) Character 
 		character.Consumables = player.Consumables
 	}
 
-	character.baseStats = BaseStats[BaseStatsKey{Race: character.Race, Class: character.Class}]
+	character.baseStats = baseStats
 
 	character.AddStats(character.baseStats)
 	character.addUniversalStatDependencies()
@@ -266,7 +276,7 @@ func (character *Character) applyEquipment() {
 }
 
 func (character *Character) addUniversalStatDependencies() {
-	character.addUniversalStatDependenciesWithRuleset(currentRuleset())
+	character.addUniversalStatDependenciesWithRuleset(character.resolvedRuleset())
 }
 
 // Returns a partially-filled PlayerStats proto for use in the CharacterStats api call.

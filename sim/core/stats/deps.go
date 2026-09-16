@@ -109,12 +109,36 @@ func (dep *StatDependency) UpdateValue(newAmount float64) {
 // Increases agility by X%
 // Reduces armor by 50%
 type StatDependencyManager struct {
-	deps      []*StatDependency
-	finalized bool
+	deps           []*StatDependency
+	finalized      bool
+	sourceRounding DependencySourceRounding
 }
+
+// DependencySourceRounding controls how a dependency reads its source value.
+// It does not round the returned stat array; final stat/display rounding is a
+// separate operation. The zero value preserves the live modern engine policy.
+type DependencySourceRounding uint8
+
+const (
+	FloorPrimarySources DependencySourceRounding = iota
+	PreserveFractionalSources
+)
 
 func NewStatDependencyManager() StatDependencyManager {
 	return StatDependencyManager{}
+}
+
+// NewStatDependencyManagerWithSourceRounding selects an immutable, per-manager
+// source policy. Fractional sources are used by the pinned Classic reference;
+// callers using the ordinary constructor or a zero-valued manager still floor
+// primary-stat sources. Invalid policies are programming errors.
+func NewStatDependencyManagerWithSourceRounding(rounding DependencySourceRounding) StatDependencyManager {
+	switch rounding {
+	case FloorPrimarySources, PreserveFractionalSources:
+		return StatDependencyManager{sourceRounding: rounding}
+	default:
+		panic("Invalid stat dependency source rounding policy")
+	}
 }
 
 func (sdm *StatDependencyManager) AddStatDependency(src Stat, dst Stat, amount float64) {
@@ -258,10 +282,10 @@ func (sdm *StatDependencyManager) ApplyStatDependencies(s Stats) Stats {
 		if dep.enabled {
 			if dep.src == dep.dst {
 				s[dep.dst] *= dep.amount
-			} else if isFlooredGameStat[dep.src] {
+			} else if sdm.sourceRounding == FloorPrimarySources && isFlooredGameStat[dep.src] {
 				// The dep sort guarantees the source stat is final here, and
-				// the game floors attributes before dependents consume them
-				// (e.g. dodge is derived from the floored Agility).
+				// the modern policy floors attributes before dependents consume
+				// them (e.g. dodge is derived from the floored Agility).
 				s[dep.dst] += math.Floor(s[dep.src]) * dep.amount
 			} else {
 				s[dep.dst] += s[dep.src] * dep.amount

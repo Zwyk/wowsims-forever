@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content="An experimental level-60 Classic character-stat baseline for the WoWSims Forever project." />
+		<title>Classic 60 baseline lab · WoWSims Forever</title>
+		<link rel="stylesheet" href="./style.css" />
+		<script src="./wasm_exec.js" defer></script>
+		<script src="./app.js" defer></script>
+	</head>
+	<body>
+		<main>
+			<header>
+				<p class="eyebrow">WoWSims Forever <span>Experimental preview</span></p>
+				<h1>Classic 60 baseline lab</h1>
+				<p class="intro">A small, inspectable foundation for a future level-60 simulator. Choose a character and check the starting numbers.</p>
+			</header>
+			<aside class="notice" aria-label="Preview limitations">
+				<strong>This is not a DPS simulator.</strong>
+				<p>
+					These are unequipped, untalented, humanoid character stats, with optional passive racial effects. There are no gear, spell, talent, pet or
+					combat simulations here. The main simulator remains on its inherited TBC level-70 rules.
+				</p>
+				<p>This preview reproduces a pinned Classic <em>source-code reference</em>, not verified in-game Forever mechanics.</p>
+			</aside>
+			<section class="panel controls" aria-labelledby="character-heading">
+				<div class="section-heading">
+					<h2 id="character-heading">Your baseline</h2>
+					<span class="level">Level 60</span>
+				</div>
+				<form id="character-form">
+					<fieldset id="character-controls" disabled>
+						<legend class="visually-hidden">Character options</legend>
+						<div class="choices">
+							<label for="race">Race<select id="race" name="race"></select></label>
+							<label for="class">Class<select id="class" name="class"></select></label>
+						</div>
+						<label class="check" for="passive-racials"
+							><input id="passive-racials" type="checkbox" checked /><span>Include supported passive racial stats</span></label
+						>
+						<p class="hint">
+							Only unconditional character-stat effects. Weapon skill, activated racials and conditional bonuses are outside this preview.
+						</p>
+					</fieldset>
+				</form>
+				<p id="status" class="status" role="status" aria-live="polite">Loading the level-60 baseline…</p>
+				<p id="error" class="error" role="alert" hidden></p>
+			</section>
+			<section id="results" class="results" aria-labelledby="results-heading" hidden>
+				<div class="section-heading">
+					<h2 id="results-heading">Character stats</h2>
+					<button id="download" type="button" disabled>Download report</button>
+				</div>
+				<p id="character-summary" class="muted"></p>
+				<dl id="stats" class="stats-grid"></dl>
+				<div class="detail-grid">
+					<section class="panel" aria-labelledby="resources-heading">
+						<h3 id="resources-heading">Resource baseline</h3>
+						<dl class="details">
+							<div>
+								<dt>Raw class base mana</dt>
+								<dd id="base-mana"></dd>
+							</div>
+						</dl>
+						<p class="hint">The raw class pool is separate from total mana; intellect and racial bonuses do not change this base-cost reference.</p>
+					</section>
+					<section class="panel" aria-labelledby="armor-heading">
+						<h3 id="armor-heading">Armor check · level 63 attacker</h3>
+						<dl class="details">
+							<div>
+								<dt>Physical damage received</dt>
+								<dd id="armor-multiplier"></dd>
+							</div>
+						</dl>
+						<p class="hint">A standalone armor calculation, not a combat result. No armor penetration or other mitigation effects.</p>
+					</section>
+				</div>
+				<section class="panel" aria-labelledby="avoidance-heading">
+					<h3 id="avoidance-heading">Baseline avoidance</h3>
+					<div class="table-scroll">
+						<table>
+							<thead>
+								<tr>
+									<th scope="col">Chance</th>
+									<th scope="col">Effective baseline</th>
+									<th scope="col">Capability</th>
+								</tr>
+							</thead>
+							<tbody id="avoidance"></tbody>
+						</table>
+					</div>
+					<p class="hint">
+						These are baseline percentages, not final chances against a level-63 boss. Parry and block are shown as zero when their capability is
+						unavailable. An unequipped character cannot block.
+					</p>
+				</section>
+				<section class="provenance" aria-labelledby="provenance-heading">
+					<h3 id="provenance-heading">What these numbers mean</h3>
+					<p id="rounding"></p>
+					<p id="source"></p>
+					<p>
+						Unsupported or unknown Forever changes are intentionally excluded. A matching reference calculation is a regression check, not a claim
+						that a game mechanic has been confirmed.
+					</p>
+					<p>
+						Known source omissions are preserved for now: Hunter, Mage and Priest have no Agility-to-Dodge dependency, and Mage and Priest have no
+						Agility-to-physical-crit dependency. These are not claims about correct in-game Classic behavior.
+					</p>
+				</section>
+			</section>
+			<footer>
+				<p id="build">Build information loading…</p>
+				<a href="https://github.com/Zwyk/wowsims-forever">Project on GitHub</a>
+			</footer>
+			<noscript><p class="error">JavaScript and WebAssembly are required for this local-in-browser preview.</p></noscript>
+		</main>
+	</body>
+</html>

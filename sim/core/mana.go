@@ -41,7 +41,7 @@ func (character *Character) EnableManaBar() {
 }
 
 func (character *Character) EnableManaBarWithModifier() {
-	character.addManaStatDependenciesWithRuleset(currentRuleset())
+	character.addManaStatDependenciesWithRuleset(character.resolvedRuleset())
 
 	// Not a real spell, just holds metrics from mana gain threat.
 	character.RegisterSpell(SpellConfig{
