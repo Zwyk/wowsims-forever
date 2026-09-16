@@ -346,6 +346,7 @@ type AttackTable struct {
 	ratings          ratingRules
 	outcomes         outcomeRules
 	mitigation       mitigationRules
+	resources        resourceRules
 	rulesInitialized bool
 
 	BaseMissChance      float64
@@ -397,6 +398,7 @@ func newAttackTableWithRuleset(attacker *Unit, defender *Unit, rules rulesetProf
 		ratings:          rules.ratings,
 		outcomes:         rules.combat.outcomes,
 		mitigation:       rules.mitigation,
+		resources:        rules.resources,
 		rulesInitialized: true,
 
 		CritMultiplier:              1,

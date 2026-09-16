@@ -25,6 +25,7 @@ func classic60MeleeReferenceRules() rulesetProfile {
 			armorModel:      armorMitigationClassicReference60,
 			resistanceModel: resistanceMitigationClassicReference60,
 		},
+		resources: resourceRules{manaModel: manaModelUnavailable},
 	}
 	var ok bool
 	rules.attributes, ok = classicReferenceLevel60AttributeRules(rules)
