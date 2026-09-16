@@ -8,6 +8,8 @@ const (
 	rulesetInheritedTBC rulesetID = iota
 	// Internal, deliberately incomplete profile used by scheduled melee tests.
 	rulesetClassic60MeleeReference
+	// Separate, resource-free caster diagnostic; never publicly selected.
+	rulesetClassic60SpellReference
 )
 
 // Keep the compile-time constants beside the active selector. Existing code
@@ -122,6 +124,7 @@ type ratingRules struct {
 // its table seeds with values from the active build-time profile.
 type outcomeRules struct {
 	weaponSkillModel                   weaponSkillModel
+	spellChanceModel                   spellChanceModel
 	expertiseAvoidanceStepsPerUnit     float64
 	dualWieldMissPenalty               float64
 	minimumSpellMissChance             float64

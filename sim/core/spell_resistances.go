@@ -18,6 +18,11 @@ func (result *SpellResult) applyResistances(sim *Simulation, spell *Spell, isPer
 
 // Modifies damage based on Armor or Magic resistances, depending on the damage type.
 func (spell *Spell) ResistanceMultiplier(sim *Simulation, isPeriodic bool, attackTable *AttackTable) (float64, HitOutcome) {
+	if attackTable.resolvedOutcomeRules().spellChanceModel == spellChanceModelClassicReference60 {
+		// Also validate always-hit periodic damage and ignore-resist paths, which
+		// need not call a spell hit/crit getter during their outcome step.
+		liveClassicSpellChanceView(spell, attackTable)
+	}
 	if spell.Flags.Matches(SpellFlagIgnoreResists) {
 		return 1, OutcomeEmpty
 	}

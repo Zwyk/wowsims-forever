@@ -246,6 +246,9 @@ func (spell *Spell) SpellDamage(target *Unit) float64 {
 }
 
 func (spell *Spell) SpellHitChance(target *Unit) float64 {
+	if table := spell.classicSpellChanceAttackTable(target); table != nil {
+		return liveClassicSpellChanceView(spell, table).bonusHitChance
+	}
 	hitPercent := spell.Unit.stats[stats.SpellHitPercent] + spell.BonusHitPercent
 	// In TBC all talents that modify spell school specific hit have a container spell class spell mask
 	// so we only apply this hit to spells that have a class spell mask set
@@ -255,6 +258,13 @@ func (spell *Spell) SpellHitChance(target *Unit) float64 {
 	return hitPercent / 100
 }
 func (spell *Spell) SpellChanceToMiss(attackTable *AttackTable) float64 {
+	switch attackTable.resolvedOutcomeRules().spellChanceModel {
+	case spellChanceModelClassicReference60:
+		return spell.classicSpellChanceToMiss(attackTable)
+	case spellChanceModelInheritedTBC:
+	default:
+		panic("unsupported spell chance model")
+	}
 	// https://royalgiraffe.github.io/resist-guide (Binary spells)
 	// hitChance = baseLevelHit * (1 - 0.75*resistCoeff) + spellHitBonus, capped at 99%.
 	// The level-based hit is reduced by the resistance roll first, then the spell hit
@@ -273,6 +283,16 @@ func (spell *Spell) MagicHitCheck(sim *Simulation, attackTable *AttackTable) boo
 
 func (spell *Spell) SpellCritChance(target *Unit) float64 {
 	attackTable := spell.Unit.AttackTables[target.UnitIndex]
+	switch attackTable.resolvedOutcomeRules().spellChanceModel {
+	case spellChanceModelClassicReference60:
+		if attackTable.Defender != target {
+			panic("Classic spell reference requires the attack table's actual defender")
+		}
+		return liveClassicSpellChanceView(spell, attackTable).critChance
+	case spellChanceModelInheritedTBC:
+	default:
+		panic("unsupported spell chance model")
+	}
 	critPercent := spell.Unit.stats[stats.SpellCritPercent] +
 		spell.BonusCritPercent +
 		attackTable.BonusSpellCritPercent -

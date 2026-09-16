@@ -16,6 +16,8 @@ type weaponSkillModel uint8
 const (
 	weaponSkillModelDisabled weaponSkillModel = iota
 	weaponSkillModelClassicReference
+	// A spell-only reference must reject physical combat, not fall back to TBC.
+	weaponSkillModelUnavailable
 )
 
 // physicalAttackTableView keeps weapon-specific values out of the shared,
@@ -58,6 +60,9 @@ func inheritedPhysicalAttackTableView(table *AttackTable) physicalAttackTableVie
 func livePhysicalAttackTableView(spell *Spell, table *AttackTable) physicalAttackTableView {
 	if table.resolvedOutcomeRules().weaponSkillModel == weaponSkillModelDisabled {
 		return inheritedPhysicalAttackTableView(table)
+	}
+	if table.resolvedOutcomeRules().weaponSkillModel != weaponSkillModelClassicReference {
+		panic("physical outcomes unavailable for selected rules")
 	}
 	if spell == nil || spell.Unit == nil || table.Attacker != spell.Unit || table.Defender == nil ||
 		table.Attacker.Type != PlayerUnit || table.Defender.Type != EnemyUnit {

@@ -29,6 +29,8 @@ These references identify inherited behavior; they are not evidence that a rule 
 | Scheduled level-60 main-hand combat and iteration reset | `classic60_combat_runtime_test.go` |
 | Dual-wield scheduling, per-hand skill and off-hand damage | `classic60_dualwield_runtime_test.go` |
 | Rear weapon specials, conditional crit and scheduled casts | `classic60_melee_special_runtime_test.go` |
+| Classic spell hit/crit, binary Hit composition and bounded runtime contexts | `spell_chance_policy_test.go` |
+| Scheduled hardcasts, binary spells and pure-DoT applications/ticks | `classic60_spell_runtime_test.go` |
 | Standalone Classic-60 diagnostic JSON and browser WASM | `classic60_preview_test.go`, `tools/classic60preview/smoke.mjs` |
 | End-to-end class behavior | Existing seeded per-class `.results` files |
 
@@ -170,9 +172,21 @@ Rear weapon specials use their hand's miss, Hit suppression, dodge and crit supp
 
 The fixture deliberately retains the pinned source's known crit approximation: its extra 1.8 percentage points of suppression at +3 apply to total crit, although the source says they should apply only to aura-derived crit. A pre-racial Human Warrior has 4% crit, so this approximation yields zero against level 63. This is a regression anchor for the source, not verified game accuracy; a provenance-aware correction requires a separate policy decision and tests.
 
-Mitigation is selected by the attack table's copied rules. Classic armor uses `400 + 85 × attacker level`, flat armor penetration and the source's uncapped reduction. Resistance supports individual schools, explicit pure-DoT classification, partial-resist buckets and the separate binary multiplier; Holy never reads the Strength stat as resistance. Hybrid schools are explicitly unsupported. These resistance paths have component/damage-pipeline tests, not an end-to-end caster implementation. The new `SpellFlagPureDot` has no effect under inherited TBC rules.
+Mitigation is selected by the attack table's copied rules. Classic armor uses `400 + 85 × attacker level`, flat armor penetration and the source's uncapped reduction. Resistance supports individual schools, explicit pure-DoT classification, partial-resist buckets and the separate binary multiplier; Holy never reads the Strength stat as resistance. Hybrid schools are explicitly unsupported. The separate spell fixture below now exercises resistance with scheduled diagnostic casts; real class implementations remain separate. The new `SpellFlagPureDot` has no effect under inherited TBC rules.
 
 The remaining runtime work includes front-facing and incoming combat, resource/regen and haste policies, live racial/final-stat rounding, forms/pets, and matching class/talent/spell/item/encounter data. Class-specific attack modifiers, on-next-swing replacements and proc interactions also need their own integration coverage. The fixture's integer pre-racial stats intentionally avoid implying that the modern live flooring behavior has already been converted. Unsupported nonzero defense/resilience conversions fail explicitly; absent zero values no longer produce `0/0` during initialization. The public simulator and browser lab retain their existing scope.
+
+### Scheduled Classic 60 spell integration
+
+`classic60SpellReferenceRules` assembles a separate internal caster profile from empty values, Classic attributes/chance inputs and the existing resistance model. It is not selectable through the public API. Its supported context is a level-60 player casting explicitly non-weapon, single-school magical damage against a passive level 60–63 enemy. The damage/chance paths reject resources, haste, pets, weapon outcomes, hybrid schools and unaudited crit modifiers rather than selecting inherited TBC behavior. Healing remains outside this diagnostic. The profile and attack table retain value-owned rule selection.
+
+The source-pinned [spell miss policy](https://github.com/wowsims/classic/blob/7779ebbf79dc7f1341e6ab939b28a3402c9a730a/sim/core/spell_result.go#L195-L233) uses 4/5/6/17% base miss at equal/+1/+2/+3 levels and a 1% miss floor. Binary resistance multiplies base level-hit before bonus Hit is added: at +3, 100 resistance and +10 percentage points Hit, miss is 27.75%. School-specific Hit applies without the inherited TBC class-mask condition. Crit is an independent roll after landing, with the baseline 1.5 damage multiplier.
+
+An explicit source caveat matters here: Classic fills `SpellCritSuppression` in its table but comments out its subtraction in `SpellCritChance`. This profile reproduces that executable behavior; it does not establish that zero boss suppression is correct in the client. Unused table seeds cannot silently introduce TBC suppression. School/target crit modifiers without a reviewed modern mapping remain unsupported.
+
+The scheduler fixture constructs a pre-racial Human Mage with its integer baseline and attribute dependencies, but no Mage agent or mana bar. Resource-free diagnostic direct/binary spells exercise hardcast completion, GCD/cooldown enforcement, resist/Hit/Crit, damage reports and iteration reset. Pure-DoT applications roll Hit once; only landed applications schedule three noncritical ticks. Periodic damage uses the explicitly classified pure-DoT resistance projection. Long seeded runs check literal expected miss/crit fractions and average damage, including penetration order, the nonpenetrable level component, and the distinction between direct and pure-DoT mitigation. Identical seeds reproduce complete event traces and normalized report metrics.
+
+Expected-outcome helpers model Hit/Crit only. They are not a deterministic full-resistance expected-DPS API: the ordinary damage pipeline still samples partial resistance. Classic's separate expected-damage postprocessing ignores some resistance inputs and is not imported. Real spell ranks, coefficients, mana costs/regeneration, haste, channels, talent/racial/proc modifiers and class rotations are still required before a usable caster can be exposed in the normal WoWSims UI. This slice changes neither the active TBC profile nor the browser lab's stat-only scope.
 
 ### Classic level-60 offensive chance-input reference
 
