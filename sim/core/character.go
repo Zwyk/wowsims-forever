@@ -431,44 +431,46 @@ func (character *Character) Finalize() {
 			},
 		})
 
-		character.MakeProcTriggerAura(ProcTrigger{
-			Name:               "Pushback trigger",
-			Callback:           CallbackOnSpellHitTaken,
-			Outcome:            OutcomeLanded,
-			RequireDamageDealt: true,
+		if character.resolvedRuleset().id != rulesetClassic60PaladinReference {
+			character.MakeProcTriggerAura(ProcTrigger{
+				Name:               "Pushback trigger",
+				Callback:           CallbackOnSpellHitTaken,
+				Outcome:            OutcomeLanded,
+				RequireDamageDealt: true,
 
-			ExtraCondition: func(sim *Simulation, spell *Spell, result *SpellResult) bool {
-				return character.Hardcast.Expires > sim.CurrentTime &&
-					// Dots will not trigger pushback
-					!(spell.dots != nil || spell.aoeDot != nil || (spell.RelatedDotSpell != nil && (spell.RelatedDotSpell.dots != nil || spell.RelatedDotSpell.aoeDot != nil)))
-			},
+				ExtraCondition: func(sim *Simulation, spell *Spell, result *SpellResult) bool {
+					return character.Hardcast.Expires > sim.CurrentTime &&
+						// Dots will not trigger pushback
+						!(spell.dots != nil || spell.aoeDot != nil || (spell.RelatedDotSpell != nil && (spell.RelatedDotSpell.dots != nil || spell.RelatedDotSpell.aoeDot != nil)))
+				},
 
-			Handler: func(sim *Simulation, spell *Spell, result *SpellResult) {
-				if !sim.Proc(character.PseudoStats.PushbackChance, "Pushback") {
-					return
-				}
-
-				if character.Hardcast.IsChanneled {
-					// Channeled spells will lose 25% of their total duration
-					pushback := character.Hardcast.CastTime / 4
-					character.Hardcast.Expires = max(sim.CurrentTime, character.Hardcast.Expires-pushback)
-
-					if sim.Log != nil {
-						character.Log(sim, "%s pushed back %s while channeling", character.Hardcast.ActionID, pushback)
+				Handler: func(sim *Simulation, spell *Spell, result *SpellResult) {
+					if !sim.Proc(character.PseudoStats.PushbackChance, "Pushback") {
+						return
 					}
-				} else {
-					// Non-channeled spells will be pushed back by 0.5s
-					character.Hardcast.Expires += SpellPushbackDuration
 
-					if sim.Log != nil {
-						character.Log(sim, "%s pushed back %s while casting", character.Hardcast.ActionID, SpellPushbackDuration)
+					if character.Hardcast.IsChanneled {
+						// Channeled spells will lose 25% of their total duration
+						pushback := character.Hardcast.CastTime / 4
+						character.Hardcast.Expires = max(sim.CurrentTime, character.Hardcast.Expires-pushback)
+
+						if sim.Log != nil {
+							character.Log(sim, "%s pushed back %s while channeling", character.Hardcast.ActionID, pushback)
+						}
+					} else {
+						// Non-channeled spells will be pushed back by 0.5s
+						character.Hardcast.Expires += SpellPushbackDuration
+
+						if sim.Log != nil {
+							character.Log(sim, "%s pushed back %s while casting", character.Hardcast.ActionID, SpellPushbackDuration)
+						}
 					}
-				}
 
-				// Re-schedule the cast at the new Expires time
-				character.newHardcastAction(sim)
-			},
-		})
+					// Re-schedule the cast at the new Expires time
+					character.newHardcastAction(sim)
+				},
+			})
+		}
 	}
 
 	character.Unit.finalize()

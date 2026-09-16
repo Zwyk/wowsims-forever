@@ -64,17 +64,20 @@ func livePhysicalAttackTableView(spell *Spell, table *AttackTable) physicalAttac
 	if table.resolvedOutcomeRules().weaponSkillModel != weaponSkillModelClassicReference {
 		panic("physical outcomes unavailable for selected rules")
 	}
+	if spell != nil && spell.classic60PaladinAttack == classic60PaladinHammerOfWrath {
+		return liveClassic60PaladinRangedView(spell, table)
+	}
 	if spell == nil || spell.Unit == nil || table.Attacker != spell.Unit || table.Defender == nil ||
 		table.Attacker.Type != PlayerUnit || table.Defender.Type != EnemyUnit {
 		panic("Classic melee reference requires a player attacking an enemy")
 	}
 	character := spell.weaponAttackCharacter()
+	paladin := character != nil && character.Class == proto.Class_ClassPaladin && character.resolvedRuleset().id == rulesetClassic60PaladinReference
 	if character == nil || &character.Unit != spell.Unit || character.Race != proto.Race_RaceHuman ||
-		spell.Unit.PseudoStats.InFrontOfTarget || spell.DefenseType != DefenseTypeMelee ||
+		(!paladin && spell.Unit.PseudoStats.InFrontOfTarget) || spell.DefenseType != DefenseTypeMelee ||
 		spell.Flags.Matches(SpellFlagCannotBeDodged) {
 		panic("Classic melee reference requires a supported Human rear melee attack")
 	}
-	paladin := character.Class == proto.Class_ClassPaladin && character.resolvedRuleset().id == rulesetClassic60PaladinReference
 	if paladin {
 		spell.validateClassic60PaladinMelee(table, character)
 	} else if character.Class != proto.Class_ClassWarrior || spell.SpellSchool != SpellSchoolPhysical ||
@@ -113,7 +116,7 @@ func livePhysicalAttackTableView(spell *Spell, table *AttackTable) physicalAttac
 	}
 	if (!paladin && spell.Unit.HasManaBar()) || spell.Unit.HasRageBar() || spell.Unit.HasEnergyBar() || spell.Unit.HasFocusBar() ||
 		spell.Unit.stats[stats.MeleeHasteRating] != 0 || spell.Unit.stats[stats.SpellHasteRating] != 0 ||
-		spell.Unit.PseudoStats.AttackSpeedMultiplier != 1 || spell.Unit.PseudoStats.MeleeSpeedMultiplier != 1 {
+		spell.Unit.PseudoStats.AttackSpeedMultiplier != 1 || (!paladin && spell.Unit.PseudoStats.MeleeSpeedMultiplier != 1) || (paladin && !classic60PaladinMeleeSpeedSupported(spell.Unit)) {
 		panic("Classic melee reference does not support resource bars or haste")
 	}
 	for _, value := range []float64{spell.Unit.stats[stats.PhysicalHitPercent], spell.Unit.stats[stats.PhysicalCritPercent], spell.BonusHitPercent, spell.BonusCritPercent} {
@@ -137,7 +140,21 @@ func livePhysicalAttackTableView(spell *Spell, table *AttackTable) physicalAttac
 	if !ok {
 		panic("unsupported weapon or level in Classic melee reference")
 	}
+	if paladin && table.Defender.PseudoStats.Stunned {
+		view.baseDodgeChance, view.baseParryChance, view.baseBlockChance = 0, 0, 0
+	}
 	return view
+}
+
+func classic60PaladinMeleeSpeedSupported(unit *Unit) bool {
+	expected := 1.0
+	if unit.HasActiveAura("Seal of the Crusader (Rank 6)") {
+		expected *= 1.4
+	}
+	if unit.HasActiveAura("Classic Divine Shield (Rank 2)") {
+		expected *= .5
+	}
+	return math.Abs(unit.PseudoStats.MeleeSpeedMultiplier-expected) < 1e-9
 }
 
 // The Command exception is private and deliberately restricted to its two
@@ -155,7 +172,7 @@ func (spell *Spell) validateClassic60PaladinMelee(table *AttackTable, character 
 	validateClassicSpellResources(spell, table)
 	weapon := character.MainHand()
 	if spell.weaponAttackSource != WeaponAttackSourceMainHand || spell.Unit.AutoAttacks.IsDualWielding ||
-		weapon.HandType != proto.HandType_HandTypeTwoHand ||
+		(weapon.HandType != proto.HandType_HandTypeTwoHand && weapon.HandType != proto.HandType_HandTypeOneHand && weapon.HandType != proto.HandType_HandTypeMainHand) ||
 		(weapon.WeaponType != proto.WeaponType_WeaponTypeSword && weapon.WeaponType != proto.WeaponType_WeaponTypeMace && weapon.WeaponType != proto.WeaponType_WeaponTypeAxe) {
 		panic("Classic Paladin reference requires an equipped two-handed sword, mace or axe")
 	}

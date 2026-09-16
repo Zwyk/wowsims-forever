@@ -553,6 +553,10 @@ func (spell *Spell) OutcomeEnemyMeleeWhiteNoHitCounter(sim *Simulation, result *
 	spell.outcomeEnemyMeleeWhite(sim, result, attackTable, false)
 }
 func (spell *Spell) outcomeEnemyMeleeWhite(sim *Simulation, result *SpellResult, attackTable *AttackTable, countHits bool) {
+	if attackTable.resolvedResourceRules().manaModel == manaModelClassic60PaladinReference {
+		spell.outcomeClassic60PaladinEnemyMelee(sim, result, attackTable, countHits)
+		return
+	}
 	roll := sim.RandomFloat("Enemy White Hit Table")
 	chance := 0.0
 

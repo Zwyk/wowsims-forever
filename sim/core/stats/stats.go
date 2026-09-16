@@ -544,10 +544,11 @@ type PseudoStats struct {
 	BaseReducedCritTakenPercent float64 // Base crit reduction from talents/auras (before Defense/Resilience contributions).
 	ReducedCritTakenPercent     float64 // Total crit reduction including Defense and Resilience contributions.
 
-	BonusHealingTaken          float64 // Talisman of Troll Divinity
-	BonusSpellCritPercentTaken float64 // Imp Shadow Bolt / Imp Scorch / Winter's Chill debuff
-	BonusPhysicalDamageTaken   float64 // Hemo, Gift of Arthas, etc
-	BonusSpellDamageTaken      float64 // Amp Magic
+	BonusHealingTaken               float64 // Talisman of Troll Divinity
+	BonusSpellCritPercentTaken      float64 // Imp Shadow Bolt / Imp Scorch / Winter's Chill debuff
+	BonusPhysicalDamageTaken        float64 // Hemo, Gift of Arthas, etc
+	BonusSpellDamageTaken           float64 // Amp Magic
+	BonusDamageTakenBeforeModifiers float64 // Classic Sanctuary, after armor/resistance and before target multipliers.
 
 	DamageTakenMultiplier       float64            // All damage
 	SchoolDamageTakenMultiplier [SchoolLen]float64 // For specific spell schools (arcane, fire, shadow, etc.)

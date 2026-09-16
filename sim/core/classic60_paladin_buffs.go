@@ -19,12 +19,7 @@ import (
 func (spells *classic60PaladinSpells) registerSelfBuffs(character *Character, talents classic60PaladinTalents) {
 	selfOnly := func(_ *Simulation, target *Unit) bool { return target == &character.Unit }
 	activateBlessing := func(sim *Simulation, selected *Aura) {
-		for _, aura := range []*Aura{spells.MightAura, spells.WisdomAura, spells.KingsAura} {
-			if aura != nil && aura != selected {
-				aura.Deactivate(sim)
-			}
-		}
-		selected.Activate(sim)
+		spells.activateBlessing(sim, selected)
 	}
 	registerBlessing := func(aura *Aura, rank int32, cost ManaCostOptions) *Spell {
 		return character.RegisterSpell(SpellConfig{
@@ -97,7 +92,7 @@ func (spells *classic60PaladinSpells) selectReferenceAura(aura *Aura) error {
 	if spells.DevotionEffect == nil {
 		return fmt.Errorf("Classic Paladin self buffs must be registered before selecting an aura")
 	}
-	if aura != nil && aura != spells.DevotionEffect && aura != spells.SanctityEffect {
+	if aura != nil && !spells.ownsReferenceAura(aura) {
 		return fmt.Errorf("Classic Paladin aura selection requires an owned, learned reference aura")
 	}
 	if aura == spells.selectedAura {
@@ -108,4 +103,22 @@ func (spells *classic60PaladinSpells) selectReferenceAura(aura *Aura) error {
 	}
 	spells.selectedAura = aura
 	return nil
+}
+
+func (spells *classic60PaladinSpells) activateBlessing(sim *Simulation, selected *Aura) {
+	for _, aura := range []*Aura{spells.MightAura, spells.WisdomAura, spells.KingsAura, spells.SalvationAura, spells.SanctuaryAura, spells.LightAura, spells.ProtectionAura, spells.FreedomAura} {
+		if aura != nil && aura != selected {
+			aura.Deactivate(sim)
+		}
+	}
+	selected.Activate(sim)
+}
+
+func (spells *classic60PaladinSpells) ownsReferenceAura(selected *Aura) bool {
+	for _, aura := range []*Aura{spells.DevotionEffect, spells.SanctityEffect, spells.RetributionEffect, spells.ConcentrationEffect, spells.FireResistanceEffect, spells.FrostResistanceEffect, spells.ShadowResistanceEffect} {
+		if aura != nil && aura == selected {
+			return true
+		}
+	}
+	return false
 }

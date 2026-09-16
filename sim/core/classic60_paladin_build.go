@@ -9,8 +9,7 @@ import (
 )
 
 // This list describes executable effects, not just talent-tree data. Reject
-// unimplemented selections before mutating the character. In particular, the
-// pinned source's Vindication self-AP buff is not a valid Classic substitute.
+// unimplemented selections before mutating the character.
 func (talents classic60PaladinTalents) validateOffensiveSupport() error {
 	if err := talents.validate(); err != nil {
 		return err
@@ -21,12 +20,21 @@ func (talents classic60PaladinTalents) validateOffensiveSupport() error {
 		}
 		switch classic60PaladinTalent(talent) {
 		case classic60PaladinDivineStrength, classic60PaladinDivineIntellect,
+			classic60PaladinHealingLight, classic60PaladinIllumination, classic60PaladinDivineFavor, classic60PaladinImprovedLayOnHands, classic60PaladinSpiritualFocus,
+			classic60PaladinImprovedSealOfRighteousness, classic60PaladinLastingJudgement,
 			classic60PaladinConsecration, classic60PaladinImprovedBlessingOfWisdom,
 			classic60PaladinHolyPower, classic60PaladinHolyShock,
 			classic60PaladinImprovedDevotionAura, classic60PaladinPrecision,
+			classic60PaladinRedoubt, classic60PaladinAnticipation, classic60PaladinShieldSpecialization,
+			classic60PaladinImprovedRighteousFury, classic60PaladinBlessingOfSanctuary, classic60PaladinReckoning,
+			classic60PaladinHolyShield, classic60PaladinOneHandedWeaponSpecialization, classic60PaladinImprovedHammerOfJustice,
 			classic60PaladinToughness, classic60PaladinBlessingOfKings,
 			classic60PaladinImprovedBlessingOfMight, classic60PaladinBenediction,
 			classic60PaladinImprovedJudgement, classic60PaladinDeflection,
+			classic60PaladinImprovedSealOfTheCrusader, classic60PaladinImprovedRetributionAura, classic60PaladinRepentance,
+			classic60PaladinEyeForAnEye,
+			classic60PaladinVindication, classic60PaladinPursuitOfJustice, classic60PaladinGuardiansFavor,
+			classic60PaladinUnyieldingFaith, classic60PaladinImprovedConcentrationAura,
 			classic60PaladinConviction, classic60PaladinSealOfCommand,
 			classic60PaladinTwoHandedWeaponSpecialization, classic60PaladinSanctityAura,
 			classic60PaladinVengeance:
@@ -38,8 +46,8 @@ func (talents classic60PaladinTalents) validateOffensiveSupport() error {
 }
 
 // registerClassic60PaladinBuild assembles a structurally valid, supported
-// level-60 talent build. It still uses the private rear, two-handed combat
-// profile; it neither selects public TBC talents nor installs item data.
+// level-60 talent build. It uses the private Human Paladin combat profile;
+// it neither selects public TBC talents nor installs item data.
 func registerClassic60PaladinBuild(character *Character, talents classic60PaladinTalents) (*classic60PaladinSpells, error) {
 	if err := talents.validateOffensiveSupport(); err != nil {
 		return nil, err
@@ -50,10 +58,10 @@ func registerClassic60PaladinBuild(character *Character, talents classic60Paladi
 		return nil, fmt.Errorf("Classic Paladin build requires the initialized Human Paladin reference")
 	}
 	weapon := character.MainHand()
-	if character.Env == nil || character.Env.IsFinalized() || character.PseudoStats.InFrontOfTarget || character.AutoAttacks.IsDualWielding ||
-		weapon.HandType != proto.HandType_HandTypeTwoHand ||
+	if character.Env == nil || character.Env.IsFinalized() || character.AutoAttacks.IsDualWielding ||
+		(weapon.HandType != proto.HandType_HandTypeTwoHand && weapon.HandType != proto.HandType_HandTypeOneHand && weapon.HandType != proto.HandType_HandTypeMainHand) ||
 		(weapon.WeaponType != proto.WeaponType_WeaponTypeSword && weapon.WeaponType != proto.WeaponType_WeaponTypeMace && weapon.WeaponType != proto.WeaponType_WeaponTypeAxe) {
-		return nil, fmt.Errorf("Classic Paladin build requires rear combat and a two-handed sword, mace or axe before finalization")
+		return nil, fmt.Errorf("Classic Paladin build requires an equipped sword, mace or axe before finalization")
 	}
 	if character.GetSpell(ActionID{SpellID: 20920}) != nil || character.GetSpell(ActionID{SpellID: 10314}) != nil {
 		return nil, fmt.Errorf("Classic Paladin spells are already registered")
@@ -64,16 +72,35 @@ func registerClassic60PaladinBuild(character *Character, talents classic60Paladi
 	character.AddStat(stats.PhysicalCritPercent, float64(talents[classic60PaladinConviction]))
 	character.ApplyEquipScaling(stats.Armor, 1+.02*float64(talents[classic60PaladinToughness]))
 	// Keep parry in percentage form; putting it into a TBC rating slot would
-	// require an unaudited defense conversion. Incoming combat remains gated.
+	// require an unaudited defense conversion. Incoming combat has its own
+	// source-backed defense table.
 	character.PseudoStats.CanParry = true
 	character.PseudoStats.BaseParryChance = .05 + .01*float64(talents[classic60PaladinDeflection])
-	character.PseudoStats.SchoolDamageDealtMultiplier[stats.SchoolIndexPhysical] *= 1 + .02*float64(talents[classic60PaladinTwoHandedWeaponSpecialization])
+	character.PseudoStats.SchoolDamageDealtMultiplier[stats.SchoolIndexPhysical] *= classic60PaladinWeaponMultiplier(character, talents)
 
 	spells := registerClassic60PaladinCommand(character, talents)
 	spells.registerOffensiveAbilities(character, talents)
 	spells.registerSelfBuffs(character, talents)
+	spells.registerSupport(character, talents)
+	spells.registerAdditionalSeals(character, talents)
+	spells.registerHealingAbilities(character, talents)
+	spells.registerClassicPushback(character, talents)
+	spells.registerHammerOfWrath(character, talents)
+	spells.classic60PaladinDefenseState = spells.registerDefense(character, talents)
+	spells.registerMagicDefense(character, talents)
+	spells.registerDefensiveCooldowns(character, talents)
+	spells.registerCrowdControl(character, talents)
+	spells.registerMiscTalents(character, talents)
+	spells.registerMobility(character, talents)
 	spells.registerVengeance(character, talents)
 	return spells, nil
+}
+
+func classic60PaladinWeaponMultiplier(character *Character, talents classic60PaladinTalents) float64 {
+	if character.MainHand().HandType == proto.HandType_HandTypeTwoHand {
+		return 1 + .02*float64(talents[classic60PaladinTwoHandedWeaponSpecialization])
+	}
+	return 1 + .02*float64(talents[classic60PaladinOneHandedWeaponSpecialization])
 }
 
 // Pinned talents.go: any dealt critical result refreshes one eight-second

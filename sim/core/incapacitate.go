@@ -6,6 +6,7 @@ import (
 
 const FearAuraTag = "Fear"
 const StunAuraTag = "Stun"
+const classic60RepentanceAuraTag = "Classic Repentance"
 
 // Tag on the tank hardcast aura, which suppresses avoidance the same way a stun
 // does and so shares the Stunned flag with the stun kind.
@@ -29,8 +30,10 @@ type incapacitateKind struct {
 func (unit *Unit) refreshIncapacitateState() {
 	feared := unit.HasActiveAuraWithTag(FearAuraTag)
 	stunned := unit.HasActiveAuraWithTag(StunAuraTag)
+	repentant := unit.HasActiveAuraWithTag(classic60RepentanceAuraTag)
+	disoriented := unit.HasActiveAuraWithTag(classic60DisorientAuraTag)
 
-	unit.PseudoStats.Incapacitated = feared || stunned
+	unit.PseudoStats.Incapacitated = feared || stunned || repentant || disoriented
 	unit.PseudoStats.Stunned = stunned || unit.HasActiveAuraWithTag(ReducedAvoidanceAuraTag)
 }
 

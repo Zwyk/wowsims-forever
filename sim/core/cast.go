@@ -15,13 +15,14 @@ import (
 type OnCastComplete func(aura *Aura, sim *Simulation, spell *Spell)
 
 type Hardcast struct {
-	Expires     time.Duration
-	ActionID    ActionID
-	OnComplete  func(*Simulation, *Unit)
-	Target      *Unit
-	CanMove     bool
-	IsChanneled bool
-	CastTime    time.Duration
+	classic60PushbackCount uint8
+	Expires                time.Duration
+	ActionID               ActionID
+	OnComplete             func(*Simulation, *Unit)
+	Target                 *Unit
+	CanMove                bool
+	IsChanneled            bool
+	CastTime               time.Duration
 }
 
 // Input for constructing the CastSpell function for a spell.
@@ -93,6 +94,12 @@ func (spell *Spell) castFailureHelper(sim *Simulation, message string, vals ...a
 
 func (spell *Spell) makeCastFunc(config CastConfig) CastSuccessFunc {
 	return func(sim *Simulation, target *Unit) bool {
+		if spell.Unit.resolvedRuleset().id == rulesetClassic60PaladinReference && !spell.Flags.Matches(SpellFlagPassiveSpell) &&
+			((spell.Unit.PseudoStats.Incapacitated && !spell.Flags.Matches(SpellFlagCastWhileIncapacitated)) ||
+				(spell.Unit.classic60PaladinPacified && spell.SpellSchool == SpellSchoolPhysical) ||
+				spell.Unit.classic60PaladinMisc.blocksCast(spell)) {
+			return spell.castFailureHelper(sim, "action prevented by crowd control or protection")
+		}
 		spell.CurCast = spell.DefaultCast
 
 		if config.ModifyCast != nil {

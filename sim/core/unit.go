@@ -38,7 +38,15 @@ type GetAttackPowerValue func(spell *Spell, target *Unit) float64
 // Unit is an abstraction of a Character/Boss/Pet/etc, containing functionality
 // shared by all of them.
 type Unit struct {
-	Type UnitType
+	Type                       UnitType
+	classic60HolyDamageTaken   float64
+	classic60PaladinDefense    *classic60PaladinDefenseState
+	classic60PaladinMobility   *classic60PaladinMobility
+	classic60PaladinMisc       *classic60PaladinMiscTalents
+	classic60RepentanceImmune  bool
+	classic60VindicationImmune bool
+	classic60ImmuneSchools     SpellSchool
+	classic60PaladinPacified   bool
 
 	// Engine-created units retain a value snapshot of the rules selected at
 	// construction. A zero-value Unit still uses the active build-time profile
@@ -968,8 +976,10 @@ func (unit *Unit) GetTotalDodgeChanceAsDefender(spell *Spell, atkTable *AttackTa
 
 func (unit *Unit) GetTotalParryChanceAsDefender(spell *Spell, atkTable *AttackTable) float64 {
 	if atkTable.resolvedOutcomeRules().weaponSkillModel != weaponSkillModelDisabled {
-		livePhysicalAttackTableView(spell, atkTable)
-		// The only activated Classic context attacks from behind.
+		view := livePhysicalAttackTableView(spell, atkTable)
+		if spell.Unit.PseudoStats.InFrontOfTarget {
+			return max(0, view.baseParryChance)
+		}
 		return 0
 	}
 	ratings := atkTable.resolvedRatingRules()
@@ -994,8 +1004,17 @@ func (unit *Unit) GetTotalChanceToBeMissedAsDefender(atkTable *AttackTable) floa
 
 func (unit *Unit) GetTotalBlockChanceAsDefender(atkTable *AttackTable) float64 {
 	if atkTable.resolvedOutcomeRules().weaponSkillModel != weaponSkillModelDisabled {
-		if atkTable.Attacker == nil || atkTable.Attacker.Type != PlayerUnit || atkTable.Attacker.PseudoStats.InFrontOfTarget || unit != atkTable.Defender || unit.Type != EnemyUnit {
+		if atkTable.Attacker == nil || atkTable.Attacker.Type != PlayerUnit || unit != atkTable.Defender || unit.Type != EnemyUnit {
 			panic("unsupported block context in Classic melee reference")
+		}
+		if atkTable.Attacker.PseudoStats.InFrontOfTarget {
+			if atkTable.resolvedResourceRules().manaModel != manaModelClassic60PaladinReference {
+				panic("unsupported Classic front-facing attacker")
+			}
+			if unit.PseudoStats.Stunned {
+				return 0
+			}
+			return .05
 		}
 		return 0
 	}
