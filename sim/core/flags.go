@@ -216,6 +216,10 @@ const (
 	SpellFlagAgentReserved3
 	SpellFlagAgentReserved4
 
+	// Classic-only resistance rule for a dot without initial direct damage.
+	// Keep this after existing flags so imported flag masks do not change.
+	SpellFlagPureDot
+
 	SpellFlagIgnoreModifiers = SpellFlagIgnoreAttackerModifiers | SpellFlagIgnoreTargetModifiers
 )
 

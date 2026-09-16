@@ -2,6 +2,35 @@ package core
 
 import "math"
 
+// mitigationRules is cached with an attack table's offensive rules. Each
+// model names a complete numerical policy; the Classic model has an explicit
+// level-60/+3 support envelope instead of borrowing TBC coefficients.
+type mitigationRules struct {
+	armorModel      armorMitigationModel
+	resistanceModel resistanceMitigationModel
+}
+
+type armorMitigationModel uint8
+
+const (
+	armorMitigationInheritedTBC armorMitigationModel = iota
+	armorMitigationClassicReference60
+)
+
+type resistanceMitigationModel uint8
+
+const (
+	resistanceMitigationInheritedTBC resistanceMitigationModel = iota
+	resistanceMitigationClassicReference60
+)
+
+func classicReferenceMitigationScope() rulesetProfile {
+	return rulesetProfile{levels: levelRules{
+		characterLevel:        classicReferenceCharacterLevel,
+		defaultBossLevelDelta: classicReferenceDefaultBossLevelDelta,
+	}}
+}
+
 // classicReferenceArmorInput contains only the numeric inputs consumed by the
 // pinned Classic armor formula. DefenderArmor is the already-resolved,
 // nonnegative value after the target's armor multiplier. FlatArmorPenetration
@@ -14,8 +43,8 @@ type classicReferenceArmorInput struct {
 
 // classicReferenceArmorDamageModifier reproduces wowsims/classic commit
 // 7779ebbf79dc7f1341e6ab939b28a3402c9a730a for the pinned level-60 world.
-// It is a comparison fallback used by tests and the standalone baseline lab;
-// the live combat path does not select it.
+// Explicit internal Classic attack tables and the standalone baseline lab use
+// this policy. The default live simulator still selects inherited TBC rules.
 //
 // The actual attacker may be anywhere from level 1 through the default +3
 // boss because the source formula uses attacker level for outgoing and

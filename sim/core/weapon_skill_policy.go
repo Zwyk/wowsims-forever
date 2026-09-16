@@ -4,12 +4,13 @@ import (
 	"math"
 
 	"github.com/wowsims/tbc/sim/core/proto"
+	"github.com/wowsims/tbc/sim/core/stats"
 )
 
 // weaponSkillModel selects how a short-lived physical attack-table view is
 // derived. The active inherited TBC profile keeps this disabled. The Classic
-// reference is compiled for characterization only and is not consumed by any
-// production outcome path.
+// reference is available to a bounded internal combat slice, while the normal
+// application still selects inherited TBC rules.
 type weaponSkillModel uint8
 
 const (
@@ -18,8 +19,8 @@ const (
 )
 
 // physicalAttackTableView keeps weapon-specific values out of the shared,
-// mutable AttackTable for an attacker/defender pair. A future activation must
-// route every relevant physical outcome through one such view atomically.
+// mutable AttackTable for an attacker/defender pair. The bounded Classic live
+// slice routes all of its physical outcomes through the same weapon view.
 type physicalAttackTableView struct {
 	baseMissChance       float64
 	hitSuppression       float64
@@ -50,9 +51,63 @@ func inheritedPhysicalAttackTableView(table *AttackTable) physicalAttackTableVie
 	}
 }
 
-// resolvePhysicalAttackTableView is deliberately unused by live outcomes.
-// It proves that a profile can derive per-weapon values without mutating the
-// pair-wide AttackTable. Unsupported Classic contexts fail closed.
+// livePhysicalAttackTableView is the deliberately narrow activation boundary
+// for the first Classic combat slice. The broader pure reference policy below
+// remains available for characterization; it is not a promise that every
+// classified weapon, class or combat modifier has a complete runtime profile.
+func livePhysicalAttackTableView(spell *Spell, table *AttackTable) physicalAttackTableView {
+	if table.resolvedOutcomeRules().weaponSkillModel == weaponSkillModelDisabled {
+		return inheritedPhysicalAttackTableView(table)
+	}
+	if spell == nil || spell.Unit == nil || table.Attacker != spell.Unit || table.Defender == nil ||
+		table.Attacker.Type != PlayerUnit || table.Defender.Type != EnemyUnit {
+		panic("Classic melee reference requires a player attacking an enemy")
+	}
+	character := spell.weaponAttackCharacter()
+	if character == nil || &character.Unit != spell.Unit || character.Class != proto.Class_ClassWarrior || character.Race != proto.Race_RaceHuman ||
+		spell.Unit.PseudoStats.InFrontOfTarget || spell.Unit.AutoAttacks.IsDualWielding ||
+		spell.DefenseType != DefenseTypeMelee || spell.SpellSchool != SpellSchoolPhysical ||
+		spell.ProcMask != ProcMaskMeleeMHAuto || spell.weaponAttackSource != WeaponAttackSourceMainHand ||
+		spell.Flags.Matches(SpellFlagCannotBeDodged) {
+		panic("Classic melee reference supports only Human Warrior rear main-hand physical auto-attacks")
+	}
+	context := spell.weaponAttackContext()
+	if context.classification.kind != weaponClassificationEquippedItem ||
+		context.weaponSkillBonus < 0 || context.weaponSkillBonus > 15 {
+		panic("Classic melee reference requires an equipped weapon and a skill bonus between zero and fifteen")
+	}
+	if spell.Unit.HasManaBar() || spell.Unit.HasRageBar() || spell.Unit.HasEnergyBar() || spell.Unit.HasFocusBar() ||
+		spell.Unit.stats[stats.MeleeHasteRating] != 0 || spell.Unit.stats[stats.SpellHasteRating] != 0 ||
+		spell.Unit.PseudoStats.AttackSpeedMultiplier != 1 || spell.Unit.PseudoStats.MeleeSpeedMultiplier != 1 {
+		panic("Classic melee reference does not support resource bars or haste")
+	}
+	for _, value := range []float64{spell.Unit.stats[stats.PhysicalHitPercent], spell.Unit.stats[stats.PhysicalCritPercent], spell.BonusHitPercent, spell.BonusCritPercent} {
+		if math.IsNaN(value) || math.IsInf(value, 0) {
+			panic("Classic melee reference requires finite hit and crit chances")
+		}
+	}
+	if spell.Unit.stats[stats.ExpertiseRating] != 0 || spell.BonusExpertiseRating != 0 ||
+		spell.Unit.PseudoStats.DodgeReduction != 0 || table.Defender.PseudoStats.DodgeReduction != 0 ||
+		table.Defender.PseudoStats.BaseDodgeChance != 0 || table.Defender.PseudoStats.BaseParryChance != 0 ||
+		table.Defender.PseudoStats.BaseBlockChance != 0 || table.Defender.PseudoStats.ReducedPhysicalHitTakenChance != 0 ||
+		table.Defender.PseudoStats.ReducedCritTakenPercent != 0 {
+		panic("unsupported avoidance modifier in Classic melee reference")
+	}
+	for _, stat := range []stats.Stat{stats.DefenseRating, stats.DodgeRating, stats.ParryRating, stats.BlockRating, stats.BlockPercent, stats.ResilienceRating} {
+		if table.Defender.stats[stat] != 0 {
+			panic("unsupported defensive stat in Classic melee reference")
+		}
+	}
+	view, ok := resolvePhysicalAttackTableView(spell, table)
+	if !ok {
+		panic("unsupported weapon or level in Classic melee reference")
+	}
+	return view
+}
+
+// resolvePhysicalAttackTableView derives per-weapon values without mutating the
+// pair-wide AttackTable. It supports the broader characterization scope;
+// livePhysicalAttackTableView applies additional runtime capability checks.
 func resolvePhysicalAttackTableView(spell *Spell, table *AttackTable) (physicalAttackTableView, bool) {
 	if table == nil {
 		return physicalAttackTableView{}, false

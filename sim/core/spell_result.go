@@ -177,7 +177,10 @@ func (spell *Spell) DodgeParrySuppression() float64 {
 
 func (spell *Spell) dodgeParrySuppression(ratings ratingRules, outcomes outcomeRules) float64 {
 	expertiseRating := spell.Unit.stats[stats.ExpertiseRating] + spell.BonusExpertiseRating
-	return math.Floor(expertiseRating/ratings.expertisePerQuarterPercentReduction) / outcomes.expertiseAvoidanceStepsPerUnit
+	if expertiseRating == 0 {
+		return 0
+	}
+	return checkedRatingQuotient(math.Floor(checkedRatingQuotient(expertiseRating, ratings.expertisePerQuarterPercentReduction)), outcomes.expertiseAvoidanceStepsPerUnit)
 }
 
 func (spell *Spell) PhysicalHitChance(attackTable *AttackTable) float64 {
@@ -187,7 +190,7 @@ func (spell *Spell) PhysicalHitChance(attackTable *AttackTable) float64 {
 		hitPercent += spell.Unit.stats[stats.RangedHitPercent]
 	}
 
-	return max(hitPercent/100-attackTable.HitSuppression, 0)
+	return max(hitPercent/100-livePhysicalAttackTableView(spell, attackTable).hitSuppression, 0)
 }
 func (spell *Spell) PhysicalHitCheck(sim *Simulation, attackTable *AttackTable) bool {
 	return sim.Proc(1.0-spell.GetPhysicalMissChance(attackTable), "Physical Hit Roll")
@@ -199,7 +202,7 @@ func (spell *Spell) PhysicalCritChance(attackTable *AttackTable) float64 {
 		critPercent += spell.Unit.stats[stats.RangedCritPercent]
 	}
 
-	return max(critPercent/100-attackTable.MeleeCritSuppression, 0)
+	return max(critPercent/100-livePhysicalAttackTableView(spell, attackTable).meleeCritSuppression, 0)
 }
 func (spell *Spell) PhysicalCritCheck(sim *Simulation, attackTable *AttackTable) bool {
 	return sim.RandomFloat("Physical Crit Roll") < spell.PhysicalCritChance(attackTable)
