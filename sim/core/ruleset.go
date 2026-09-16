@@ -31,10 +31,11 @@ const (
 )
 
 type rulesetProfile struct {
-	id      rulesetID
-	levels  levelRules
-	ratings ratingRules
-	combat  combatRules
+	id         rulesetID
+	levels     levelRules
+	ratings    ratingRules
+	combat     combatRules
+	attributes attributeRules
 }
 
 type levelRules struct {

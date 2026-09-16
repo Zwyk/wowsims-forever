@@ -41,18 +41,7 @@ func (character *Character) EnableManaBar() {
 }
 
 func (character *Character) EnableManaBarWithModifier() {
-
-	if character.Unit.Type == PlayerUnit {
-		// Pets might have different scaling so let them handle their scaling
-		character.AddStatDependency(stats.Intellect, stats.SpellCritPercent, CritPerIntMaxLevel[character.Class])
-
-		// Assumes all units have >= 20 intellect.
-		// See https://wowwiki-archive.fandom.com/wiki/Base_mana.
-		// Subtract out the non-linear part of the formula separately, so that weird
-		// mana values are not included when using the stat dependency manager.
-		character.AddStat(stats.Mana, 20-15*20)
-		character.AddStatDependency(stats.Intellect, stats.Mana, 15)
-	}
+	character.addManaStatDependenciesWithRuleset(currentRuleset())
 
 	// Not a real spell, just holds metrics from mana gain threat.
 	character.RegisterSpell(SpellConfig{
