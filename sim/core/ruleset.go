@@ -12,6 +12,7 @@ const (
 	rulesetClassic60SpellReference
 	// Bounded Human Mage mana diagnostic; never publicly selected.
 	rulesetClassic60MageManaReference
+	rulesetClassic60PaladinReference
 )
 
 // Keep the compile-time constants beside the active selector. Existing code

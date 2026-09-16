@@ -59,7 +59,7 @@ func TestClassic60MageManaRejectsUnsupportedInitialization(t *testing.T) {
 				Unit: Unit{Type: PlayerUnit, Level: 60, rulesInitialized: true, rules: classic60MageManaReferenceRules()}}
 			test.change(character)
 			defer func() {
-				if recover() == nil || character.HasManaBar() || character.classic60MageReference || len(character.Spellbook) != 0 {
+				if recover() == nil || character.HasManaBar() || character.classic60ManaClass != proto.Class_ClassUnknown || len(character.Spellbook) != 0 {
 					t.Fatal("unsupported mana initialization did not reject before mutation")
 				}
 			}()
@@ -80,7 +80,7 @@ func TestClassic60MageManaRejectsUnsupportedRuntime(t *testing.T) {
 		{"regen speed", func(a *classic60ManaTestAgent) { a.manaRegenMultiplier = 2 }, func(a *classic60ManaTestAgent) { a.UpdateManaRegenRates() }},
 		{"negative Spirit", func(a *classic60ManaTestAgent) { a.stats[stats.Spirit] = -1 }, func(a *classic60ManaTestAgent) { a.UpdateManaRegenRates() }},
 		{"NaN MP5", func(a *classic60ManaTestAgent) { a.stats[stats.MP5] = math.NaN() }, func(a *classic60ManaTestAgent) { a.UpdateManaRegenRates() }},
-		{"unvalidated mana bar", func(a *classic60ManaTestAgent) { a.classic60MageReference = false }, func(a *classic60ManaTestAgent) { a.SpiritManaRegenPerSecond() }},
+		{"unvalidated mana bar", func(a *classic60ManaTestAgent) { a.classic60ManaClass = proto.Class_ClassUnknown }, func(a *classic60ManaTestAgent) { a.SpiritManaRegenPerSecond() }},
 		{"foreign mana bar", func(a *classic60ManaTestAgent) { a.manaBar.unit = &Unit{} }, func(a *classic60ManaTestAgent) { a.SpiritManaRegenPerSecond() }},
 		{"foreign table resource policy", func(a *classic60ManaTestAgent) {
 			a.AttackTables[0].resources = resourceRules{manaModel: manaModelUnavailable}

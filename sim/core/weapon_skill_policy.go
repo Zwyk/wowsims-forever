@@ -69,11 +69,17 @@ func livePhysicalAttackTableView(spell *Spell, table *AttackTable) physicalAttac
 		panic("Classic melee reference requires a player attacking an enemy")
 	}
 	character := spell.weaponAttackCharacter()
-	if character == nil || &character.Unit != spell.Unit || character.Class != proto.Class_ClassWarrior || character.Race != proto.Race_RaceHuman ||
-		spell.Unit.PseudoStats.InFrontOfTarget ||
-		spell.DefenseType != DefenseTypeMelee || spell.SpellSchool != SpellSchoolPhysical ||
+	if character == nil || &character.Unit != spell.Unit || character.Race != proto.Race_RaceHuman ||
+		spell.Unit.PseudoStats.InFrontOfTarget || spell.DefenseType != DefenseTypeMelee ||
 		spell.Flags.Matches(SpellFlagCannotBeDodged) {
-		panic("Classic melee reference supports only Human Warrior rear physical melee attacks")
+		panic("Classic melee reference requires a supported Human rear melee attack")
+	}
+	paladin := character.Class == proto.Class_ClassPaladin && character.resolvedRuleset().id == rulesetClassic60PaladinReference
+	if paladin {
+		spell.validateClassic60PaladinMelee(table, character)
+	} else if character.Class != proto.Class_ClassWarrior || spell.SpellSchool != SpellSchoolPhysical ||
+		spell.classic60PaladinAttack != classic60PaladinAttackNone {
+		panic("Classic melee reference requires a supported class and school")
 	}
 	// Hand selection is explicit and must agree with the proc category. Do not
 	// infer skill from a broad/mixed mask or permit an unequipped off-hand.
@@ -105,7 +111,7 @@ func livePhysicalAttackTableView(spell *Spell, table *AttackTable) physicalAttac
 		context.weaponSkillBonus < 0 || context.weaponSkillBonus > 15 {
 		panic("Classic melee reference requires an equipped weapon and a skill bonus between zero and fifteen")
 	}
-	if spell.Unit.HasManaBar() || spell.Unit.HasRageBar() || spell.Unit.HasEnergyBar() || spell.Unit.HasFocusBar() ||
+	if (!paladin && spell.Unit.HasManaBar()) || spell.Unit.HasRageBar() || spell.Unit.HasEnergyBar() || spell.Unit.HasFocusBar() ||
 		spell.Unit.stats[stats.MeleeHasteRating] != 0 || spell.Unit.stats[stats.SpellHasteRating] != 0 ||
 		spell.Unit.PseudoStats.AttackSpeedMultiplier != 1 || spell.Unit.PseudoStats.MeleeSpeedMultiplier != 1 {
 		panic("Classic melee reference does not support resource bars or haste")
@@ -132,6 +138,51 @@ func livePhysicalAttackTableView(spell *Spell, table *AttackTable) physicalAttac
 		panic("unsupported weapon or level in Classic melee reference")
 	}
 	return view
+}
+
+// The Command exception is private and deliberately restricted to its two
+// registered Holy attacks. Generic physical specials and magical melee spells
+// do not become supported merely by selecting the combined profile.
+func (spell *Spell) validateClassic60PaladinMelee(table *AttackTable, character *Character) {
+	index := table.Defender.UnitIndex
+	if !table.rulesInitialized || index < 0 || int(index) >= len(spell.Unit.AttackTables) ||
+		spell.Unit.AttackTables[index] != table || spell.Unit.Level != 60 ||
+		table.resolvedResourceRules().manaModel != manaModelClassic60PaladinReference ||
+		table.resolvedOutcomeRules().spellChanceModel != spellChanceModelClassicReference60 ||
+		table.resolvedMitigationRules().resistanceModel != resistanceMitigationClassicReference60 {
+		panic("Classic Paladin requires its owned combined attack table")
+	}
+	validateClassicSpellResources(spell, table)
+	weapon := character.MainHand()
+	if spell.weaponAttackSource != WeaponAttackSourceMainHand || spell.Unit.AutoAttacks.IsDualWielding ||
+		weapon.HandType != proto.HandType_HandTypeTwoHand ||
+		(weapon.WeaponType != proto.WeaponType_WeaponTypeSword && weapon.WeaponType != proto.WeaponType_WeaponTypeMace && weapon.WeaponType != proto.WeaponType_WeaponTypeAxe) {
+		panic("Classic Paladin reference requires an equipped two-handed sword, mace or axe")
+	}
+	if spell.Flags.Matches(SpellFlagBinary | SpellFlagIgnoreResists | SpellFlagPureDot) {
+		panic("Classic Paladin attacks require ordinary armor or nonbinary resistance")
+	}
+	switch spell.classic60PaladinAttack {
+	case classic60PaladinAttackNone:
+		if spell.SpellSchool != SpellSchoolPhysical || spell.ProcMask != ProcMaskMeleeMHAuto {
+			panic("Classic Paladin physical reference supports white main-hand attacks")
+		}
+	case classic60PaladinCommandProc, classic60PaladinCommandJudgement:
+		expectedID := int32(20947)
+		if spell.classic60PaladinAttack == classic60PaladinCommandJudgement {
+			expectedID = 20966
+		}
+		if spell.SpellID != expectedID || spell.SpellSchool != SpellSchoolHoly || spell.SchoolIndex != stats.SchoolIndexHoly ||
+			spell.ProcMask != ProcMaskMeleeMHSpecial || !spell.IgnoreHaste {
+			panic("Classic Paladin Holy melee requires a registered Command attack")
+		}
+	default:
+		panic("unsupported Classic Paladin attack")
+	}
+	if table.CritMultiplier != 1 || spell.Unit.PseudoStats.CritDamageMultiplier != 1 ||
+		spell.CritMultiplierPct != 1 || spell.CritMultiplierAdditive != 0 || spell.Unit.PseudoStats.CastSpeedMultiplier != 1 {
+		panic("Classic Paladin reference does not support crit or cast-speed modifiers")
+	}
 }
 
 // The same weapon view supplies white and special chances, but their outcome
