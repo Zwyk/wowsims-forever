@@ -33,7 +33,8 @@ const (
 // values are refactoring anchors, not evidence for Forever mechanics.
 func inheritedTBCRuleset() rulesetProfile {
 	return rulesetProfile{
-		id: rulesetInheritedTBC,
+		id:         rulesetInheritedTBC,
+		attributes: inheritedTBCAttributeRules(),
 		levels: levelRules{
 			characterLevel:        inheritedTBCCharacterLevel,
 			defaultBossLevelDelta: inheritedTBCDefaultBossLevelDelta,

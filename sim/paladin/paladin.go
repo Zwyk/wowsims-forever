@@ -125,8 +125,7 @@ func NewPaladin(character *core.Character, talentsStr string, options *proto.Pal
 		AutoSwingMelee: true,
 	})
 
-	paladin.AddStatDependency(stats.Strength, stats.AttackPower, 2)
-	paladin.AddStatDependency(stats.Agility, stats.PhysicalCritPercent, core.CritPerAgiMaxLevel[character.Class])
+	paladin.AddBaseClassStatDependencies()
 	paladin.AddStatDependency(stats.Agility, stats.DodgeRating, 1/25.0*core.DodgeRatingPerDodgePercent)
 	paladin.AddStatDependency(stats.BonusArmor, stats.Armor, 1)
 

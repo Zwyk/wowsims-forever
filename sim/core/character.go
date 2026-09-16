@@ -266,9 +266,7 @@ func (character *Character) applyEquipment() {
 }
 
 func (character *Character) addUniversalStatDependencies() {
-	character.Unit.addUniversalStatDependencies()
-	character.AddStatDependency(stats.Stamina, stats.Health, 10)
-	character.AddStatDependency(stats.Agility, stats.Armor, 2)
+	character.addUniversalStatDependenciesWithRuleset(currentRuleset())
 }
 
 // Returns a partially-filled PlayerStats proto for use in the CharacterStats api call.

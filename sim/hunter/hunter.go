@@ -266,10 +266,7 @@ func (hunter *Hunter) RegisterSpells() {
 }
 
 func (hunter *Hunter) AddStatDependencies() {
-	hunter.AddStatDependency(stats.Strength, stats.AttackPower, 1)
-	hunter.AddStatDependency(stats.Agility, stats.AttackPower, 1)
-	hunter.AddStatDependency(stats.Agility, stats.RangedAttackPower, 1)
-	hunter.AddStatDependency(stats.Agility, stats.PhysicalCritPercent, core.CritPerAgiMaxLevel[hunter.Class])
+	hunter.AddBaseClassStatDependencies()
 	hunter.AddStatDependency(stats.Agility, stats.DodgeRating, 1.0/25*core.DodgeRatingPerDodgePercent)
 }
 
